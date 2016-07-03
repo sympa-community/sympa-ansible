@@ -7,9 +7,9 @@ Vagrant.configure("2") do |config|
     # Note: The "nocm" version of this box does not have any puppet software installed
     config.vm.box = "puppetlabs/ubuntu-14.04-64-nocm"
 
-    # VM: "dev-vm"
-    config.vm.define "dev-vm" do |conf|
-        conf.vm.hostname = "dev-vm"
+    # VM: "local-sympa"
+    config.vm.define "local-sympa" do |conf|
+        conf.vm.hostname = "local-sympa"
         # Give it a fixed IP
         conf.vm.network "private_network", ip: "192.168.66.66", :netmask => "255.255.255.0"
         conf.vm.provider "vmware_fusion" do |v|
@@ -39,7 +39,7 @@ Vagrant.configure("2") do |config|
         # These are not used by provision.yml
 
         ansible.groups = {
-          "somegroup" => ["dev-vm"],
+          "sympa" => ["local-sympa"],
         }
         ansible.playbook = "provision-vagrant-vm.yml"
         #ansible.verbose = "vvvv" # For troubleshooting ansible connection problems
