@@ -1,0 +1,24 @@
+---
+
+- name: Plain include
+  include: example_include.yml
+
+- name: Include with var=value syntax
+  include: example_include.yml variable1=First variable2=Second
+
+- name: Include with var map syntax
+  include: example_include.yml
+  vars:
+    variable1: First
+    variable2: Second
+
+- name: Include, set vars from other vars
+  include: example_include.yml
+  vars:
+    variable1: "{{ example_string1 }}"
+    variable2: "{{ example_dictionary1 }}"
+
+- name: Include, set vars direct
+  include: example_include.yml
+  vars:
+    variable2: { a: 1, b: 2, c: 3 }

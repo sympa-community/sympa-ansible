@@ -1,0 +1,25 @@
+---
+
+- name: Register output
+  debug: msg="test string"
+  register: output
+
+- name: Show output
+  debug: var=output
+
+- name: Conditional execution
+  debug: msg="conditional execution"
+  when: output.msg=="test string" and (some_variable is not defined)
+
+- name: Conditional success
+  command: /command/that/does/not/exist
+  register: result
+  failed_when: result == 0
+
+- name: Ignore failure
+  command: /command/that/does/not/exist
+  ignore_errors: true
+
+- name: Custom changed
+  command: echo "some string"
+  changed_when: false

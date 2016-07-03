@@ -1,0 +1,41 @@
+# Set of tasks to apply to all hosts
+
+- name: Set /etc/hostname to {{ inventory_hostname }}
+  template: src='hostname.j2' dest='/etc/hostname'
+
+- name: Write /etc/hosts with {{ inventory_hostname }}
+  template: src='hosts.j2' dest='/etc/hosts'
+
+# Directory for keeping misc ansible files
+- name: Create managed files dir
+  file: name={{ managed_file_dir }} state=directory
+
+- name: Set /etc/localtime
+  file: src=/usr/share/zoneinfo/{{ timezone }}  dest=/etc/localtime state=link force=yes
+
+- name: Set /etc/timezone
+  copy: content="{{ timezone }}" dest=/etc/timezone
+
+- name: Install ntp, iptables-persistent, rsyslog
+  apt: name={{item}} state=present
+  with_items:
+  - ntp
+  - iptables-persistent
+  - rsyslog
+
+- name: Put iptables configuration
+  template: src={{ inventory_dir }}/templates/common/{{item}}.j2 dest=/etc/iptables/{{ item }}
+  with_items:
+    - rules.v4
+    - rules.v6
+  notify:
+  - restart iptables-persistent
+
+- name: Enable services ntpd, iptables-persistent on boot
+  service: name={{item}} enabled=true
+  with_items:
+  - ntp
+  - iptables-persistent
+
+# Include environment specific tasks
+- include: "{{ inventory_dir }}/tasks/common.yml"

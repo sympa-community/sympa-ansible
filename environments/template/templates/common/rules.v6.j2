@@ -1,0 +1,51 @@
+# This file is managed by Ansible
+# IPv6 firewall configuration
+# TODO: Further restrict access based on the actual deployment
+
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+
+# Disable forwarding
+-P FORWARD DROP
+# Allow any outgoing
+-P OUTPUT ACCEPT
+# Allow all localhost
+-A INPUT -i lo -j ACCEPT
+# Allow incoming trafic related to existing "connections"
+-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT
+# Allow ICMP
+-A INPUT -p ipv6-icmp -j ACCEPT
+
+# Add rules for opening additional ports here:
+
+# Allow TCP connections to port 22 (SSH) from ANYWHERE
+-A INPUT -p tcp --dport 22 -m state --state NEW -j ACCEPT
+
+### End of configuration
+
+{# BEGIN JINJA2 COMMENT
+
+See rules.v4.j2 for some useful Ansible patterns
+
+### Firewall rule syntax
+
+# To open a TCP <port> for world:
+-A INPUT -p tcp --dport <port> -m state --state NEW -j ACCEPT
+
+# To open <port> specific port for an <ip address> (range)
+# <ip address> can be a single address: 1234:5678::9abc:cdef or a range: 1234:5678:9abc:cdef::/64
+-A INPUT -p tcp --dport <port> -s <ip address> -m state --state NEW -j ACCEPT
+
+# Multiple ports:
+-A INPUT -p tcp -m multiport --dports <port>,<port>,... -m state --state NEW -j ACCEPT
+
+END JINJA2 COMMENT #}
+
+
+# End of INPUT chain
+-P INPUT DROP
+
+COMMIT
+# Note: there must be a newline after the COMMIT

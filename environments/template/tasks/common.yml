@@ -1,0 +1,5 @@
+# Additional environement specific tasks to perform at the end of the common role
+
+- name: Disallow SSH root login
+  lineinfile: dest=/etc/ssh/sshd_config regexp="^PermitRootLogin\s" line="PermitRootLogin no"
+  notify: restart sshd

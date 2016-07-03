@@ -1,0 +1,40 @@
+---
+
+# Variables that will be included for hosts in the "example" group
+# Because the varibale namespace is global it is a good practive to prefix all varibles with the name of the role
+
+# example_string1..3 are equal
+example_string1: example value
+example_string2: "example value"
+example_string3: 'example value'
+
+# "line 1\nline 2\nline 3\n"
+example_multi_line_string1: |
+  line 1
+  line 2
+  line 3
+
+# example_list1..3 are equal
+example_list1:
+- item 1
+- item 2
+example_list2: [ item1 1, item 2 ]
+example_list3: [ "item1 1", "item 2" ]
+
+# example_dictionary1..3 are equal
+example_dictionary1:
+  item 1: value 1
+  item 2: value 2
+example_dictionary2: { item 1: value 1, item 2: value 2}
+
+# example_list_of_dict1..3 are equal
+example_list_of_dict1:
+- item1: value1
+  item2: value2
+- item1: value1
+  item2: value2
+
+example_list_of_dict2: [
+  { item1: value1, item2: value2 },
+  { item1: value1, item2: value2 }
+]

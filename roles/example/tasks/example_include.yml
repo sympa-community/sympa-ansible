@@ -1,0 +1,9 @@
+---
+
+- name: Print value of variable string1
+  debug:
+    msg: "variable1: {{ variable1 | default('not defined') }}"
+
+- name: Print variable variable1, if defined
+  debug: var=variable2
+  when: variable2 is defined

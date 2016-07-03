@@ -1,0 +1,48 @@
+---
+
+
+- name: Print value of the example_string1 variable
+  debug: var=example_string1
+
+# Using "key=value" syntax
+- name: Print value of example_string2
+  debug: msg="{{ example_string2 }}"
+
+# Using YAML map syntax
+- name: Print value of example_string3
+  debug:
+    msg: "{{ example_string3 }}"
+
+# Using "key=value" syntax
+- name: Copy file
+  copy: src=hello.txt dest="/home/vagrant/hello.txt" mode=0640 owner=vagrant group=vagrant
+
+# Using YAML map syntax
+- name: Copy file
+  copy:
+    src: hello.txt
+    dest: /home/vagrant/hello.txt
+    mode: 0640
+    owner: vagrant
+    group: vagrant
+
+- name: Excecute long command
+  shell: echo "First argument," "Second argument" "and todays date is:" `date`
+  register: result1
+  changed_when: false
+
+# Using YAML ">" syntax to split a string over multiple lines
+# Use only for modules (like the command or shell modules) that require long strings.
+# Otherwise prefer YAML map syntax above
+- name: Excecute long command
+  shell: >
+    echo
+    First argument,
+    Second argument
+    and todays date is:
+    `date`
+  register: result2
+  changed_when: false
+
+- name: Print stdout of the previous command
+  debug: msg="{{ result2.stdout }}"

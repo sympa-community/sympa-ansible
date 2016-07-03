@@ -1,0 +1,24 @@
+---
+
+- name: Provision Vagrant VM (Ubuntu 14.04 LTS)
+  hosts: all
+  sudo: True
+  gather_facts: False
+  vars:
+      - ansible_ssh_user: vagrant
+
+  tasks:
+      - name: Create dir for storing apt cache in /vagrant
+        file: state=directory path=/vagrant/apt/cache/partial
+
+      - name: Set apt cache location
+        copy: content='dir::cache::archives "/vagrant/apt/cache";' dest=/etc/apt/apt.conf.d/cache
+
+      # May take a while...
+      - name: Apt dist-upgrade
+        apt: update_cache=yes upgrade=dist cache_valid_time=3600
+
+      - name: Install optional packages
+        apt: name={{ item }}
+        with_items:
+        - vim

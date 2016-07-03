@@ -1,0 +1,2 @@
+Vault scripts based on the alternative ansible vault scripts by lvonk: https://gist.github.com/lvonk/3a094e0218bc91f0e2d4
+Related discussion of encrypting individual values vs. encrypting files: http://jpmens.net/2014/02/22/my-thoughts-on-ansible-s-vault/
