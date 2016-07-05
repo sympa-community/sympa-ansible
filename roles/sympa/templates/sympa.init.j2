@@ -1,0 +1,164 @@
+#!/bin/sh
+
+set -e
+
+### BEGIN INIT INFO
+# Provides:          sympa
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Should-Start:      mysql postgresql
+# Should-Stop:       mysql postgresql
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: start and stop the SYMPA mailing list manager
+# Description:       SYMPA is a mailing list manager
+### END INIT INFO
+
+PATH=/bin:/usr/bin:/sbin:/usr/sbin
+RUNDIR=/var/run/sympa
+EXECPATH=/usr/lib/sympa/bin
+USER=sympa
+GROUP=sympa
+
+NAME="sympa"
+DESC="Sympa mailing list manager"
+
+DAEMONS="sympa task_manager bulk bounced archived"
+
+if [ -f /etc/default/sympa ]; then
+    . /etc/default/sympa
+fi
+
+for daemon in $DAEMONS ; do
+    if [ ! -f "${EXECPATH}/${daemon}.pl" ]; then
+        exit 0
+    fi
+done
+
+. /lib/lsb/init-functions
+
+reverse_order() {
+    RET=
+    for elem in $1 ; do
+        RET="$elem $RET"
+    done
+    echo $RET
+}
+
+create_rundir() {
+    if [ ! -d "$RUNDIR" ]; then
+        mkdir -p "$RUNDIR"
+    fi
+    chown "${USER}:${GROUP}" "$RUNDIR"
+    chmod 0755 "$RUNDIR"
+}
+
+get_daemon_pids() {
+    ps -eo pid,user,cmd | sed 's/^[[:space:]]*//' \
+    | egrep "^[0-9]+ ${USER} .* ${EXECPATH}/${1}.pl" \
+    | cut -d ' ' -f1 | tr '\n' ' ' | sed 's/[[:space:]]*$//'
+}
+
+isrunning_sympa() {
+    RET=1
+    for daemon in $DAEMONS ; do
+        if [ "$(get_daemon_pids "$daemon")" != "" ]; then
+            RET=0
+            break
+        fi
+    done
+    return $RET
+}
+
+status_sympa() {
+    log_daemon_msg "Status of $DESC"
+    for daemon in $DAEMONS ; do
+        pids=$(get_daemon_pids "$daemon")
+        if [ "$pids" != "" ]; then
+            log_progress_msg "$daemon (pid $pids)"
+        else
+            log_progress_msg "$daemon (not running)"
+        fi
+    done
+    log_end_msg 0
+}
+
+start_sympa() {
+    ERRORS=
+    create_rundir
+    log_daemon_msg "Starting $DESC"
+    if ! isrunning_sympa ; then
+        for daemon in $DAEMONS ; do
+            log_progress_msg "$daemon"
+            start-stop-daemon --start --quiet --chuid "${USER}:${GROUP}" \
+                --pidfile "${RUNDIR}/${daemon}.pid" \
+                --exec "${EXECPATH}/${daemon}.pl" || ERRORS="$ERRORS $daemon"
+        done
+        log_end_msg 0
+        if [ "$ERRORS" != "" ]; then
+            log_daemon_msg "Some daemons failed to be started:$ERRORS"
+            log_end_msg 1
+        fi
+    else
+        log_progress_msg "$NAME is already running (see status command)"
+        log_end_msg 0
+    fi
+}
+
+stop_sympa() {
+    ERRORS=
+    log_daemon_msg "Stoping $DESC"
+    if isrunning_sympa ; then
+        for daemon in $(reverse_order "$DAEMONS") ; do
+            log_progress_msg "$daemon"
+            start-stop-daemon --stop --quiet --retry 5 \
+                --pidfile "${RUNDIR}/${daemon}.pid" || ERRORS="$ERRORS $daemon"
+            # It may happened that some processes are not tracked with pidfiles.
+            # For example, with the parameter 'distribution_mode fork' used by
+            # sympa.pl. It forked but the second process pid is not tracked,
+            # here is some kind of 'garbage collector'
+            pids=$(get_daemon_pids "$daemon")
+            if [ "$pids" != "" ]; then
+                for p in $pids ; do
+                    kill -TERM "$p" 2>/dev/null || true
+                done
+            fi
+        done
+        log_end_msg 0
+        if [ "$ERRORS" != "" ]; then
+            log_daemon_msg "Some daemons failed to be stopped (not running?):$ERRORS"
+            log_end_msg 1
+        fi
+    else
+        log_progress_msg "$NAME is already stopped"
+        log_end_msg 0
+    fi
+}
+
+case "$1" in
+    start)
+        start_sympa
+        ;;
+    stop)
+        stop_sympa
+        ;;
+    restart)
+        stop_sympa
+        start_sympa
+        ;;
+    reload|force-reload)
+        if isrunning_sympa ; then
+            stop_sympa || true
+            start_sympa
+        fi
+        ;;
+    status)
+        status_sympa
+        ;;
+    *)
+        echo "Usage: $(readlink -f "$0") {start|stop|restart|reload|force-reload|status}"
+        exit 1
+        ;;
+esac
+
+exit 0

@@ -28,4 +28,7 @@
     chdir: "/home/sympa/src/sympa-{{ sympa_version }}"
     executable: /bin/bash
 
-
+- name: Install Sympa configuration file
+  template: src=sympa.conf.j2 dest=/etc/sympa/sympa.conf owner=sympa group=sympa mode=0640
+  tags: sympa_conf
+  
