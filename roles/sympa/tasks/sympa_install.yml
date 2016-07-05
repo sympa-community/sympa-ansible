@@ -1,0 +1,31 @@
+---
+
+- name: Add sympa group
+  group: name=sympa
+
+- name: Add sympa user
+  user: name=sympa group=sympa password=no
+  
+- name: Create sympa directories
+  file: dest=/home/{{ item }} state=directory mode=755 owner=sympa
+  with_items: ['sympa', 'sympa/src']
+
+- name: Download Sympa tar.gz
+  get_url:
+    url: "{{ sympa_download_url }}"
+    dest: "/home/sympa/src"
+    sha256sum: "{{ sympa_sha256 }}"
+
+- name: Create the Sympa src directory
+  file: path=/home/sympa/src/sympa-{{ sympa_version }} state=directory
+  
+- name: Unpack the tarball
+  unarchive: src=/home/sympa/src/sympa-{{ sympa_version }}.tar.gz dest=/home/sympa/src/ copy=no creates=/home/sympa/src/sympa-{{ sympa_version }}/README
+  
+- name: Install Sympa
+  shell: ./configure && make && make install
+  args:
+    chdir: "/home/sympa/src/sympa-{{ sympa_version }}"
+    executable: /bin/bash
+
+

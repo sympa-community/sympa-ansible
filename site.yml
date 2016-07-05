@@ -13,17 +13,12 @@
   roles:
   - common
 
-
-# Applies the "example" role to the hosts in the "example" group
-# In the default inventory the "example" group does not exists, nor are there hosts named "example". Therefore the
-# example role is not applied to any hosts
-- name: Apply role "example" to hosts in group "example"
-  hosts: example
+- name: Apply role "sympa" to hosts in group "sympa"
+  hosts: sympa
   sudo: True
-  tags: example
+  tags: sympa
   gather_facts: no
   remote_user: "{{ ansible_remote_user }}"
 
   roles:
-  - example
-# - some_other_role
+  - sympa

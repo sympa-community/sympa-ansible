@@ -1,0 +1,15 @@
+# group_vars/all: Variables visible in all roles
+
+# Location of the keystore directory on the deploy host
+vault_keydir: "{{ inventory_dir }}/ansible-keystore"
+
+# Directory for keeping files on the remote host for use by Ansible
+managed_file_dir: /opt/ansible/managed_files
+
+# Timezone
+# Format: IANA tz zone name (e.g. "Europe/Amsterdam")
+timezone: Europe/Amsterdam
+
+# Default user to for Ansible "remote_user"
+# You can override this in groups_vars, or host_vars
+ansible_remote_user: root

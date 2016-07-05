@@ -1,0 +1,9 @@
+---
+
+- name: Install prerequisites for Sympa
+  tags: sympa_prereq
+  include: sympa_prereq.yml
+  
+- name: Install Sympa software
+  tags: sympa_install
+  include: sympa_install.yml
