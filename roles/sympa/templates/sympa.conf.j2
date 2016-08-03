@@ -272,7 +272,7 @@ db_user	sympa_user
 ## What ever you use a password or not, you must protect the SQL server (is it
 ## not a public internet service ?)
 # was db_passwd user_password
-db_passwd	sdoijsd;ao/
+db_passwd	{{ sympa_db_app_password }}
 
 ## Database private extention to subscriber table
 ## You need to extend the database format with these fields
