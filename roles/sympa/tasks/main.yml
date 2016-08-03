@@ -4,6 +4,10 @@
   tags: sympa_prereq
   include: sympa_prereq.yml
   
+- name: Install and configure database
+  tags: sympa_db
+  include: sympa_db.yml
+  
 - name: Install Sympa software
   tags: sympa_install
   include: sympa_install.yml

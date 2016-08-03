@@ -1,0 +1,43 @@
+---
+# Install and configure Sympa database
+
+- name: Install required packages for MySQL
+  apt: name={{item}} state=present
+  with_items:
+    - mysql-server
+    - python-mysqldb # Required by Ansible
+
+- name: Enable MySQL server on boot
+  service: name=mysql enabled=yes
+  
+# localhost needs to be the last item for idempotency, see
+# http://ansible.cc/docs/modules.html#mysql-user
+- name: 'Update Mysql Root Password'
+  mysql_user:
+    login_user: root
+    login_password: "{{ sympa_db_root_password }}"
+    ## Useful to update root user only if it is in the initial configuration state
+    check_implicit_admin: true
+    name: root
+    host: "{{ item }}"
+    password: "{{ sympa_db_root_password }}"
+    priv: "*.*:ALL,GRANT"
+    state: present
+  with_items:
+    - 127.0.0.1
+    - ::1
+    - localhost
+
+- name: Configure sympa user for MySQL server
+  mysql_user:
+    login_user: root
+    login_password: "{{ sympa_db_root_password }}"
+    name: sympa_user
+    password: "{{ sympa_db_app_password }}"
+    host: "{{ item }}"
+    priv: "sympa.*:ALL"
+  with_items:
+    - 127.0.0.1
+    - ::1
+    - localhost
+
