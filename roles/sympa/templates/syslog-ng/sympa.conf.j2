@@ -1,0 +1,6 @@
+## Syslog config for Sympa
+## Installed by Ansible
+
+destination d_sympa { file ("/var/log/sympa") ; };
+log { source(s_src); filter(f_sympa); destination(d_sympa); };
+filter f_sympa     { facility(local1)  and match('sympa' value('PROGRAM')); };
