@@ -32,3 +32,7 @@
   template: src=sympa.conf.j2 dest=/etc/sympa/sympa.conf owner=sympa group=sympa mode=0640
   tags: sympa_conf
   
+- name: Install custom syslog-ng.conf file
+  template: src=syslog-ng/sympa.conf.j2 dest=/etc/syslog-ng/conf.d/sympa.conf mode=0644
+  tags: syslog
+  
