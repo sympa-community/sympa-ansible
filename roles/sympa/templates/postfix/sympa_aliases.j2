@@ -1,0 +1,9 @@
+## This aliases file is dedicated to Sympa Mailing List Manager
+## You should edit your sendmail.mc or sendmail.cf file to declare it
+
+sympa: "| /home/sympa/bin/queue sympa@{{ sympa_mail_hostname }}"
+listmaster: "| /home/sympa/bin/queue listmaster@{{ sympa_mail_hostname }}"
+bounce+*: "| /home/sympa/bin/bouncequeue sympa@{{ sympa_mail_hostname }}"
+abuse-feedback-report: "| /home/sympa/bin/bouncequeue sympa@{{ sympa_mail_hostname }}"
+sympa-request: listmaster@{{ sympa_mail_hostname }}
+sympa-owner: listmaster@{{ sympa_mail_hostname }}

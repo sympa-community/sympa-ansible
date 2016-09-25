@@ -23,7 +23,7 @@
   unarchive: src=/home/sympa/src/sympa-{{ sympa_version }}.tar.gz dest=/home/sympa/src/ copy=no creates=/home/sympa/src/sympa-{{ sympa_version }}/README
   
 - name: Install Sympa
-  shell: ./configure && make && make install
+  shell: ./configure --with-lockdir=/var/lock --with-initdir=/etc/init.d  && make && make install
   args:
     chdir: "/home/sympa/src/sympa-{{ sympa_version }}"
     executable: /bin/bash
@@ -31,6 +31,7 @@
 - name: Install Sympa configuration file
   template: src=sympa.conf.j2 dest=/etc/sympa/sympa.conf owner=sympa group=sympa mode=0640
   tags: sympa_conf
+  notify: restart sympa
   
 - name: Install custom syslog-ng.conf file
   template: src=syslog-ng/sympa.conf.j2 dest=/etc/syslog-ng/conf.d/sympa.conf mode=0644
