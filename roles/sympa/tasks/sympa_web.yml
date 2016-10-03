@@ -1,0 +1,14 @@
+---
+# Configure Apache
+
+- name: Install Apache2
+  apt: name={{ item }} state=present
+  with_items:
+  - apache2
+  - libapache2-mod-fcgid # FastCGI interface module for Apache 2
+
+- name: Enable CGI Apache module
+  apache2_module: name=fcgid state=present
+  notify: Restart Apache
+  tags: apache
+ 

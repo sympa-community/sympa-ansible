@@ -1,0 +1,29 @@
+<VirtualHost {{ item.ip }}:{{ item.port }}>
+    ServerAdmin {{ server_admin_email }}
+    ServerName {{ item.name }}:{{ item.port }}
+    ServerSignature off
+
+    ErrorLog ${APACHE_LOG_DIR}/error_{{ item.name }}.log
+    CustomLog ${APACHE_LOG_DIR}/access_{{ item.name }}.log combined
+
+{% if item.ssl %}
+    # SSL/TLS Configuration
+    SSLEngine on
+    SSLCertificateKeyFile /etc/ssl/private/{{ item.name }}.key
+    SSLCertificateFile /etc/ssl/certs/{{ item.name }}.crt
+{# Less strict cipher suits #}
+    SSLCipherSuite ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:DHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES128-SHA:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA
+{# Strict cipher suits
+    SSLCipherSuite ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA256:ECDHE-RSA-AES256-SHA:DHE-RSA-AES256-SHA:AES256-GCM-SHA384:AES256-SHA256:AES256-SHA
+#}
+    SSLHonorCipherOrder on
+    SSLCompression off
+    SSLProtocol all -SSLv2 -SSLv3
+{# 15768000 seconds = 6 months #}
+    Header always set Strict-Transport-Security max-age=15768000
+    SSLUseStapling on
+{% endif %}
+
+    # VHost specific config
+{{ item.config }}
+</VirtualHost>

@@ -1,0 +1,23 @@
+  DocumentRoot "/var/www/html/"
+
+  Alias /static-sympa {{ sympa_root_directory }}/static_content
+
+  <Location /sympa>
+    SetHandler fcgid-script
+  </Location>
+  
+  ScriptAlias /sympa {{ sympa_root_directory }}/bin/wwsympa-wrapper.fcgi
+  
+#  <Location /secure>
+#    AuthType shibboleth
+#    ShibRequestSetting requireSession 1
+#    ShibRequestSetting applicationId default
+#    require shib-session
+#  </Location>
+  
+#  ## Activation globale de l'authentification Shibboleth
+#  ## C'est nécessaire pour activer les handlers
+#  <Location />
+#    AuthType shibboleth
+#    Require shibboleth
+#  </Location>

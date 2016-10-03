@@ -12,6 +12,10 @@
   tags: sympa_mail
   include: sympa_mail.yml
 
+- name: Configure Apache
+  tags: sympa_web
+  include: sympa_web.yml
+
 - name: Install and configure database
   tags: sympa_db
   include: sympa_db.yml

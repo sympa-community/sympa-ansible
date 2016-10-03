@@ -1,0 +1,69 @@
+---
+
+- name: Install Apache
+  apt: name={{ item }}
+  with_items:
+  - apache2
+  - apache2-utils
+
+- name: Disable default Apache sites
+  command: /usr/sbin/a2dissite {{ item }} removes=/etc/apache2/sites-enabled/{{ item }}.conf
+  with_items:
+  - 000-default
+  - default-ssl
+  notify: Restart Apache
+
+  # Enable modules required for ssl
+- name: Enable Apache modules
+  apache2_module: name={{ item }} state=present
+  with_items:
+  - ssl
+  - headers
+  notify: Restart Apache
+
+- name: Put global Apache config
+  copy: src=stapling.conf dest=/etc/apache2/conf-available/stapling.conf owner=root group=root mode=644
+  notify: Restart Apache
+
+- name: Enable global Apache config
+  command: /usr/sbin/a2enconf {{ item }} creates=/etc/apache2/conf-enabled/{{ item }}.conf
+  with_items:
+  - stapling
+  notify: Restart Apache
+
+  # Print message with vhost information. We use no_log below to suppress printing/logging the item array because it is
+  # big and contains the SSL private key
+- name: Vhosts to be installed
+  debug: msg="vhost={{ vhosts[item|int].name }}:{{ vhosts[item|int].port }}; IP={{ vhosts[item|int].ip }}; SSL={{ vhosts[item|int].ssl }}"
+  with_sequence: "count={{ vhosts | length }} start=0"
+  #msg: "Configuring vhosts: {{ vhosts | map(attribute='name') | join(', ') }}"
+
+- name: Put Apache vhost config
+  no_log: True
+  template: src=apache_vhost.conf.j2 dest=/etc/apache2/sites-available/{{ item.name }}:{{ item.port }}.conf owner=root group=root mode=644
+  with_items: "{{ vhosts }}"
+  notify: Restart Apache
+
+- name: Put Apache vhost certs
+  no_log: True
+  copy: content="{{ item.ssl_certificate }}" dest=/etc/ssl/certs/{{ item.name }}.crt owner=root group=root mode=644
+  when: item.ssl
+  with_items: "{{ vhosts }}"
+  notify: Restart Apache
+
+- name: Put Apache vhost keys
+  no_log: True
+  copy: content="{{ item.ssl_key }}" dest=/etc/ssl/private/{{ item.name }}.key owner=root group=ssl-cert mode=640
+  with_items: "{{ vhosts }}"
+  when: item.ssl
+  notify: Restart Apache
+
+- name: Enable Apache vhost sites
+  no_log: True
+  command: /usr/sbin/a2ensite {{ item.name }}:{{ item.port }} creates=/etc/apache2/sites-enabled/{{ item.name }}:{{ item.port }}.conf
+  with_items: "{{ vhosts }}"
+  notify: Restart Apache
+
+
+- name: Enable Apache on boot
+  service: name=apache2 enabled=yes

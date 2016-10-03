@@ -18,3 +18,8 @@ sympa_db_root_password: "{{ lookup('file',inventory_dir+'/password/sympa_db_root
 # App passwd for the Sympa database
 sympa_db_app_password: "{{ lookup('file',inventory_dir+'/password/sympa_db_app_password') }}"
 
+# SSL cert for Apache
+sympa_ssl_certificate: "{{ lookup('file',inventory_dir+'/ssl_cert/webserver.crt') }}"
+
+# SSL private key for Apache
+sympa_ssl_key: "{{ lookup('file',inventory_dir+'/ssl_cert/webserver.key') }}"
