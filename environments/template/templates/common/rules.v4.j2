@@ -23,6 +23,12 @@
 # Allow TCP connections to port 22 (SSH) from ANYWHERE
 -A INPUT -p tcp --dport 22 -m state --state NEW -j ACCEPT
 
+{% if 'sympa' in group_names %}
+# registry server
+-A INPUT -p tcp --dport 443 -m state --state NEW -j ACCEPT
+-A INPUT -p tcp --dport 80 -m state --state NEW -j ACCEPT
+{% endif %}
+
 ### End of configuration
 
 {# BEGIN JINJA2 COMMENT
@@ -34,9 +40,10 @@ Note: The examples below assume that each host has a variable "host_ipv4" define
       When you want to use the Ansible facts you would use "hostvars[host].ansible_default_ipv4.address" and ensure
       that ansible has contacted each host to discover facts before.
 
-{% if '<group>' in group_names %}
-Rules for host in the group named <group>
-...
+{% if 'sympa' in group_names %}
+# registry server
+-A INPUT -p tcp --dport 443 -m state --state NEW -j ACCEPT
+-A INPUT -p tcp --dport 80 -m state --state NEW -j ACCEPT
 {% endif %}
 
 Allow access from all hosts in the group named <group> to <port>

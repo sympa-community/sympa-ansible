@@ -23,6 +23,12 @@
 # Allow TCP connections to port 22 (SSH) from ANYWHERE
 -A INPUT -p tcp --dport 22 -m state --state NEW -j ACCEPT
 
+{% if 'sympa' in group_names %}
+# registry server
+-A INPUT -p tcp --dport 443 -m state --state NEW -j ACCEPT
+-A INPUT -p tcp --dport 80 -m state --state NEW -j ACCEPT
+{% endif %}
+
 ### End of configuration
 
 {# BEGIN JINJA2 COMMENT
