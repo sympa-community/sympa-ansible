@@ -33,7 +33,7 @@
   tags: sympa_conf
   notify: restart sympa
   
-- name: Install custom syslog-ng.conf file
-  template: src=syslog-ng/sympa.conf.j2 dest=/etc/syslog-ng/conf.d/sympa.conf mode=0644
+- name: Install custom rsyslog conf file
+  template: src=rsyslog/sympa.conf.j2 dest=/etc/rsyslog.d/sympa.conf mode=0644
   tags: syslog
   

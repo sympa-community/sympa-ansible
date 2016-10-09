@@ -5,8 +5,6 @@
 - name: Install required packages
   apt: name={{ item }} state=present
   with_items:
-  - syslog-ng-core # needs to be installed before syslog-ng package
-  - syslog-ng # syslog server
   - postfix
 
 - name: Install required CPAN Perl modules

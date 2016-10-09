@@ -37,5 +37,11 @@
   - ntp
   - iptables-persistent
 
+- name: Add user accounts
+  user: name={{item}} group=sympa password=no
+  with_items:
+  - david
+  - olivier
+  
 # Include environment specific tasks
 - include: "{{ inventory_dir }}/tasks/common.yml"
