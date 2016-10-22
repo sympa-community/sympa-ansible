@@ -5,3 +5,6 @@
 
 - name: restart sympa
   service: name=sympa state=restarted
+
+- name: restart rsyslog
+  service: name=rsyslog state=restarted
