@@ -1,8 +1,5 @@
 ---
 
-- name: Add sympa group
-  group: name=sympa
-
 - name: Add sympa user
   user: name=sympa group=sympa password=no
   

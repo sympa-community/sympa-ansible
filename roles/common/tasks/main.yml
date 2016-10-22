@@ -37,6 +37,9 @@
   - ntp
   - iptables-persistent
 
+- name: Add sympa group
+  group: name=sympa
+
 - name: Add user accounts
   user: name={{item}} group=sympa password=no
   with_items:
