@@ -1,0 +1,8 @@
+<IfModule mod_fcgid.c>
+  FcgidConnectTimeout 20
+  FcgidMaxProcesses 2
+
+  <IfModule mod_mime.c>
+    AddHandler fcgid-script .fcgi
+  </IfModule>
+</IfModule>

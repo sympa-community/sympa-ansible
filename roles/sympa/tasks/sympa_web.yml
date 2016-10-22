@@ -12,3 +12,7 @@
   notify: Restart Apache
   tags: apache
  
+- name: install custom fcgid.conf file
+  template: src=apache/fcgid.conf.j2 dest=/etc/apache2/mods-available/fcgid.conf
+  notify: Restart Apache
+  tags: apache
