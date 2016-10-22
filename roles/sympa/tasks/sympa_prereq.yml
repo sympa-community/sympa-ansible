@@ -43,3 +43,12 @@
   - libmail-dkim-perl # cryptographically identify the sender of email - perl library
   - libsoap-lite-perl # Perl implementation of a SOAP client and server
   
+- name: add mhonarc path to PERL5LIB in profile.d/
+  template: src=profile.d/sympa.sh.j2 dest=/etc/profile.d/sympa.sh
+  tags: profile.d
+  
+- name: keep PERL5LIB variable in sudoers.d/
+  template: src=sudoers.d/sympa.j2 dest=/etc/sudoers.d/sympa
+  tags: sudoers
+  notify: restart sudo
+
