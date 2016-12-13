@@ -35,6 +35,9 @@
   tags: sympa_conf
   notify: restart sympa
   
+- name: Enable Sympa on boot
+  service: name=sympa enabled=yes
+  
 - name: Install custom rsyslog conf file
   template: src=rsyslog/sympa.conf.j2 dest=/etc/rsyslog.d/sympa.conf mode=0644
   tags: syslog
