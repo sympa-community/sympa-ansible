@@ -3,6 +3,18 @@
 # Run using:
 # ansible-playbook site.yml -i environments/vm/inventory
 
+## Ansible version requirements:
+##  2.2 : provide include_role plugin
+- name: Check Ansible version
+  hosts: all
+  remote_user: "{{ ansible_remote_user }}"
+  tags: check_ansible
+  tasks:
+    - name: Check Ansible version
+      assert:
+        that: "ansible_version.full | version_compare('2.2.0', '>=')"
+        msg: "This playbook requires Ansible 2.3.0 or greater."
+
 - name: Configuration for all nodes
   hosts: all
   sudo: True
