@@ -19,4 +19,27 @@
 - name: Install and configure database
   tags: sympa_db
   include: sympa_db.yml
-  
+
+## include_vars merges all variables in a single hash
+## therefore each robot YML file needs to have a different hash key
+- include_vars:
+    dir: "{{ inventory_dir }}/sympa_virtual_robots"
+    name: robots
+  tags: sympa_robots
+
+#- name: Dump variables définissant les robots
+#  debug:
+#    var: "{{ item.value }}"
+#    verbosity: 0
+#  with_dict: "{{ robots }}"
+#  tags: sympa_robots
+
+- name: Install and configure Sympa virtual robots
+  tags: sympa_robots
+  include_role:
+    name: sympa_virtual_robot
+  vars:
+    robot: "{{ item.value }}"
+  with_dict: "{{ robots }}"
+ 
+ 

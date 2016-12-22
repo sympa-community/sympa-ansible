@@ -1,0 +1,5 @@
+robot2:
+  hostname: robot2.example.com
+  title: Robot2 mailing list service
+  create_list: listmaster
+  

@@ -1,0 +1,10 @@
+## configuration for virtual robot {{ robot.hostname }}
+
+http_host       {{ robot.hostname }}
+host            {{ robot.hostname }}
+wwsympa_url     http://{{ robot.hostname }}/sympa
+cookie_domain   {{ robot.hostname }}
+listmaster      {{ sympa_listmaster_email }}
+create_list     {{ robot.create_list }}
+default_home    home
+title           {{ robot.title }}
