@@ -34,12 +34,15 @@
 #  with_dict: "{{ robots }}"
 #  tags: sympa_robots
 
+## Here we use loop_var to prevent conflicts on item var name with outer loops
 - name: Install and configure Sympa virtual robots
   tags: sympa_robots
   include_role:
     name: sympa_virtual_robot
   vars:
-    robot: "{{ item.value }}"
+    robot: "{{ robot_item.value }}"
   with_dict: "{{ robots }}"
+  loop_control:
+    loop_var: robot_item
  
  

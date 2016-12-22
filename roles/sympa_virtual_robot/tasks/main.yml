@@ -17,11 +17,13 @@
   template: src=robot.conf.j2 dest="{{ sympa_root_directory }}/etc/{{ robot.hostname }}/robot.conf" mode=0640 owner=sympa group=sympa
   notify: restart sympa
   
-# TODO : créer etc/robot/robot.conf
 # TODO : créer conf postfix
-# TODO : créer conf Apache
 # TODO : conf réseau/hostname
-# TODO : ajout aliases pour ce robot
+# TODO : ajout mail aliases pour ce robot
+# TODO : cert x.509 pour Apache
+# TODO : CSS, logo et favicon
+
+
 
 
 
