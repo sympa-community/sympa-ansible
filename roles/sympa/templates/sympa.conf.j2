@@ -1,7 +1,6 @@
 ###\\\\ Site customization ////###
 
 ## Main robot hostname
-# was domain local-sympa
 domain	{{ sympa_mail_hostname }}
 
 ## Local part of sympa email address
@@ -16,16 +15,13 @@ gecos	SYMPA
 ## Sympa will associate listmaster privileges to these email addresses (mail
 ## and web interfaces). Some error reports may also be sent to these
 ## addresses.
-# was listmaster your_email_address@local-sympa
 listmaster	{{ sympa_listmaster_email }}
 
 ## URL of main Web page
-# was wwsympa_url http://local-sympa/sympa
 wwsympa_url	http://{{ sympa_web_hostname }}/sympa
 
 ## Store distributed messages into archive
 ## This setting can be overridden by each list
-# was process_archive off
 process_archive	on
 
 voot_feature	off
@@ -104,11 +100,9 @@ nrcpt	25
 avg	10
 
 ## Specify which rfc2369 mailing list headers to add
-# was rfc2369_header_fields ARRAY(0x4ef7f18)
 rfc2369_header_fields	help,subscribe,unsubscribe,post,owner,archive
 
 ## Specify header fields to be removed before message distribution
-# was remove_headers ARRAY(0x4ef7fa8)
 remove_headers	X-Sympa-To,X-Family-To,Return-Receipt-To,Precedence,X-Sequence,Disposition-Notification-To,Sender
 
 ## Reject mail from automates (crontab, etc) sent to a list?
@@ -197,7 +191,6 @@ supported_lang	ca,cs,de,el,es,et,en-US,fr,fi,hu,it,ja,ko,nl,nb,oc,pl,pt-BR,ru,sv
 
 ## Default language (one of supported languages)
 ## This is the default language used by Sympa
-# was lang en-US
 lang	fr
 
 ## If set to "on", enables support of legacy character set
@@ -235,7 +228,6 @@ bounce_halt_rate	50
 ## binary_file)
 ## Set this parameter to "binary_file" if you manage a big amount of lists
 ## (1000+); it should make the web interface startup faster
-# was cache_list_config none
 cache_list_config	binary_file
 
 ## Sympa commands priority
@@ -271,7 +263,6 @@ db_user	sympa_user
 ## Password for the database connection
 ## What ever you use a password or not, you must protect the SQL server (is it
 ## not a public internet service ?)
-# was db_passwd user_password
 db_passwd	{{ sympa_db_app_password }}
 
 ## Database private extention to subscriber table
@@ -315,7 +306,7 @@ dkim_feature	off
 dkim_add_signature_to	robot,list
 
 ## The "d=" tag as defined in rfc 4871, default is virtual host domain name
-dkim_signer_domain	local-sympa
+dkim_signer_domain	{{ sympa_mail_hostname }}
 
 ###\\\\ Antivirus plug-in ////###
 
@@ -392,7 +383,6 @@ password_case	insensitive
 review_page_size	25
 
 ## Title of main Web page
-# was title Mailing lists service
 title	Mon service de listes
 
 ## If set to "on", users will be able to post messages in HTML using a
@@ -416,7 +406,6 @@ use_fast_cgi	1
 viewlogs_page_size	25
 
 ## Web domain of a virtual host
-# was http_host host.domain.tld
 http_host	{{ sympa_mail_hostname }}
 
 ## The password validation techniques to be used against user passwords that
