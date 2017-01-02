@@ -1,6 +1,6 @@
 ---
 
-- name: Provision Vagrant VM (Ubuntu 14.04 LTS)
+- name: Provision Vagrant VM (Ubuntu 16.04 LTS)
   hosts: all
   sudo: True
   gather_facts: False

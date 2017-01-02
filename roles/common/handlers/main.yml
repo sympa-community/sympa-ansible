@@ -1,7 +1,7 @@
 ---
 
-- name: restart iptables-persistent
-  service: name=iptables-persistent state=reloaded
+- name: restart netfilter-persistent
+  service: name=netfilter-persistent state=reloaded
 
 - name: restart ntpd
   service: name=ntpd state=restarted

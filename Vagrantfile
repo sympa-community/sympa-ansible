@@ -5,13 +5,14 @@ Vagrant.configure("2") do |config|
 
     # The VM Image to use. Find others at: http://vagrantcloud.com
     # Note: The "nocm" version of this box does not have any puppet software installed
-    config.vm.box = "puppetlabs/ubuntu-14.04-64-nocm"
+# TODO : tester avec "ubuntu/xenial64"
+    config.vm.box = "puppetlabs/ubuntu-16.04-64-nocm"
 
     # VM: "local-sympa"
-    config.vm.define "local-sympa" do |conf|
-        conf.vm.hostname = "local-sympa"
+    config.vm.define "local-sympa-ubuntu16" do |conf|
+        conf.vm.hostname = "local-sympa-ubuntu16"
         # Give it a fixed IP
-        conf.vm.network "private_network", ip: "192.168.66.66", :netmask => "255.255.255.0"
+        conf.vm.network "private_network", ip: "192.168.66.67", :netmask => "255.255.255.0"
         conf.vm.provider "vmware_fusion" do |v|
             v.vmx["memsize"] = "1024"
         end
@@ -39,7 +40,7 @@ Vagrant.configure("2") do |config|
         # These are not used by provision.yml
 
         ansible.groups = {
-          "sympa" => ["local-sympa"],
+          "sympa" => ["local-sympa-ubuntu16"],
         }
         ansible.playbook = "provision-vagrant-vm.yml"
         #ansible.verbose = "vvvv" # For troubleshooting ansible connection problems

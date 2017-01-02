@@ -29,13 +29,13 @@
     - rules.v4
     - rules.v6
   notify:
-  - restart iptables-persistent
+  - restart netfilter-persistent
 
 - name: Enable services ntpd, iptables-persistent on boot
   service: name={{item}} enabled=true
   with_items:
   - ntp
-  - iptables-persistent
+  - netfilter-persistent
 
 - name: Add sympa group
   group: name=sympa

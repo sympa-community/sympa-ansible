@@ -25,7 +25,7 @@
   unarchive: src=/home/sympa/src/sympa-{{ sympa_version }}.tar.gz dest=/home/sympa/src/ copy=no creates=/home/sympa/src/sympa-{{ sympa_version }}/README
   
 - name: Install Sympa
-  shell: ./configure --with-lockdir=/var/lock --with-initdir=/etc/init.d  && make && make install
+  shell: ./configure --with-lockdir=/var/lock --without-initdir --with-unitsdir=/lib/systemd/system  && make && make install
   args:
     chdir: "/home/sympa/src/sympa-{{ sympa_version }}"
     executable: /bin/bash
@@ -35,8 +35,9 @@
   tags: sympa_conf
   notify: restart sympa
   
-- name: Enable Sympa on boot
-  service: name=sympa enabled=yes
+- name: Create sympa log file
+  file: dest=/var/log/sympa state=touch mode=622 owner=syslog group=adm
+  tags: syslog
   
 - name: Install custom rsyslog conf file
   template: src=rsyslog/sympa.conf.j2 dest=/etc/rsyslog.d/sympa.conf mode=0644

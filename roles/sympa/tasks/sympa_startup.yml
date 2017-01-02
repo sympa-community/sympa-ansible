@@ -1,0 +1,11 @@
+---
+
+- name: Create systemd directory for custom conf
+  file: dest=/etc/systemd/system/sympa.service.d state=directory mode=755
+
+- name: Install custom systemd conf to define requirements with mysql server  
+  template: src=systemd/custom.conf.j2 dest=/etc/systemd/system/sympa.service.d/custom.conf mode=0644
+
+- name: Enable Sympa on boot
+  service: name=sympa enabled=yes
+  

@@ -20,6 +20,10 @@
   tags: sympa_db
   include: sympa_db.yml
 
+- name: Enable Sympa startup
+  tags: sympa_startup
+  include: sympa_startup.yml
+
 ## include_vars merges all variables in a single hash
 ## therefore each robot YML file needs to have a different hash key
 - include_vars:
