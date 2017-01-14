@@ -25,6 +25,14 @@
   copy: src=stapling.conf dest=/etc/apache2/conf-available/stapling.conf owner=root group=root mode=644
   notify: Restart Apache
 
+- name: Install Apache security config
+  template: src=security.conf.j2 dest=/etc/apache2/conf-available/security.conf owner=root group=root mode=644
+  notify: Restart Apache
+  
+- name: Install Apache main config with security options
+  template: src=apache2.conf.j2 dest=/etc/apache2/apache2.conf owner=root group=root mode=644
+  notify: Restart Apache
+
 - name: Enable global Apache config
   command: /usr/sbin/a2enconf {{ item }} creates=/etc/apache2/conf-enabled/{{ item }}.conf
   with_items:
