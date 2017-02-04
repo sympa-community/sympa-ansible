@@ -15,7 +15,7 @@ First install the tools on your local machine:
 
 Clone or download this repository to your local machine:
 
-   $ git clone https://osalaun@bitbucket.org/osalaun/collabasso-sympa.git
+    $ git clone https://osalaun@bitbucket.org/osalaun/collabasso-sympa.git
 
 Next change into the "collabasso-sympa" directory and start the development VM: 
 
@@ -23,66 +23,37 @@ Next change into the "collabasso-sympa" directory and start the development VM:
 
 This prepares a VM that is ready to be managed by Ansible. It will call a simple Ansible playbook to make some changes to the VM.  Run `$ vagrant provision` to rerun just the provisioning step and update the inventory.
 
-Create the new environment for the VM:
-
-    $ ./scripts/create_new_environment.sh environments/local
-
 A starting point for a playbook is provided. Run the playbook "site.yml": 
 
     $ ansible-playbook site.yml -i environments/local/inventory
 
 You can login to the VM using `$ vagrant ssh`
 
+# Defining Sympa server setup 
+
+
 
 # Organisation
 
-Ansible-tools is organised such that it can be used as a starting point for your own Ansible project. It follows a standard [Ansible playbook](http://docs.ansible.com/ansible/playbooks.html) layout containing:
-
-- The _roles_ directory - containing the roles
-- The _filter_plugins_ directory - containing custom Ansible plugins
-- A top level Ansible playbook _site.yml_
-
-When compared to the directory layout described in the 
-[Ansible playbook best practices](http://docs.ansible.com/ansible/playbooks_best_practices.html) you will notice that ansible-tools 
-is "missing" the inventory file(s) and the groups\_vars and host\_vars directories. In the organisation that ansible-tools 
-is promoting these are all part of an environment and are stored in a different part of the directory structure. 
-
-This separation is what allows the configuration that is environment specific to be managed separately from the Ansible 
-playbook(s) and roles. Environment specific configuration are things like Hostnames, IP addresses, Firewall rules,
-Email addresses, Passwords, private keys, certificates etc.
-
-An environment is an independent directory structure. This allows it to be maintained in a different (git, svn, ...)
-repository than the ansible playbooks. For an open source project, this allows open sourcing the Ansible playbooks 
-including everything that is required to setup a new environment without revealing any private infrastructure related 
-configuration. 
-
-All that is the same between the environments should be put in the playbook(s), and not in an environment:
-
-- Updating a playbook needs only to be done once, updating an environment needs to be done for each environment.
-- Because the playbooks are shared by all the environments, they will get more testing.
-
-> Only put the variables and templates that are _different_ between environments in the environment. The rest goes in the
-> playbook and roles
+The _environments_ directory contains configuration elements specific to each target environment (local VM, dev, staging, production). This separation is what allows the configuration that is environment specific to be managed separately from the Ansible playbook(s) and roles. Environment specific configuration are things like Hostnames, IP addresses, Firewall rules, Email addresses, Passwords, private keys, certificates etc.
 
 The other top level directories and files are:
 
-- The _environments_ directory containingg the template for a new environments
+- The _environments_ directory containing the template for a new environments
 - The _scripts_ directory containing the various scripts used to create a new environment and manage secrets and work with
   the Vault
 - A _Vagrantfile_ for creating a VM using Vagrant
 - _ansible.cfg_ (optional) makes playbooks run faster by enabling SSH pipelining, 
 - _provision-vagrant-vm.yml_ playbook used by the Vagrant provisioning step only.
 
-
 # Creating a new environment
-To get started you need an environment. Ansible-tools does not ship with a ready made environment, instead it ships
-with the tools to create new environments. In the environments directory of Ansible-tools you will find two 
-directories:
+To get started you need an environment. Ansible-tools does not ship with a ready made environment, instead it ships with the tools to create new environments. In the environments directory of Ansible-tools you will find two directories:
 
 - [template](#templatedir) - This is the starting point of all new environments
 - [local](#localdir) - some configuration that matches the included Vagrant file.
 
 ## [About the environments/template directory](id:templatedir)
+
 The environments/template directory contains the starting point of a new environment. It is only used during the
 creation of a new environment. That means that when you start extending your playbooks, and find that you need to add
 variables to a environment, you should also add these variable to the template. It is thus up to you to make sure that
