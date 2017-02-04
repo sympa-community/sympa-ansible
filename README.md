@@ -29,6 +29,8 @@ A starting point for a playbook is provided. Run the playbook "site.yml":
 
 You can login to the VM using `$ vagrant ssh`
 
+> By default, Vagrant shares your project directory (remember, that is the one with the Vagrantfile) to the /vagrant directory in your guest machine.
+
 # Defining Sympa server setup 
 
 # Ansible-tools documentation
