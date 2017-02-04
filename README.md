@@ -72,9 +72,19 @@ sympa_ssl_certificate: "{{ lookup('file',inventory_dir+'/ssl_cert/webserver.crt'
 
 # SSL private key for Apache
 sympa_ssl_key: "{{ lookup('file',inventory_dir+'/ssl_cert/webserver.key') }}"
+```
 
+Sympa virtual robots are enabled via YAML files, like _environments/local/sympa_virtual_robots/robot1.yml_ :
 
 ```
+#!yaml
+
+robot1:
+  hostname: robot1.example.com
+  title: Robot1 mailing list service
+  create_list: listmaster
+```
+
 
 # Ansible-tools documentation
 
