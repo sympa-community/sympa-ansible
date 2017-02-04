@@ -35,6 +35,7 @@ You should add an entry in your host _/etc/hosts_ file for the VM's IP address
 
     192.168.66.67 lists.example.com robot1.example.com robot2.example.com
 
+You can now connect to your Sympa server web interface [https://lists.example.com/sympa](https://lists.example.com/sympa).
 
 # Defining Sympa server setup 
 
