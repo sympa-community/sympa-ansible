@@ -1,45 +1,38 @@
 # Sympa deployment with Ansible
 
 [Sympa](http://www.sympa.org/) is an open source mailing list software
+
 [Ansible](http://docs.ansible.com/) is an IT automation tool. It can configure systems, deploy software
 
 This project is based on [Ansible-tools](https://github.com/pmeulen/ansible-tools), an example of Ansible Playbooks organization focusing on deployment for multiple environments, articulation with [Vagrant](https://www.vagrantup.com/docs/), [keyczar](https://github.com/google/keyczar) based encryption. Ansible-tools demonstrates a way to use Ansible to effectively and securely manage multiple environments ranging from development to production using the same playbook.
 
 # [Quickstart: Creating a development VM](id:quickstart)
 
-This section is intended to get you started quickly with a development VM. It lets you install the required tools 
-and lets you create a Vagrant VM and run an Ansible playbook on it. It does not use the encryption feature of 
-Ansible tools. The how and why are described in the sections below.
-
 First install the tools on your local machine:
 
-* Install [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org). Virtualbox will run 
-  the development VM and Vagrant is used to create, configure and manage the development VM instance.
-* Install [Ansible](http://www.ansible.com). There are several ways to install Ansible. They are described in the 
-  [Ansible installation guide](http://docs.ansible.com/ansible/intro_installation.html).
+* Install [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org). Virtualbox will run the development VM and Vagrant is used to create, configure and manage the development VM instance.
+* Install [Ansible](http://www.ansible.com). There are several ways to install Ansible. They are described in the [Ansible installation guide](http://docs.ansible.com/ansible/intro_installation.html).
 
-Clone or download this repository to your local machine if you haven't already. Next change into the "ansible-tools" 
-directory (i.e. where this README is located) and create and start the development VM: 
+Clone or download this repository to your local machine if you haven't already. Next change into the "ansible-tools" directory (i.e. where this README is located) and create and start the development VM: 
 
     $ vagrant up
 
-This prepares a VM that is ready to be managed by Ansible. It will call a simple Ansible playbook to make some changes to the VM. 
-Run `$ vagrant provision` to rerun just the provisioning step and update the inventory.
+This prepares a VM that is ready to be managed by Ansible. It will call a simple Ansible playbook to make some changes to the VM.  Run `$ vagrant provision` to rerun just the provisioning step and update the inventory.
 
 Create the new environment for the VM:
 
-    $ ./scripts/create_new_environment.sh environments/vm
+    $ ./scripts/create_new_environment.sh environments/local
 
 A starting point for a playbook is provided. Run the playbook "site.yml": 
 
-    $ ansible-playbook site.yml -i environments/vm/inventory
+    $ ansible-playbook site.yml -i environments/local/inventory
 
 You can login to the VM using `$ vagrant ssh`
 
 
 # Organisation
-Ansible-tools is organised such that it can be used as a starting point for your own Ansible project. It follows
-a standard [Ansible playbook](http://docs.ansible.com/ansible/playbooks.html) layout containing:
+
+Ansible-tools is organised such that it can be used as a starting point for your own Ansible project. It follows a standard [Ansible playbook](http://docs.ansible.com/ansible/playbooks.html) layout containing:
 
 - The _roles_ directory - containing the roles
 - The _filter_plugins_ directory - containing custom Ansible plugins
