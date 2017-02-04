@@ -2,7 +2,7 @@
 
 [Sympa](http://www.sympa.org/) is an open source mailing list software
 
-[Ansible](http://docs.ansible.com/) is an IT automation tool. It can configure systems, deploy software. Ansible 2.2 is required for the _include-role_ feature to be used.
+[Ansible](http://docs.ansible.com/) is an IT automation tool. It can configure systems, deploy software.
 
 This project is based on [Ansible-tools](https://github.com/pmeulen/ansible-tools), an example of Ansible Playbooks organization focusing on deployment for multiple environments, articulation with [Vagrant](https://www.vagrantup.com/docs/), [keyczar](https://github.com/google/keyczar) based encryption. Ansible-tools demonstrates a way to use Ansible to effectively and securely manage multiple environments ranging from development to production using the same playbook.
 
@@ -11,7 +11,7 @@ This project is based on [Ansible-tools](https://github.com/pmeulen/ansible-tool
 First install the tools on your local machine:
 
 * Install [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org). Virtualbox will run the development VM and Vagrant is used to create, configure and manage the development VM instance.
-* Install [Ansible](http://www.ansible.com). There are several ways to install Ansible. They are described in the [Ansible installation guide](http://docs.ansible.com/ansible/intro_installation.html).
+* Install [Ansible](http://www.ansible.com). There are several ways to install Ansible. They are described in the [Ansible installation guide](http://docs.ansible.com/ansible/intro_installation.html). Ansible 2.2 is required for the _include-role_ feature to be used.
 
 Clone or download this repository to your local machine:
 
