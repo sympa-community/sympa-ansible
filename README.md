@@ -2,7 +2,7 @@
 
 [Sympa](http://www.sympa.org/) is an open source mailing list software
 
-[Ansible](http://docs.ansible.com/) is an IT automation tool. It can configure systems, deploy software
+[Ansible](http://docs.ansible.com/) is an IT automation tool. It can configure systems, deploy software. Ansible 2.2 is required for the _include-role_ feature to be used.
 
 This project is based on [Ansible-tools](https://github.com/pmeulen/ansible-tools), an example of Ansible Playbooks organization focusing on deployment for multiple environments, articulation with [Vagrant](https://www.vagrantup.com/docs/), [keyczar](https://github.com/google/keyczar) based encryption. Ansible-tools demonstrates a way to use Ansible to effectively and securely manage multiple environments ranging from development to production using the same playbook.
 
