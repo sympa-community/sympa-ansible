@@ -38,6 +38,44 @@ You should add an entry in your host _/etc/hosts_ file for the VM's IP address
 
 # Defining Sympa server setup 
 
+The Sympa server parameters can be customized in the _environments/local/group_vars/sympa.yml_ file:
+
+
+```
+#!yaml
+
+# Group vars for sympa servers
+
+# FQDN for mail addresses
+sympa_mail_hostname: lists.example.com
+
+# FQDN of web interface
+sympa_web_hostname: "{{ sympa_mail_hostname }}"
+
+# Web server admin email
+server_admin_email: "listmaster@{{ sympa_mail_hostname }}"
+
+# Root directory to install Sympa software
+sympa_root_directory: /home/sympa
+
+# Email addresses of listmasters (comma separated)
+sympa_listmaster_email: croq.salaun@gmail.com
+
+# Root passwd for the Sympa database
+sympa_db_root_password: "{{ lookup('file',inventory_dir+'/password/sympa_db_root_password') }}"
+
+# App passwd for the Sympa database
+sympa_db_app_password: "{{ lookup('file',inventory_dir+'/password/sympa_db_app_password') }}"
+
+# SSL cert for Apache
+sympa_ssl_certificate: "{{ lookup('file',inventory_dir+'/ssl_cert/webserver.crt') }}"
+
+# SSL private key for Apache
+sympa_ssl_key: "{{ lookup('file',inventory_dir+'/ssl_cert/webserver.key') }}"
+
+
+```
+
 # Ansible-tools documentation
 
 ## Organisation
