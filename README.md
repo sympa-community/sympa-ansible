@@ -31,6 +31,11 @@ You can login to the VM using `$ vagrant ssh`
 
 > By default, Vagrant shares your project directory (remember, that is the one with the Vagrantfile) to the /vagrant directory in your guest machine.
 
+You should add an entry in your host _/etc/hosts_ file for the VM's IP address
+
+    192.168.66.67 lists.example.com robot1.example.com robot2.example.com
+
+
 # Defining Sympa server setup 
 
 # Ansible-tools documentation
