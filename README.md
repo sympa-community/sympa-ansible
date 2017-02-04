@@ -1,25 +1,9 @@
-# Ansible-tools
-Ansible-tools serves as a starting point and an example of an 
-[Ansible playbook](http://docs.ansible.com/ansible/playbooks.html) with some tools added that
-make it easier to use the same playbooks and roles for multiple **environments**. 
+# Sympa deployment with Ansible
 
-In this context an [**environment**](id:environment) is a server or set of servers i.e. your production environment, 
-your staging environment or your local development environment. It is not related to the environment variables like 
-PATH or HOME that are used by an operating system.
+[Sympa](http://www.sympa.org/) is an open source mailing list software
+[Ansible](http://docs.ansible.com/) is an IT automation tool. It can configure systems, deploy software
 
-Ansible-tools demonstrates a way to use Ansible to effectively and securely manage multiple environments ranging 
-from development to production using the same playbook.
-
-Ansible-tools provides:
-
-- Vagrant integration for creating a local development VM
-- An automated way to create a new environment, including generating passwords and certificates
-- Optional encryption of the passwords and private keys in an environment using a symmetric key (keyczar)
-
-The setup used by Ansible-tools assumes that you will be managing multiple similar environments. It can be used to
-manage a single environment of course, and the use of Vagrant and a keyczar based vault is entirely optional.
-
-Suggestions, improvements or critique welcome.
+This project is based on [Ansible-tools](https://github.com/pmeulen/ansible-tools), an example of Ansible Playbooks organization focusing on deployment for multiple environments, articulation with [Vagrant](https://www.vagrantup.com/docs/), [keyczar](https://github.com/google/keyczar) based encryption. Ansible-tools demonstrates a way to use Ansible to effectively and securely manage multiple environments ranging from development to production using the same playbook.
 
 # [Quickstart: Creating a development VM](id:quickstart)
 
