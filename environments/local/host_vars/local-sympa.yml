@@ -1,5 +1,0 @@
-# Fixed IP address of the host that was assigned by Vagrant
-host_ipv4: 192.168.66.67
-
-# User to use to connect to the VM
-ansible_remote_user: vagrant
