@@ -15,9 +15,9 @@ First install the tools on your local machine:
 
 Clone or download this repository to your local machine:
 
-    $ git clone https://osalaun@bitbucket.org/osalaun/collabasso-sympa.git
+    $ git clone https://github.com/sympa-community/sympa-ansible.git
 
-Next change into the "collabasso-sympa" directory and start the development VM: 
+Next change into the "sympa-ansible" directory and start the development VM: 
 
     $ vagrant up
 
