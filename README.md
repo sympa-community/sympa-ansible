@@ -15,13 +15,27 @@ First install the tools on your local machine:
 
 Clone or download this repository to your local machine:
 
-    $ git clone https://osalaun@bitbucket.org/osalaun/collabasso-sympa.git
+    $ git clone https://github.com/sympa-community/sympa-ansible.git
 
-Next change into the "collabasso-sympa" directory and start the development VM: 
+Next change into the "sympa-ansible" directory and start the development VM: 
 
     $ vagrant up
 
-This prepares a VM that is ready to be managed by Ansible. It will call a simple Ansible playbook to make some changes to the VM.  Run `$ vagrant provision` to rerun just the provisioning step and update the inventory.
+This prepares a VM that is ready to be managed by Ansible. It will call a simple Ansible playbook to make some changes to the VM.
+
+Create the new environment for the VM:
+
+    $ ./scripts/create_new_environment.sh environments/local
+
+Provision the environment:
+
+    $ vagrant provision
+
+And link the environment to your local directory:
+
+    $ cd environments/local/; ln -s ../../.vagrant/provisioners/ansible/inventory; cd ../..
+
+Run `$ vagrant provision` to rerun just the provisioning step and update the inventory.
 
 A starting point for a playbook is provided. Run the playbook "site.yml": 
 
