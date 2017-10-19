@@ -4,3 +4,4 @@ sympa_source: http://www.sympa.org/distribution
 sympa_version: 6.2.16
 sympa_download_url: "{{ sympa_source }}/sympa-{{ sympa_version }}.tar.gz"
 sympa_sha256: 9fc09c6fd757fa5aadf356c331479836b8b3a1cd50a9e1609f3cd28bd4381b90
+sympa_install_prefix: /usr/local/sympa

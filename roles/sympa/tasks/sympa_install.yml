@@ -4,30 +4,30 @@
   user: name=sympa group=sympa password=no
   
 - name: Create sympa directories
-  file: dest=/home/{{ item }} state=directory mode=755 owner=sympa
-  with_items: ['sympa', 'sympa/src']
+  file: dest={{ item }} state=directory mode=755 owner=sympa
+  with_items: ["{{ sympa_install_prefix }}", "{{ sympa_install_prefix }}/src"]
 
 - name: Check Sympa tar.gz existence
-  stat: path="/home/sympa/src/sympa-{{ sympa_version }}.tar.gz"
+  stat: path="{{ sympa_install_prefix }}/src/sympa-{{ sympa_version }}.tar.gz"
   register: sympa_archive_file
 
 - name: Download Sympa tar.gz
   get_url:
     url: "{{ sympa_download_url }}"
-    dest: "/home/sympa/src"
+    dest: "{{ sympa_install_prefix }}/src"
     sha256sum: "{{ sympa_sha256 }}"
   when: not sympa_archive_file.stat.exists
 
 - name: Create the Sympa src directory
-  file: path=/home/sympa/src/sympa-{{ sympa_version }} state=directory
+  file: path={{ sympa_install_prefix }}/src/sympa-{{ sympa_version }} state=directory
   
 - name: Unpack the tarball
-  unarchive: src=/home/sympa/src/sympa-{{ sympa_version }}.tar.gz dest=/home/sympa/src/ copy=no creates=/home/sympa/src/sympa-{{ sympa_version }}/README
+  unarchive: src={{ sympa_install_prefix }}/src/sympa-{{ sympa_version }}.tar.gz dest={{ sympa_install_prefix }}/src/ copy=no creates={{ sympa_install_prefix }}/src/sympa-{{ sympa_version }}/README
   
 - name: Install Sympa
-  shell: ./configure --with-lockdir=/var/lock --without-initdir --with-unitsdir=/lib/systemd/system  && make && make install
+  shell: ./configure --prefix={{ sympa_install_prefix }} --with-lockdir=/var/lock --without-initdir --with-unitsdir=/lib/systemd/system  && make && make install
   args:
-    chdir: "/home/sympa/src/sympa-{{ sympa_version }}"
+    chdir: "{{ sympa_install_prefix }}/src/sympa-{{ sympa_version }}"
     executable: /bin/bash
 
 - name: Install Sympa configuration file
