@@ -50,5 +50,4 @@
 - name: keep PERL5LIB variable in sudoers.d/
   template: src=sudoers.d/sympa.j2 dest=/etc/sudoers.d/sympa
   tags: sudoers
-  notify: restart sudo
 
