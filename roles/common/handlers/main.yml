@@ -1,7 +1,7 @@
 ---
 
 - name: restart netfilter-persistent
-  service: name=netfilter-persistent state=reloaded
+  service: name=netfilter-persistent state=restarted
 
 - name: restart ntpd
   service: name=ntpd state=restarted
