@@ -17,7 +17,7 @@
 
 - name: Configuration for all nodes
   hosts: all
-  sudo: True
+  become: yes
   tags: common
   gather_facts: no
   remote_user: "{{ ansible_remote_user }}"
@@ -27,7 +27,7 @@
 
 - name: Apply role "sympa" to hosts in group "sympa"
   hosts: sympa
-  sudo: True
+  become: yes
   tags: sympa
   gather_facts: no
   remote_user: "{{ ansible_remote_user }}"
