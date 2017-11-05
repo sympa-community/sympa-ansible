@@ -10,3 +10,4 @@
 
 - name: Install Sympa mail aliases
   template: src=postfix/sympa_aliases.j2 dest=/etc/mail/sympa_aliases owner=sympa group=sympa mode=0664 force=no
+  notify: update postfix aliases database
