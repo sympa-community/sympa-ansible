@@ -1,7 +1,9 @@
 ---
 
 sympa_source: http://www.sympa.org/distribution
-sympa_version: 6.2.16
+sympa_version: 6.2.22
 sympa_download_url: "{{ sympa_source }}/sympa-{{ sympa_version }}.tar.gz"
-sympa_sha256: 9fc09c6fd757fa5aadf356c331479836b8b3a1cd50a9e1609f3cd28bd4381b90
+sympa_sha256:
+    - {version: "6.2.22", sha256: "21f5e90f5f911c7f8d24b88b0cf45668545da5b45b7cf30138ba144eace6c8b7"}
+
 sympa_install_prefix: /usr/local/sympa

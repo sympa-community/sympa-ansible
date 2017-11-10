@@ -15,7 +15,7 @@
   get_url:
     url: "{{ sympa_download_url }}"
     dest: "{{ sympa_install_prefix }}/src"
-    sha256sum: "{{ sympa_sha256 }}"
+    sha256sum: "{{ sympa_sha256[sympa_version] }}"
   when: not sympa_archive_file.stat.exists
 
 - name: Create the Sympa src directory
