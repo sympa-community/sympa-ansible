@@ -31,9 +31,9 @@ Provision the environment:
 
     $ vagrant provision
 
-And link the environment to your local directory:
+And link the inventory to your local directory:
 
-    $ cd environments/local/; ln -s ../../.vagrant/provisioners/ansible/inventory; cd ../..
+    $ cd environments/local/; ln -s ../../.vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory inventory; cd ../..
 
 Run `$ vagrant provision` to rerun just the provisioning step and update the inventory.
 
