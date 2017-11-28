@@ -4,4 +4,5 @@
 /.vagrant
 /apt
 /tmp
-
+.project
+site.retry
