@@ -2,27 +2,27 @@
 
 - name: Install prerequisites for Sympa
   tags: sympa_prereq
-  include: sympa_prereq.yml
+  include_tasks: sympa_prereq.yml
   
 - name: Install Sympa software
   tags: sympa_install
-  include: sympa_install.yml
+  include_tasks: sympa_install.yml
 
 - name: Configure postfix and mail aliases
   tags: sympa_mail
-  include: sympa_mail.yml
+  include_tasks: sympa_mail.yml
 
 - name: Configure Apache
   tags: sympa_web
-  include: sympa_web.yml
+  include_tasks: sympa_web.yml
 
 - name: Install and configure database
   tags: sympa_db
-  include: sympa_db.yml
+  include_tasks: sympa_db.yml
 
 - name: Enable Sympa startup
   tags: sympa_startup
-  include: sympa_startup.yml
+  include_tasks: sympa_startup.yml
 
 ## include_vars merges all variables in a single hash
 ## therefore each robot YML file needs to have a different hash key
