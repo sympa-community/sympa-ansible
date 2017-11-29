@@ -48,3 +48,6 @@
   template: src=logrotate/sympa.j2 dest=/etc/logrotate.d/sympa mode=0644
   tags: logrotate
   
+- name: Upgrade Sympa
+  shell: "{{ sympa_install_prefix }}/bin/sympa.pl --upgrade"
+
