@@ -21,7 +21,6 @@
   tags: common
   gather_facts: no
   remote_user: "{{ ansible_remote_user }}"
-
   roles:
   - common
 
@@ -31,6 +30,5 @@
   tags: sympa
   gather_facts: no
   remote_user: "{{ ansible_remote_user }}"
-
   roles:
   - sympa
