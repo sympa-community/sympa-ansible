@@ -23,3 +23,5 @@ sympa_ssl_certificate: "{{ lookup('file',inventory_dir+'/ssl_cert/webserver.crt'
 
 # SSL private key for Apache
 sympa_ssl_key: "{{ lookup('file',inventory_dir+'/ssl_cert/webserver.key') }}"
+
+sympa_incoming_smtp: '192.168.66.66'
