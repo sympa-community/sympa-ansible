@@ -7,7 +7,7 @@ sympa_mail_hostname: lists.example.com
 sympa_web_hostname: "{{ sympa_mail_hostname }}"
 
 # Root directory to install Sympa software
-sympa_root_directory: /home/sympa
+sympa_root_directory: /usr/local/sympa
 
 # Email addresses of listmasters (comma separated)
 sympa_listmaster_email: john.doe@my.domain
@@ -23,6 +23,8 @@ sympa_ssl_certificate: "{{ lookup('file',inventory_dir+'/ssl_cert/webserver.crt'
 
 # SSL private key for Apache
 sympa_ssl_key: "{{ lookup('file',inventory_dir+'/ssl_cert/webserver.key') }}"
+
+sympa_force_smtp_route: 0
 
 sympa_incoming_smtp: '192.168.66.66'
 
