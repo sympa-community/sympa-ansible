@@ -7,6 +7,7 @@ sympa_sha256:
     { "6.2.22": "21f5e90f5f911c7f8d24b88b0cf45668545da5b45b7cf30138ba144eace6c8b7"}
 
 sympa_install_prefix: /usr/local/sympa
+sympa_apply_patches: 1
 sympa_force_smtp_route: 0
 sympa_incoming_smtp: '192.168.66.66'
 sympa_outgoing_server: "{{ sympa_incoming_smtp }}"
