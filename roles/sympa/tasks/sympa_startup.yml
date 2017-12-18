@@ -3,6 +3,9 @@
 - name: Upgrade Sympa
   shell: "{{ sympa_install_prefix }}/bin/sympa.pl --upgrade"
 
+- name: Create Sympa database for new installations
+  shell: "{{ sympa_root_directory }}/bin/sympa.pl --health_check"
+
 - name: Create systemd directory for custom conf
   file: dest=/etc/systemd/system/sympa.service.d state=directory mode=755
 

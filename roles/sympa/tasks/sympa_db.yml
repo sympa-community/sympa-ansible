@@ -46,7 +46,3 @@
 
 - name: Create required /etc/mail/ directory    
   file: dest=/etc/mail state=directory mode=755
-
-- name: Create Sympa database
-  shell: "{{ sympa_root_directory }}/bin/sympa.pl --health_check"
- 
