@@ -1,5 +1,7 @@
 ---
 
+sympa_repository: https://github.com/sympa-community/sympa.git
+sympa_install_from_repository: 0
 sympa_source: http://www.sympa.org/distribution/releases
 sympa_version: 6.2.24
 sympa_download_url: "{{ sympa_source }}/sympa-{{ sympa_version }}.tar.gz"
