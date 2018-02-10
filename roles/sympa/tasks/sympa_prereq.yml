@@ -17,6 +17,7 @@
   with_items:
     - autoconf
     - automake
+    - gettext
     - git
   when: sympa_install_from_repository  
 
