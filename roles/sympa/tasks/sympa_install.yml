@@ -2,51 +2,20 @@
 
 - name: Add sympa user
   user: name=sympa group=sympa password=no
-  
+
 - name: Create sympa directories
   file: dest={{ item }} state=directory mode=755 owner=sympa
   with_items: ["{{ sympa_install_prefix }}", "{{ sympa_install_prefix }}/src"]
 
-- name: Check Sympa tar.gz existence
-  stat: path="{{ sympa_install_prefix }}/src/sympa-{{ sympa_version }}.tar.gz"
-  register: sympa_archive_file
-
-- name: Download Sympa tar.gz
-  get_url:
-    url: "{{ sympa_download_url }}"
-    dest: "{{ sympa_install_prefix }}/src"
-    sha256sum: "{{ sympa_sha256[sympa_version] }}"
-  when: not sympa_archive_file.stat.exists and not sympa_install_from_repository
-
-- name: Create the Sympa src directory
-  file: path={{ sympa_install_prefix }}/src/sympa-{{ sympa_version }} state=directory
-  when: not sympa_install_from_repository
-  
-- name: Unpack the tarball
-  unarchive: src={{ sympa_install_prefix }}/src/sympa-{{ sympa_version }}.tar.gz dest={{ sympa_install_prefix }}/src/ copy=no creates={{ sympa_install_prefix }}/src/sympa-{{ sympa_version }}/README
+- name: Include retrieving sources from tar.gz task if needed
+  include_tasks: sympa_install_get_sources_from_targz.yml
+  tags: sympa_install_get_soources_from_targz
   when: not sympa_install_from_repository
 
-- name: Apply Sympa patches
-  patch:
-    src: "{{ item }}"
-    basedir: "{{ sympa_install_prefix }}/src/sympa-{{ sympa_version }}"
-    strip: 1
-  when: sympa_apply_patches and not sympa_install_from_repository
-  with_fileglob: "{{ role_path }}/patches/{{ sympa_version }}/*.diff"
-
-- name: Download sources from repository
-  git:
-    repo: "{{ sympa_repository }}"
-    dest: "{{ sympa_install_prefix }}/src/sympa-{{ sympa_version }}"
-    force: yes
-  when: sympa_install_from_repository  
-
-- name: Prepare configure
-  shell: autoreconf -i
-  args:
-    chdir: "{{ sympa_install_prefix }}/src/sympa-{{ sympa_version }}"
-    executable: /bin/bash
-  when: sympa_install_from_repository  
+- name: Include retrieving sources from repository if needed.
+  include_tasks: sympa_install_get_sources_from_repo.yml
+  tags: sympa_install_get_sources_from_repo
+  when: sympa_install_from_repository
 
 - name: "Install Sympa [1/3: configure]"
   shell: ./configure --prefix={{ sympa_install_prefix }} --with-lockdir=/var/lock --without-initdir --with-unitsdir=/lib/systemd/system
