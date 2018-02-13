@@ -3,6 +3,7 @@
     repo: "{{ sympa_repository }}"
     dest: "{{ sympa_install_prefix }}/src/{{ source_dir }}"
     force: yes
+    version: "{{ sympa_repo_version }}"
 
 - name: Prepare configure
   shell: autoreconf -i
