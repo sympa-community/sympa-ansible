@@ -1,12 +1,12 @@
 - name: Download sources from repository
   git:
     repo: "{{ sympa_repository }}"
-    dest: "{{ sympa_install_prefix }}/src/sympa-{{ sympa_version }}"
+    dest: "{{ sympa_install_prefix }}/src/{{ source_dir }}"
     force: yes
 
 - name: Prepare configure
   shell: autoreconf -i
   args:
-    chdir: "{{ sympa_install_prefix }}/src/sympa-{{ sympa_version }}"
+    chdir: "{{ sympa_install_prefix }}/src/{{ source_dir }}"
     executable: /bin/bash
 

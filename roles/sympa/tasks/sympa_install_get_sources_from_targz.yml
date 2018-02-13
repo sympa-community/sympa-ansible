@@ -1,5 +1,5 @@
 - name: Check Sympa tar.gz existence
-  stat: path="{{ sympa_install_prefix }}/src/sympa-{{ sympa_version }}.tar.gz"
+  stat: path="{{ sympa_install_prefix }}/src/{{ source_dir }}.tar.gz"
   register: sympa_archive_file
 
 - name: Download Sympa tar.gz
@@ -10,15 +10,15 @@
   when: not sympa_archive_file.stat.exists
 
 - name: Create the Sympa src directory
-  file: path={{ sympa_install_prefix }}/src/sympa-{{ sympa_version }} state=directory
+  file: path={{ sympa_install_prefix }}/src/{{ source_dir }} state=directory
   
 - name: Unpack the tarball
-  unarchive: src={{ sympa_install_prefix }}/src/sympa-{{ sympa_version }}.tar.gz dest={{ sympa_install_prefix }}/src/ copy=no creates={{ sympa_install_prefix }}/src/sympa-{{ sympa_version }}/README
+  unarchive: src={{ sympa_install_prefix }}/src/{{ source_dir }}.tar.gz dest={{ sympa_install_prefix }}/src/ copy=no creates={{ sympa_install_prefix }}/src/{{ source_dir }}/README
 
 - name: Apply Sympa patches
   patch:
     src: "{{ item }}"
-    basedir: "{{ sympa_install_prefix }}/src/sympa-{{ sympa_version }}"
+    basedir: "{{ sympa_install_prefix }}/src/{{ source_dir }}"
     strip: 1
   when: sympa_apply_patches
   with_fileglob: "{{ role_path }}/patches/{{ sympa_version }}/*.diff"
