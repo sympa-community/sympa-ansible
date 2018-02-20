@@ -74,7 +74,7 @@ server_admin_email: "listmaster@{{ sympa_mail_hostname }}"
 sympa_root_directory: /home/sympa
 
 # Email addresses of listmasters (comma separated)
-sympa_listmaster_email: croq.salaun@gmail.com
+sympa_listmaster_email: guevara@chemail.com
 
 # Root passwd for the Sympa database
 sympa_db_root_password: "{{ lookup('file',inventory_dir+'/password/sympa_db_root_password') }}"
