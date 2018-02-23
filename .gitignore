@@ -5,4 +5,4 @@
 /apt
 /tmp
 .project
-site.retry
+*.retry
