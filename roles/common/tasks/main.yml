@@ -41,10 +41,18 @@
   group: name=sympa
 
 - name: Add user accounts
-  user: name={{item}} group=sympa password=no
-  with_items:
-  - david
-  - olivier
-  
+  user:
+    name: "{{item.name}}"
+    group: "{{item.group}}"
+    password: "{{item.password}}"
+  with_items: "{{ users }}"
+
+- name: Ensure all users have a .ssh directory
+  file:
+    state: directory
+    owner: "{{item.name}}"
+    name: "/home/{{item.name}}/.ssh"
+  with_items: "{{ users }}"
+
 # Include environment specific tasks
 - include_tasks: "{{ inventory_dir }}/tasks/common.yml"
