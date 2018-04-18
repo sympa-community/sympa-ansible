@@ -1,3 +1,4 @@
+/environments/formation/
 /environments/local/
 *.pyc
 /.idea
