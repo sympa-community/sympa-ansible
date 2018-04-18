@@ -1,0 +1,13 @@
+---
+
+users:
+     - {
+      "name": "david",
+      "password": "no",
+      "group": "sympa"
+      }
+     - {
+      "name": "olivier",
+      "password": "no",
+      "group": "sympa"
+      }
