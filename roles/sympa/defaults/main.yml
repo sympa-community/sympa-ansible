@@ -4,7 +4,7 @@ sympa_repository: https://github.com/sympa-community/sympa.git
 sympa_repository_version: HEAD
 sympa_install_from_repository: 0
 sympa_source: http://www.sympa.org/distribution/releases
-sympa_version: 6.2.24
+sympa_version: 6.2.32
 sympa_download_url: "{{ sympa_source }}/sympa-{{ sympa_version }}.tar.gz"
 sympa_sha256:
     {
@@ -37,6 +37,7 @@ sympa_sha256:
      "6.2.22": "21f5e90f5f911c7f8d24b88b0cf45668545da5b45b7cf30138ba144eace6c8b7",
      "6.2.24": "578224944370a0ea55f884591074f89d1b352628e9f39897dabea56bd7373310",
      "6.2.30": "84253a9227f7ee0cef064861455bd6bdda89d41a6012b97f6903fe827c7f2f61",
+     "6.2.32": "e2990cbd57f931c4ca26c7b94db0090cac82bcc644be2f58bb48512af19fc52e",
     }
 
 sympa_install_prefix: /usr/local/sympa
