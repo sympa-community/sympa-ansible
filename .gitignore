@@ -1,6 +1,5 @@
-/environments/formation/
-/environments/formation-prod/
-/environments/local/
+/environments
+!/environments/template
 *.pyc
 /.idea
 /.vagrant
