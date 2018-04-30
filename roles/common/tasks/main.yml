@@ -40,11 +40,52 @@
 - name: Add sympa group
   group: name=sympa
 
+- name: Make sure we have a 'wheel' group
+  group:
+    name: wheel
+    state: present
+
+- name: Allow 'wheel' group to have passwordless sudo
+  lineinfile:
+    dest: /etc/sudoers
+    state: present
+    regexp: '^%wheel'
+    line: '%wheel ALL=(ALL) NOPASSWD: ALL'
+    validate: 'visudo -cf %s'
+
 - name: Add user accounts
-  user: name={{item}} group=sympa password=no
-  with_items:
-  - david
-  - olivier
-  
+  user:
+    name: "{{item.name}}"
+    group: "{{item.group}}"
+    password: "{{item.password}}"
+  with_items: "{{ users }}"
+
+- name: Add sudoers users to wheel group
+  user:
+    name: "{{item.name}}"
+    groups: wheel
+    append: yes
+  with_items: "{{ users }}"
+
+- name: Ensure all users have a .ssh directory
+  file:
+    state: directory
+    owner: "{{item.name}}"
+    name: "/home/{{item.name}}/.ssh"
+  with_items: "{{ users }}"
+
+- name: Ensure all users have an authorized_keys file
+  file:
+    state: touch
+    owner: "{{item.name}}"
+    path: "/home/{{item.name}}/.ssh/authorized_keys"
+  with_items: "{{ users }}"
+
+- name: If needed, add the public keys to the relevant authorized_keys files.
+  lineinfile:
+    path: "/home/{{item.user}}/.ssh/authorized_keys"
+    line: "{{item.public_key}}"
+  with_items: "{{ public_keys }}"
+
 # Include environment specific tasks
 - include_tasks: "{{ inventory_dir }}/tasks/common.yml"

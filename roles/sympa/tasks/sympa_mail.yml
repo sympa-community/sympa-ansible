@@ -1,6 +1,11 @@
 ---
 # Configure postfix and mail aliases
 
+- name: Install required packages
+  apt: name={{ item }} state=present
+  with_items:
+    - postfix
+
 - name: Install Postfix main.cf configuration file
   template: src=postfix/main.cf.j2 dest=/etc/postfix/main.cf
   notify: restart postfix

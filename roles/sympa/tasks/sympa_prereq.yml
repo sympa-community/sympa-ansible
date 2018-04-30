@@ -5,7 +5,8 @@
 - name: Install required packages
   apt: name={{ item }} state=present
   with_items:
-  - postfix
+    - gcc
+    - make
 
 - name: Install prerequsites for patching Sympa
   apt: name={{ item }} state=present

@@ -1,4 +1,5 @@
-/environments/local/
+/environments
+!/environments/template
 *.pyc
 /.idea
 /.vagrant
