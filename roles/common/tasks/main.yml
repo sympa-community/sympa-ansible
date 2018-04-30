@@ -86,6 +86,7 @@
     path: "/home/{{item.user}}/.ssh/authorized_keys"
     line: "{{item.public_key}}"
   with_items: "{{ public_keys }}"
+  when: public_keys is defined
 
 # Include environment specific tasks
 - include_tasks: "{{ inventory_dir }}/tasks/common.yml"
