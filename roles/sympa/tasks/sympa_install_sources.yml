@@ -1,0 +1,16 @@
+---
+
+
+- name: Add sympa user
+  user: name=sympa group=sympa password=no
+
+- name: Create sympa directories
+  file: dest={{ item }} state=directory mode=755 owner=sympa
+  with_items: ["{{ sympa_install_prefix }}", "{{ sympa_install_prefix }}/src"]
+
+- name: Include retrieving sources from tar.gz task if needed
+  include_tasks: sympa_install_get_sources_from_targz.yml
+
+- name: Include retrieving sources from repository if needed.
+  include_tasks: sympa_install_get_sources_from_repo.yml
+
