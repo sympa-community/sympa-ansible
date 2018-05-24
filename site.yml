@@ -19,7 +19,6 @@
   hosts: all
   become: yes
   tags: common
-  gather_facts: no
   remote_user: "{{ ansible_remote_user }}"
   roles:
   - common
@@ -28,7 +27,6 @@
   hosts: sympa
   become: yes
   tags: sympa
-  gather_facts: no
   remote_user: "{{ ansible_remote_user }}"
   roles:
   - sympa
