@@ -49,4 +49,5 @@
   loop_control:
     loop_var: robot_item
  
- 
+ # Include environment specific tasks
+- include: "{{ inventory_dir }}/tasks/sympa.yml"
