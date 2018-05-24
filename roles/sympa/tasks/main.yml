@@ -16,15 +16,15 @@
 
 - name: Download Sympa sources
   tags: sympa_install
-  import_tasks: sympa_install_sources.yml
+  import_tasks: sympa_install/get_sources.yml
 
 - name: Install Sympa software
   tags: sympa_install, reinstall
-  import_tasks: sympa_install_install.yml
+  import_tasks: sympa_install/deploy.yml
 
 - name: Sympa post-install operations
   tags: sympa_install
-  import_tasks: sympa_install_post_install.yml
+  import_tasks: sympa_install/post_install.yml
 
 - name: Configure postfix and mail aliases
   tags: sympa_mail
