@@ -22,7 +22,11 @@
     SSLProtocol all -SSLv2 -SSLv3
 {# 15768000 seconds = 6 months #}
     Header always set Strict-Transport-Security max-age=15768000
+    {% if item.signedcertificate is defined and item.signedcertificate %}
     SSLUseStapling on
+    {% else %}
+    SSLUseStapling off
+    {% endif %}
 {% endif %}
 
     # VHost specific config
