@@ -1,3 +1,10 @@
+---
+
+-name: Ensures git is installed.
+  apt:
+    name: git
+    state: present
+
 - name: Download sources from repository
   git:
     repo: "{{ sympa_repository }}"
