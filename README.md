@@ -10,7 +10,7 @@ This project is based on [Ansible-tools](https://github.com/pmeulen/ansible-tool
 
 First install the tools on your local machine:
 
-* Install [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org). Virtualbox will run the development VM and Vagrant is used to create, configure and manage the development VM instance.
+* Install [Vagrant](https://www.vagrantup.com/) and [VirtualBox](https://www.virtualbox.org). Virtualbox will run the development VM and Vagrant is used to create, configure and manage the development VM instance. **Vagrant 2 and later is required** (there is problems with previous versions).
 * Install [Ansible](http://www.ansible.com). There are several ways to install Ansible. They are described in the [Ansible installation guide](http://docs.ansible.com/ansible/intro_installation.html). **Ansible 2.5 is required** for the _include-role_ feature to be used.
 
 Clone or download this repository to your local machine:

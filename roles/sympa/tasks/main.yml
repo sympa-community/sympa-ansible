@@ -4,9 +4,27 @@
   tags: sympa_prereq
   include_tasks: sympa_prereq.yml
   
-- name: Install Sympa software
+- name: Getting source folder name
+  tags: always
+  include_vars: source_dir_repo.yml
+  when: sympa_install_from_repository
+  
+- name: Getting source folder name
+  tags: always
+  include_vars: source_dir_tgz.yml
+  when: not sympa_install_from_repository
+
+- name: Download Sympa sources
   tags: sympa_install
-  include_tasks: sympa_install.yml
+  import_tasks: sympa_install/get_sources.yml
+
+- name: Install Sympa software
+  tags: sympa_install, reinstall
+  import_tasks: sympa_install/deploy.yml
+
+- name: Sympa post-install operations
+  tags: sympa_install
+  import_tasks: sympa_install/post_install.yml
 
 - name: Configure postfix and mail aliases
   tags: sympa_mail
@@ -49,4 +67,5 @@
   loop_control:
     loop_var: robot_item
  
- 
+ # Include environment specific tasks
+- include: "{{ inventory_dir }}/tasks/sympa.yml"

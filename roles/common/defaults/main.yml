@@ -11,3 +11,12 @@ users:
       "password": "no",
       "group": "sympa"
       }
+
+## This variable should be populated this way:
+## public_keys:
+##       - {
+##         "user": "user_name",
+##         "public_key": "{{ lookup('file',inventory_dir+'/ssl_cert/id_rsa.username.pub') }}"
+##       }
+
+public_keys: []
