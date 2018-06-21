@@ -16,3 +16,19 @@
 - name: Install Sympa mail aliases
   template: src=postfix/sympa_aliases.j2 dest=/etc/mail/sympa_aliases owner=sympa group=sympa mode=0664 force=no
   notify: update postfix aliases database
+
+- name: Create virtual alias maps
+  template:
+    src: postfix/postfix_virtual.j2
+    dest: /etc/postfix/virtual
+
+- name: Compile virtual alias maps
+  shell: postmap /etc/postfix/virtual
+
+- name: Creating bounce alias
+  template:
+    src: postfix/aliases.j2
+    dest: /etc/aliases
+
+- name: Compile bounce alias
+  shell: postmap /etc/aliases
