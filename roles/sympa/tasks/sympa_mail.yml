@@ -31,4 +31,4 @@
     dest: /etc/aliases
 
 - name: Compile bounce alias
-  shell: postmap /etc/aliases
+  shell: postalias /etc/aliases
