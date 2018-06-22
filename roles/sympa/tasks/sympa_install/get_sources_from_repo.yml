@@ -1,6 +1,6 @@
 ---
 
--name: Ensures git is installed.
+- name: Ensures git is installed.
   apt:
     name: git
     state: present

@@ -1,5 +1,1 @@
-<<<<<<< 31b35873ea954950f56f9ad0932127c0deac741b
-# Dummy file.
-=======
 # Additional task to be run on a specific Sympa environment.
->>>>>>> Adjusting gitingore to ignore environments but still update what the environment template contains.
