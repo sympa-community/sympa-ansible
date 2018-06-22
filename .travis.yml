@@ -2,13 +2,14 @@ before_install:
   - sudo apt-get update
   - sudo apt-get install software-properties-common
   - sudo apt-add-repository -y ppa:ansible/ansible
+  - sudo bash -c 'echo "deb [arch=amd64] http://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" > /etc/apt/sources.list.d/virtualbox.list'
+  - wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
   - sudo apt-get update
   - sudo apt-get -y install ansible linux-headers-4.4.0-101-generic
-  - sudo apt-get -y install virtualbox virtualbox-dkms
+  - sudo apt-get -y install virtualbox-5.2 virtualbox-dkms
   - sudo /sbin/vboxconfig
-  - sudo modprobe vboxnetflt
   - sudo dpkg-reconfigure virtualbox-dkms
-  - sudo dpkg-reconfigure virtualbox
+  - sudo dpkg-reconfigure virtualbox-5.2
   - wget https://releases.hashicorp.com/vagrant/2.1.1/vagrant_2.1.1_x86_64.deb
   - sudo dpkg -i vagrant_2.1.1_x86_64.deb
   - sudo VBoxManage --version
