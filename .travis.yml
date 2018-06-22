@@ -1,12 +1,12 @@
 before_install:
-  - wget https://releases.hashicorp.com/vagrant/2.1.1/vagrant_2.1.1_x86_64.deb
-  - sudo dpkg -i vagrant_2.1.1_x86_64.deb
   - sudo apt-get update
   - sudo apt-get install software-properties-common
   - sudo apt-add-repository -y ppa:ansible/ansible
   - sudo apt-get update
   - sudo apt-get -y install ansible
   - sudo apt-get -y install virtualbox virtualbox-dkms linux-headers-generic
+  - wget https://releases.hashicorp.com/vagrant/2.1.1/vagrant_2.1.1_x86_64.deb
+  - sudo dpkg -i vagrant_2.1.1_x86_64.deb
   - sudo VBoxManage --version
 
 install:
