@@ -1,0 +1,6 @@
+install:
+  - vagrant up
+  - ./scripts/create_new_environment.sh environments/local
+  - ln -s ../../.vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory environments/local/inventory
+  - ansible-playbook site.yml -i environments/local/inventory
+  
