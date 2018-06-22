@@ -1,13 +1,11 @@
-sudo: true
-
 before_install:
   - wget https://releases.hashicorp.com/vagrant/2.1.1/vagrant_2.1.1_x86_64.deb
-  - dpkg -i vagrant_2.1.1_x86_64.deb
-  - apt-get update
-  - apt-get install software-properties-common
-  - apt-add-repository ppa:ansible/ansible
-  - apt-get update
-  - apt-get install ansible
+  - sudo dpkg -i vagrant_2.1.1_x86_64.deb
+  - sudo apt-get update
+  - sudo apt-get install software-properties-common
+  - sudo apt-add-repository ppa:ansible/ansible
+  - sudo apt-get update
+  - sudo apt-get install ansible
 
 install:
   - vagrant up
