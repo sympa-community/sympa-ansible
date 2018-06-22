@@ -8,6 +8,7 @@ before_install:
   - sudo apt-get -y install ansible linux-headers-4.4.0-101-generic
   - sudo apt-get -y install virtualbox-5.2 virtualbox-dkms
   - sudo /sbin/vboxconfig
+  - sudo modprobe vboxnetflt
   - sudo dpkg-reconfigure virtualbox-dkms
   - sudo dpkg-reconfigure virtualbox-5.2
   - wget https://releases.hashicorp.com/vagrant/2.1.1/vagrant_2.1.1_x86_64.deb
