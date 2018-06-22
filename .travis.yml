@@ -6,7 +6,7 @@ before_install:
   - sudo apt-add-repository -y ppa:ansible/ansible
   - sudo apt-get update
   - sudo apt-get -y install ansible
-  - sudo apt-get -y install virtualbox virtualbox-dkms
+  - sudo apt-get -y install virtualbox virtualbox-dkms linux-headers-generic
   - sudo VBoxManage --version
 
 install:
