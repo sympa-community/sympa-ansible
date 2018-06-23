@@ -2,8 +2,7 @@
 ::1         localhost localhost.localdomain localhost6 localhost6.localdomain6 {{ inventory_hostname }} {{ inventory_hostname_short }}
 {{ ansible_default_ipv4.address }}   {{ inventory_hostname }} {{ inventory_hostname_short }}
 
-{# Resolve somename.example.com locally for hosts in <group>
-{% if '<group>' in group_names %}
-{{ ansible_default_ipv4.address }} somename.example.com
+{% if 'sympa' in group_names %}
+{{ ansible_default_ipv4.address }} {{ sympa_mail_hostname }}
 {% endif %}
-#}
+
