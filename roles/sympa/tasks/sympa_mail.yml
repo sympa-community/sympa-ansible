@@ -13,8 +13,14 @@
 - name: Create required /etc/mail/ directory    
   file: dest=/etc/mail state=directory mode=755 owner=sympa group=sympa
 
+- name: Check if /etc/mail/sympa_aliases file exists
+  stat:
+    path: /etc/mail/sympa_aliases
+  register: sympa_aliases_check 
+
 - name: Install Sympa mail aliases
   template: src=postfix/sympa_aliases.j2 dest=/etc/mail/sympa_aliases owner=sympa group=sympa mode=0664 force=no
+  when: sympa_aliases_check.stat.exists == False
   notify: update postfix aliases database
 
 - name: Create virtual alias maps
@@ -25,10 +31,16 @@
 - name: Compile virtual alias maps
   shell: postmap /etc/postfix/virtual
 
+- name: Check if /etc/aliases file exists
+  stat:
+    path: /etc/aliases
+  register: aliases_check
+
 - name: Creating bounce alias
   template:
     src: postfix/aliases.j2
     dest: /etc/aliases
+  when: aliases_check.stat.exists == False
 
 - name: Compile bounce alias
   shell: postalias /etc/aliases
