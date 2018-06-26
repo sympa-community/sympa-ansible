@@ -5,7 +5,7 @@ before_install:
   - sudo apt-get update
   - sudo apt-get -y install ansible
   - sudo useradd vagrant
-  - echo "StrictHostKeyChecking no" >> ~/.ssh/config.
+  - sudo echo "StrictHostKeyChecking no" >> /root/.ssh/config.
 
 install:
   - ./scripts/create_new_environment.sh environments/local
