@@ -4,7 +4,9 @@ before_install:
   - sudo apt-add-repository -y ppa:ansible/ansible
   - sudo apt-get update
   - sudo apt-get -y install ansible
-  - echo "StrictHostKeyChecking no" >> ~/.ssh/config
+  - sudo useradd vagrant
+  - echo "StrictHostKeyChecking no" >> /home/vagrant/.ssh/config.
+  - echo "AllowUsers vagrant" >> /etc/ssh/sshd_config
 
 install:
   - ./scripts/create_new_environment.sh environments/local
