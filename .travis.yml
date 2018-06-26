@@ -1,31 +1,14 @@
 ---
 services: docker
 
-env:
-
-  - distro: ubuntu1604
-    version: latest
-    init: /lib/systemd/systemd
-    run_opts: "--privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro"
-
 before_install:
-  - sudo apt-get update
-  - sudo apt-get install software-properties-common
-  - sudo apt-add-repository -y ppa:ansible/ansible
-  - sudo bash -c 'echo "deb [arch=amd64] http://download.virtualbox.org/virtualbox/debian $(lsb_release -cs) contrib" > /etc/apt/sources.list.d/virtualbox.list'
-  - wget -q https://www.virtualbox.org/download/oracle_vbox.asc -O- | sudo apt-key add -
-  - sudo apt-get update
-  - sudo apt-get -y install ansible linux-headers-4.4.0-101-generic
-  - sudo apt-get -y install virtualbox-5.2 virtualbox-dkms
-  - sudo /sbin/vboxconfig
-  - sudo dpkg-reconfigure virtualbox-dkms
-  - sudo dpkg-reconfigure virtualbox-5.2
-  - wget https://releases.hashicorp.com/vagrant/2.1.1/vagrant_2.1.1_x86_64.deb
-  - sudo dpkg -i vagrant_2.1.1_x86_64.deb
-  - sudo VBoxManage --version
+  # Pull container
+  - 'docker pull rndmh3ro/docker-ubuntu1604-ansible:latest'
 
-install:
-  - vagrant up
-  - ./scripts/create_new_environment.sh environments/local
-  - ln -s ../../.vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory environments/local/inventory
-  - ansible-playbook site.yml -i environments/local/inventory
+script:
+  - container_id=$(mktemp)
+  # Run container in detached state.
+  - 'docker run --detach --volume="${PWD}":/etc/ansible/roles/sympa:ro --privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro rndmh3ro/docker-ubuntu1604-ansible:latest "/lib/systemd/systemd" > "${container_id}"'
+
+   # Test role.
+  - 'docker exec "$(cat ${container_id})" ansible-playbook /etc/ansible/roles/sympa/site.yml
