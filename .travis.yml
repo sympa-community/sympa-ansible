@@ -7,7 +7,7 @@ before_install:
   - sudo useradd vagrant
   - sudo echo "Host *" >> /home/vagrant/.ssh/config.
   - sudo echo "    StrictHostKeyChecking no" >> /home/vagrant/.ssh/config.
-  - sudo echo "Host * >> ~/.ssh/config.
+  - sudo echo "Host * ">> ~/.ssh/config.
   - sudo echo "    StrictHostKeyChecking no" >> ~/.ssh/config.
 
 install:
