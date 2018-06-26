@@ -1,3 +1,10 @@
+before_install:
+  - sudo apt-get update
+  - sudo apt-get install software-properties-common
+  - sudo apt-add-repository -y ppa:ansible/ansible
+  - sudo apt-get update
+  - sudo apt-get -y install ansible
+
 install:
   - ./scripts/create_new_environment.sh environments/local
   - echo "localhost ansible_host=localhost" > environments/local/inventory
