@@ -5,12 +5,11 @@ before_install:
   - sudo apt-get update
   - sudo apt-get -y install ansible
   - sudo useradd vagrant
-  - echo "StrictHostKeyChecking no" >> /home/vagrant/.ssh/config.
-  - sudo echo "AllowUsers vagrant" >> /etc/ssh/sshd_config
+  - echo "StrictHostKeyChecking no" >> ~/.ssh/config.
 
 install:
   - ./scripts/create_new_environment.sh environments/local
-  - echo "localhost ansible_host=localhost ansible_port=22 " > environments/local/inventory
+  - echo "localhost ansible_host=localhost ansible_port=22 ansible_user=root" > environments/local/inventory
   - echo "" >> environments/local/inventory
   - echo "[sympa]" >> environments/local/inventory
   - echo "localhost" >> environments/local/inventory
