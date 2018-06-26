@@ -5,7 +5,6 @@ before_install:
   - sudo apt-get update
   - sudo apt-get -y install ansible
   - sudo useradd vagrant
-  - sudo echo "StrictHostKeyChecking no" >> /root/.ssh/config.
   - sudo echo "StrictHostKeyChecking no" >> /home/vagrant/.ssh/config.
   - sudo echo "StrictHostKeyChecking no" >> ~/.ssh/config.
 
