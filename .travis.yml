@@ -1,7 +1,6 @@
 ---
 services: docker
 
-
 before_install:
   # Pull container
   - 'docker pull rndmh3ro/docker-ubuntu1604-ansible:latest'
@@ -12,4 +11,4 @@ script:
   - 'docker run --detach --volume="${PWD}":/etc/ansible/roles/sympa:ro --privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro rndmh3ro/docker-ubuntu1604-ansible:latest "/lib/systemd/systemd" > "${container_id}"'
 
    # Test role.
-  - 'docker exec "$(cat ${container_id})" ansible-playbook /etc/ansible/roles/sympa/site.yml
+  - 'docker exec "$(cat ${container_id})" ansible-playbook /etc/ansible/roles/sympa/site.yml'
