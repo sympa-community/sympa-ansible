@@ -1,21 +1,16 @@
----
-services: docker
-
+language: python
+python: "2.7"
 before_install:
-  # Pull container
-  - 'docker pull rndmh3ro/docker-ubuntu1604-ansible:latest'
-
+  - sudo apt-add-repository -y ppa:ansible/ansible
+  - sudo apt-get update
+install:
+  - sudo apt-get install software-properties-common
+  - sudo apt-get -y install ansible
+  - ansible --version
 script:
-  - container_id=$(mktemp)
-  # Run container in detached state.
-  - 'docker run --detach --volume="${PWD}":/etc/ansible/roles/sympa:ro --privileged --volume=/sys/fs/cgroup:/sys/fs/cgroup:ro rndmh3ro/docker-ubuntu1604-ansible:latest "/lib/systemd/systemd" > "${container_id}"'
-
-  - docker exec "$(cat ${container_id})" sudo apt-get update
-  - docker exec "$(cat ${container_id})" sudo apt-get install software-properties-common
-  - docker exec "$(cat ${container_id})" sudo apt-add-repository -y ppa:ansible/ansible
-  - docker exec "$(cat ${container_id})" sudo apt-get update
-  - docker exec "$(cat ${container_id})" sudo apt-get -y install ansible
-
-  - 'docker exec "$(cat ${container_id})" /etc/ansible/roles/sympa/scripts/create_new_environment.sh /etc/ansible/roles/sympa/environments/local'
-
-  - 'docker exec "$(cat ${container_id})" ansible-playbook /etc/ansible/roles/sympa/site.yml'
+  - ./scripts/create_new_environment.sh environments/local
+  - echo "localhost ansible_host=localhost" > environments/local/inventory
+  - echo "" >> environments/local/inventory
+  - echo "[sympa]" >> environments/local/inventory
+  - echo "localhost" >> environments/local/inventory
+  - ansible-playbook site.yml --connection=local --become -vvvv -i environments/local/inventory
