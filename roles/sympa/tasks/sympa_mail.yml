@@ -31,16 +31,10 @@
 - name: Compile virtual alias maps
   shell: postmap /etc/postfix/virtual
 
-- name: Check if /etc/aliases file exists
-  stat:
-    path: /etc/aliases
-  register: aliases_check
-
 - name: Creating bounce alias
   template:
     src: postfix/aliases.j2
-    dest: /etc/aliases
-  when: aliases_check.stat.exists == False
+    dest: /etc/mail/sympa_global_aliases
 
 - name: Compile bounce alias
-  shell: postalias /etc/aliases
+  shell: postalias /etc/mail/sympa_global_aliases

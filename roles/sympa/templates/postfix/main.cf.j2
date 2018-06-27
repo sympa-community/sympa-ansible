@@ -29,8 +29,8 @@ smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 
 smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination
 myhostname = {{ sympa_mail_hostname }}
-alias_maps = hash:/etc/aliases hash:/etc/mail/sympa_aliases
-alias_database = hash:/etc/aliases hash:/etc/mail/sympa_aliases
+alias_maps = hash:/etc/aliases hash:/etc/mail/sympa_aliases hash:/etc/mail/sympa_global_aliases
+alias_database = hash:/etc/aliases hash:/etc/mail/sympa_aliases hash:/etc/mail/sympa_global_aliases
 mydestination = $myhostname, local-sympa, localhost.localdomain, localhost 
 {% if sympa_force_smtp_route %}
 relayhost = {{ sympa_outgoing_server }}
