@@ -3,6 +3,9 @@
 - name: restart netfilter-persistent
   service: name=netfilter-persistent state=restarted
 
+- name: restart iptables-persistent
+  service: name=iptables-persistent state=restarted
+
 - name: restart ntpd
   service: name=ntpd state=restarted
 
