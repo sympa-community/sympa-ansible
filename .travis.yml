@@ -1,11 +1,10 @@
 language: python
-python: "2.7"
 before_install:
   - sudo apt-add-repository -y ppa:ansible/ansible
   - sudo apt-get update
 install:
   - sudo apt-get install software-properties-common
-  - sudo apt-get -y install ansible
+  - sudo apt-get -y install ansible mysql-server-5.5
   - ansible --version
 script:
   - ./scripts/create_new_environment.sh environments/local
