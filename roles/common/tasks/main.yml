@@ -58,7 +58,7 @@
   service: name={{item}} enabled=true
   with_items:
   - ntp
-  - iptabless-persistent
+  - iptables-persistent
   when: version.stdout == '14.04'
 
 - name: Add sympa group
