@@ -4,7 +4,7 @@ before_install:
   - sudo apt-get update
 install:
   - sudo apt-get install software-properties-common
-  - sudo apt-get -y install ansible mysql-server-5.5
+  - sudo apt-get -y install ansible mysql-server-5.5 mysql-client-5.5 mysql-server-core-5.5
   - ansible --version
 script:
   - ./scripts/create_new_environment.sh environments/local
