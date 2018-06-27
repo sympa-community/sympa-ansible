@@ -27,6 +27,8 @@
   shell: lsb_release -a | grep Release | awk '{print $2}'
   register: version
 
+- debug: msg="Trace depuis role ; var={{ version }}"
+
 - name: Put iptables configuration
   template: src={{ inventory_dir }}/templates/common/{{item}}.j2 dest=/etc/iptables/{{ item }}
   with_items:
@@ -34,14 +36,14 @@
     - rules.v6
   notify:
   - restart netfilter-persistent
-  when: version != '14.04'
+  when: version.stdout != '14.04'
 
 - name: Enable services ntpd, iptables-persistent on boot
   service: name={{item}} enabled=true
   with_items:
   - ntp
   - netfilter-persistent
-  when: version != '14.04'
+  when: version.stdout != '14.04'
 
 - name: Put iptables configuration
   template: src={{ inventory_dir }}/templates/common/{{item}}.j2 dest=/etc/iptables/{{ item }}
@@ -50,14 +52,14 @@
     - rules.v6
   notify:
   - restart iptables-persistent
-  when: version == '14.04'
+  when: version.stdout == '14.04'
 
 - name: Enable services ntpd, iptables-persistent on boot
   service: name={{item}} enabled=true
   with_items:
   - ntp
   - iptabless-persistent
-  when: version == '14.04'
+  when: version.stdout == '14.04'
 
 - name: Add sympa group
   group: name=sympa
