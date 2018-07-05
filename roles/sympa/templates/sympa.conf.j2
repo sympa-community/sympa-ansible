@@ -18,7 +18,10 @@ gecos	SYMPA
 listmaster	{{ sympa_listmaster_email }}
 
 ## URL of main Web page
-wwsympa_url	http://{{ sympa_web_hostname }}/sympa
+wwsympa_url	https://{{ sympa_web_hostname }}/sympa
+
+## URL of SOAP service
+soap_url	https://{{ sympa_web_hostname }}/sympasoap
 
 ## Store distributed messages into archive
 ## This setting can be overridden by each list

@@ -1,4 +1,5 @@
 <VirtualHost {{ item.ip }}:{{ item.port }}>
+    DocumentRoot /var/www/html
     ServerAdmin {% if server_admin_email is defined %}{{ server_admin_email }}{% else %}sympa@{{ item.name }}{% endif %}
 
     ServerName {{ item.name }}:{{ item.port }}
