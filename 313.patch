@@ -1,0 +1,943 @@
+From 7b8b79c053488ec423397b52a8545fce6c1bb2e7 Mon Sep 17 00:00:00 2001
+From: IKEDA Soji <ikeda@conversion.co.jp>
+Date: Sat, 19 May 2018 16:39:41 +0900
+Subject: [PATCH 1/7] New request handler update_automatic_list to be
+ integrated to Sympa::Request handler.
+
+---
+ src/lib/Makefile.am                                |   1 +
+ src/lib/Sympa/Family.pm                            | 156 +++---------------
+ .../Sympa/Request/Handler/update_automatic_list.pm | 175 +++++++++++++++++++++
+ 3 files changed, 198 insertions(+), 134 deletions(-)
+ create mode 100644 src/lib/Sympa/Request/Handler/update_automatic_list.pm
+
+diff --git a/src/lib/Makefile.am b/src/lib/Makefile.am
+index fb798aae8..6ec4d2bd6 100644
+--- a/src/lib/Makefile.am
++++ b/src/lib/Makefile.am
+@@ -111,6 +111,7 @@ nobase_modules_DATA = \
+ 	Sympa/Request/Handler/stats.pm \
+ 	Sympa/Request/Handler/subscribe.pm \
+ 	Sympa/Request/Handler/unknown.pm \
++	Sympa/Request/Handler/update_automatic_list.pm \
+ 	Sympa/Request/Handler/verify.pm \
+ 	Sympa/Request/Handler/which.pm \
+ 	Sympa/Request/Message.pm \
+diff --git a/src/lib/Sympa/Family.pm b/src/lib/Sympa/Family.pm
+index ee7ca1caa..dc4a7465f 100644
+--- a/src/lib/Sympa/Family.pm
++++ b/src/lib/Sympa/Family.pm
+@@ -52,11 +52,9 @@ use Conf;
+ use Sympa::Config_XML;
+ use Sympa::DatabaseManager;
+ use Sympa::List;
+-use Sympa::LockedFile;
+ use Sympa::Log;
+ use Sympa::Regexps;
+ use Sympa::Spindle::ProcessRequest;
+-use Sympa::Template;
+ use Sympa::Tools::File;
+ 
+ my $log = Sympa::Log->instance;
+@@ -391,8 +389,15 @@ sub modify_list {
+     my $old_status     = $list->{'admin'}{'status'};
+ 
+     ## list config family updating
+-    my $result = $self->_update_list($list, $hash_list->{'config'});
+-    unless (defined $result) {
++    my $spindle = Sympa::Spindle::ProcessRequest->new(
++        context      => $self,
++        action       => 'update_automatic_list',
++        current_list => $list,
++        parameters   => $hash_list->{config},
++        sender       => Sympa::get_address($self, 'listmaster'),
++        scenario_context => {skip => 1},
++    );
++    unless ($spindle and $spindle->spin and $spindle->success) {
+         $log->syslog('err', 'No object list resulting from updating list %s',
+             $list->{'name'});
+         push @{$return->{'string_error'}},
+@@ -400,7 +405,6 @@ sub modify_list {
+         $list->set_status_error_config('modify_list_family', $self->{'name'});
+         return $return;
+     }
+-    $list = $result;
+ 
+     ## set list customizing
+     foreach my $p (keys %{$custom->{'allowed'}}) {
+@@ -459,7 +463,7 @@ sub modify_list {
+     }
+ 
+     ## status
+-    $result = $self->_set_status_changes($list, $old_status);
++    my $result = $self->_set_status_changes($list, $old_status);
+ 
+     if ($result->{'aliases'} == 1) {
+         push @{$return->{'string_info'}},
+@@ -545,131 +549,9 @@ sub modify_list {
+     return $return;
+ }
+ 
+-# update a list : used by sympa.pl--instantiate_family
+-# with family concept when the list already exists
+-#
+-# IN  : - $list : the list to update
+-#       - $param : ref on parameters of the new
+-#          config list with obligatory :
+-#         $param->{'listname'}
+-#         $param->{'subject'}
+-#         $param->{'owner'} (or owner_include):
+-#          array of hash,with key email obligatory
+-#         $param->{'owner_include'} array of hash :
+-#              with key source obligatory
+-#       - $self : the family object
+-#       - $robot : the list's robot
+-#
+-# OUT : - $list : the updated list or undef
+-#
+ # Old name: Sympa::Admin::update_list().
+-sub _update_list {
+-    $log->syslog('info', '(%s, %s, %s)', @_);
+-    my $self  = shift;
+-    my $list  = shift;
+-    my $param = shift;
+-
+-    my $robot = $self->{'robot'};
+-
+-    ## mandatory list parameters
+-    foreach my $arg ('listname') {
+-        unless ($param->{$arg}) {
+-            $log->syslog('err', 'Missing list param %s', $arg);
+-            return undef;
+-        }
+-    }
+-
+-    ## template file
+-    my $template_file = Sympa::search_fullpath($self, 'config.tt2');
+-    unless (defined $template_file) {
+-        $log->syslog('err', 'No config template from family %s@%s',
+-            $self->{'name'}, $robot);
+-        return undef;
+-    }
+-
+-    ### Check topics
+-    #if (defined $param->{'topics'}) {
+-    #    unless (_check_topics($param->{'topics'}, $robot)) {
+-    #        $log->syslog('err', 'Topics param %s not defined in topics.conf',
+-    #            $param->{'topics'});
+-    #    }
+-    #}
+-
+-    ## Lock config before openning the config file
+-    my $lock_fh = Sympa::LockedFile->new($list->{'dir'} . '/config', 5, '>');
+-    unless ($lock_fh) {
+-        $log->syslog('err', 'Impossible to create %s/config: %s',
+-            $list->{'dir'}, $ERRNO);
+-        return undef;
+-    }
+-
+-    my $template =
+-        Sympa::Template->new(undef, include_path => [$self->{'dir'}]);
+-    unless ($template->parse($param, 'config.tt2', $lock_fh)) {
+-        $log->syslog('err', 'Can\'t parse %s/config.tt2: %s',
+-            $self->{'dir'}, $template->{last_error});
+-        return undef;
+-    }
+-    ## Unlock config file
+-    $lock_fh->close;
+-
+-    ## Create list object
+-    unless ($list = Sympa::List->new($param->{'listname'}, $robot)) {
+-        $log->syslog('err', 'Unable to create list %s', $param->{'listname'});
+-        return undef;
+-    }
+-
+-    $list->{'admin'}{'creation'}{'date_epoch'} = time;
+-    $list->{'admin'}{'creation'}{'email'}      = $param->{'creation_email'}
+-        || Sympa::get_address($robot, 'listmaster');
+-    $list->{'admin'}{'status'} = $param->{'status'} || 'open';
+-    $list->{'admin'}{'family_name'} = $self->{'name'};
+-
+-    ## Create associated files if a template was given.
+-    my @files_to_parse;
+-    foreach my $file (split ',',
+-        Conf::get_robot_conf($robot, 'parsed_family_files')) {
+-        $file =~ s{\s}{}g;
+-        push @files_to_parse, $file;
+-    }
+-    for my $file (@files_to_parse) {
+-        my $template_file = Sympa::search_fullpath($self, $file . ".tt2");
+-        if (defined $template_file) {
+-            my $file_content;
+-
+-            my $template =
+-                Sympa::Template->new(undef, include_path => [$self->{'dir'}]);
+-            my $tt_result =
+-                $template->parse($param, $file . ".tt2", \$file_content);
+-            unless ($tt_result) {
+-                $log->syslog(
+-                    'err',
+-                    'Template error. List %s from family %s@%s, file %s: %s',
+-                    $param->{'listname'},
+-                    $self->{'name'},
+-                    $robot,
+-                    $file,
+-                    $template->{last_error}
+-                );
+-                next;    #FIXME: Abort processing and rollback.
+-            }
+-            unless (open FILE, '>', "$list->{'dir'}/$file") {
+-                $log->syslog('err', 'Impossible to create %s/%s: %s',
+-                    $list->{'dir'}, $file, $!);
+-            }
+-            print FILE $file_content;
+-            close FILE;
+-        }
+-    }
+-
+-    ## Synchronize list members if required
+-    if ($list->has_include_data_sources()) {
+-        $log->syslog('notice', "Synchronizing list members...");
+-        $list->sync_include();
+-    }
+-
+-    return $list;
+-}
++# Moved: Use Sympa::Request::Handler::update_automatic_list handler.
++#sub _update_list;
+ 
+ =pod 
+ 
+@@ -2058,13 +1940,19 @@ sub _update_existing_list {
+     my $old_status     = $list->{'admin'}{'status'};
+ 
+     ## list config family updating
+-    my $result = $self->_update_list($list, $hash_list->{'config'});
+-    unless (defined $result) {
++    my $spindle = Sympa::Spindle::ProcessRequest->new(
++        context      => $self,
++        action       => 'update_automatic_list',
++        current_list => $list,
++        parameters   => $hash_list->{config},
++        sender       => Sympa::get_address($self, 'listmaster'),
++        scenario_context => {skip => 1},
++    );
++    unless ($spindle and $spindle->spin and $spindle->success) {
+         $log->syslog('err', 'No object list resulting from updating list %s',
+             $list->{'name'});
+         return undef;
+     }
+-    $list = $result;
+ 
+     ## set list customizing
+     foreach my $p (keys %{$custom->{'allowed'}}) {
+@@ -2125,7 +2013,7 @@ sub _update_existing_list {
+     }
+ 
+     ## status
+-    $result = $self->_set_status_changes($list, $old_status);
++    my $result = $self->_set_status_changes($list, $old_status);
+ 
+     if ($result->{'aliases'} == 1) {
+         push(@{$self->{'updated_lists'}{'aliases_ok'}}, $list->{'name'});
+diff --git a/src/lib/Sympa/Request/Handler/update_automatic_list.pm b/src/lib/Sympa/Request/Handler/update_automatic_list.pm
+new file mode 100644
+index 000000000..3514fdc46
+--- /dev/null
++++ b/src/lib/Sympa/Request/Handler/update_automatic_list.pm
+@@ -0,0 +1,175 @@
++# -*- indent-tabs-mode: nil; -*-
++# vim:ft=perl:et:sw=4
++# $Id$
++
++# Sympa - SYsteme de Multi-Postage Automatique
++#
++# Copyright 2018 The Sympa Community. See the AUTHORS.md file at the
++# top-level directory of this distribution and at
++# <https://github.com/sympa-community/sympa.git>.
++#
++# This program is free software; you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation; either version 2 of the License, or
++# (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <http://www.gnu.org/licenses/>.
++
++use strict;
++use warnings;
++use English qw(-no_match_vars);
++
++use Sympa;
++use Conf;
++use Sympa::List;
++use Sympa::LockedFile;
++use Sympa::Log;
++use Sympa::Template;
++
++use base qw(Sympa::Request::Handler);
++
++use constant _action_scenario => undef;            # Only listmasters allowed.
++use constant _context_class   => 'Sympa::Family';
++
++my $log = Sympa::Log->instance;
++
++# Old name: Sympa::Admin::update_list(), Sympa::Family::_update_list().
++sub _twist {
++    my $self    = shift;
++    my $request = shift;
++
++    my $family   = $request->{context};
++    my $list     = $request->{current_list};
++    my $param    = $request->{parameters};
++    my $robot_id = $family->{'robot'};
++
++    # Check the template supposed to be used exist.
++    my $template_file = Sympa::search_fullpath($family, 'config.tt2');
++    unless (defined $template_file) {
++        $log->syslog('err', 'No config template from family %s', $family);
++        $self->add_stash($request, 'intern');
++        return undef;
++    }
++
++    my $config = '';
++    my $template =
++        Sympa::Template->new(undef, include_path => [$family->{'dir'}]);
++    unless ($template->parse($param, 'config.tt2', \$config)) {
++        $log->syslog('err', 'Can\'t parse %s/config.tt2: %s',
++            $family->{'dir'}, $template->{last_error});
++        $self->add_stash($request, 'intern');
++        return undef;
++    }
++
++    ### Check topics
++    #if (defined $param->{'topics'}) {
++    #    unless (_check_topics($param->{'topics'}, $robot_id)) {
++    #        $log->syslog('err', 'Topics param %s not defined in topics.conf',
++    #            $param->{'topics'});
++    #    }
++    #}
++
++    ## Lock config before openning the config file
++    my $lock_fh = Sympa::LockedFile->new($list->{'dir'} . '/config', 5, '>');
++    unless ($lock_fh) {
++        $log->syslog('err', 'Impossible to create %s/config: %s',
++            $list->{'dir'}, $ERRNO);
++        $self->add_stash($request, 'intern');
++        return undef;
++    }
++    print $lock_fh $config;
++
++    ## Unlock config file
++    $lock_fh->close;
++
++    #FIXME: Would info file be updated?
++
++    ## Create associated files if a template was given.
++    my @files_to_parse;
++    foreach my $file (split ',',
++        Conf::get_robot_conf($robot_id, 'parsed_family_files')) {
++        $file =~ s{\s}{}g;
++        push @files_to_parse, $file;
++    }
++    for my $file (@files_to_parse) {
++        my $template_file = Sympa::search_fullpath($family, $file . ".tt2");
++        if (defined $template_file) {
++            my $file_content;
++
++            my $template =
++                Sympa::Template->new(undef,
++                include_path => [$family->{'dir'}]);
++            my $tt_result =
++                $template->parse($param, $file . ".tt2", \$file_content);
++            unless ($tt_result) {
++                $log->syslog(
++                    'err',
++                    'Template error. List %s from family %s@%s, file %s: %s',
++                    $param->{'listname'},
++                    $family->{'name'},
++                    $robot_id,
++                    $file,
++                    $template->{last_error}
++                );
++                next;    #FIXME: Abort processing and rollback.
++            }
++            unless (open FILE, '>', "$list->{'dir'}/$file") {
++                $log->syslog('err', 'Impossible to create %s/%s: %s',
++                    $list->{'dir'}, $file, $!);
++            }
++            print FILE $file_content;
++            close FILE;
++        }
++    }
++
++    ## Create list object
++    my $listname = $list->{'name'};
++    unless ($list = Sympa::List->new($listname, $robot_id)) {
++        $log->syslog('err', 'Unable to create list %s', $listname);
++        $self->add_stash($request, 'intern');
++        return undef;
++    }
++
++    #FIXME: Not saved?
++    $list->{'admin'}{'creation'}{'date_epoch'} = time;
++    $list->{'admin'}{'creation'}{'email'}      = $param->{'creation_email'}
++        || Sympa::get_address($robot_id, 'listmaster');
++    $list->{'admin'}{'status'} = $param->{'status'} || 'open';
++    $list->{'admin'}{'family_name'} = $family->{'name'};
++
++    ## Synchronize list members if required
++    if ($list->has_include_data_sources()) {
++        $log->syslog('notice', "Synchronizing list members...");
++        $list->sync_include();
++    }
++
++    return 1;
++}
++
++1;
++__END__
++
++=encoding utf-8
++
++=head1 NAME
++
++Sympa::Request::Handler::update_automatic_list -
++update_automatic_list request handler
++
++=head1 DESCRIPTION
++
++Update a list with family concept when the list already exists.
++
++TBD.
++
++=head1 HISTORY
++
++L<Sympa::Request::Handler::update_automatic_list> appeared on Sympa 6.2.33b.2.
++
++=cut
+
+From a56e9a3430c163b204bcf9122b7fce7e7084f0ee Mon Sep 17 00:00:00 2001
+From: IKEDA Soji <ikeda@conversion.co.jp>
+Date: Sat, 19 May 2018 17:35:13 +0900
+Subject: [PATCH 2/7] [-feature] "owner" and "editor" in list profile (create
+ list template) are written in dump files when a family list is updated.
+
+---
+ .../Sympa/Request/Handler/update_automatic_list.pm | 23 +++++++++++++++++++++-
+ 1 file changed, 22 insertions(+), 1 deletion(-)
+
+diff --git a/src/lib/Sympa/Request/Handler/update_automatic_list.pm b/src/lib/Sympa/Request/Handler/update_automatic_list.pm
+index 3514fdc46..5f67a3c19 100644
+--- a/src/lib/Sympa/Request/Handler/update_automatic_list.pm
++++ b/src/lib/Sympa/Request/Handler/update_automatic_list.pm
+@@ -83,7 +83,23 @@ sub _twist {
+         $self->add_stash($request, 'intern');
+         return undef;
+     }
+-    print $lock_fh $config;
++
++    # Write config.
++    # - Write out permanent owners/editors in <role>.dump files.
++    # - Write remainder to config file.
++    $config =~ s/(\A|\n)[\t ]+(?=\n)/$1/g;      # normalize empty lines
++    open my $ifh, '<', \$config;                # open "in memory" file
++    my @config = do { local $RS = ''; <$ifh> };
++    close $ifh;
++    foreach my $role (qw(owner editor)) {
++        my $file = $list->{'dir'} . '/' . $role . '.dump';
++        if (!-e $file and open my $ofh, '>', $file) {
++            my $admins = join '', grep {/\A\s*$role\b/} @config;
++            print $ofh $admins;
++            close $ofh;
++        }
++    }
++    print $lock_fh join '', grep { !/\A\s*(owner|editor)\b/ } @config;
+ 
+     ## Unlock config file
+     $lock_fh->close;
+@@ -136,6 +152,11 @@ sub _twist {
+         return undef;
+     }
+ 
++    # Store permanent list users.
++    #XXX$list->restore_users('member');
++    $list->restore_users('owner');
++    $list->restore_users('editor');
++
+     #FIXME: Not saved?
+     $list->{'admin'}{'creation'}{'date_epoch'} = time;
+     $list->{'admin'}{'creation'}{'email'}      = $param->{'creation_email'}
+
+From b01501ec0a8883cdfba6dc71fda850c033795234 Mon Sep 17 00:00:00 2001
+From: IKEDA Soji <ikeda@conversion.co.jp>
+Date: Tue, 22 May 2018 11:47:26 +0900
+Subject: [PATCH 3/7] Sympa::List::restore_users() for owner/editor replaces
+ users on database with content of dump file, instead of simply adding content
+ of dump file.
+
+---
+ src/lib/Sympa/List.pm                              | 218 +++++++++++++--------
+ .../Sympa/Request/Handler/update_automatic_list.pm |   8 +-
+ 2 files changed, 146 insertions(+), 80 deletions(-)
+
+diff --git a/src/lib/Sympa/List.pm b/src/lib/Sympa/List.pm
+index f575021c9..1988403df 100644
+--- a/src/lib/Sympa/List.pm
++++ b/src/lib/Sympa/List.pm
+@@ -3992,94 +3992,114 @@ sub _create_add_error_string {
+ 
+ ## Adds a new list admin user, no overwrite.
+ sub add_list_admin {
+-    my ($self, $role, @new_admin_users) = @_;
+-    $log->syslog('debug2', '');
++    $log->syslog('debug2', '(%s, %s, ...)', @_);
++    my $self = shift;
++    my $role = shift;
++    my @users = @_;
+ 
+-    my $name  = $self->{'name'};
+     my $total = 0;
++    foreach my $user (@users) {
++        $total++ if $self->_add_list_admin($role, $user);
++    }
+ 
+-    foreach my $new_admin_user (@new_admin_users) {
+-        my $who =
+-            Sympa::Tools::Text::canonic_email($new_admin_user->{'email'});
+-
+-        next unless defined $who;
+-
+-        $new_admin_user->{'date'} ||= time;
+-        $new_admin_user->{'update_date'} ||= $new_admin_user->{'date'};
+-
+-        ##  either is_included or is_subscribed must be set
+-        ## default is is_subscriber for backward compatibility reason
+-        unless ($new_admin_user->{'included'}) {
+-            $new_admin_user->{'subscribed'} = 1;
+-        }
+-
+-        unless ($new_admin_user->{'included'}) {
+-            ## Is the email in user table?
+-            ## Insert in User Table
+-            unless (
+-                Sympa::User->new(
+-                    $who,
+-                    'gecos'    => $new_admin_user->{'gecos'},
+-                    'lang'     => $new_admin_user->{'lang'},
+-                    'password' => $new_admin_user->{'password'}
+-                )
+-                ) {
+-                $log->syslog('err', 'Unable to add admin %s to user_table',
+-                    $who);
+-                next;
+-            }
+-        }
+-
+-        $new_admin_user->{'subscribed'} ||= 0;
+-        $new_admin_user->{'included'}   ||= 0;
++    $self->_cache_publish_expiry('admin_user') if $total;
++    return $total;
++}
+ 
+-        $new_admin_user->{'reception'}  ||= 'mail';
+-        $new_admin_user->{'visibility'} ||= 'noconceal';
++sub _add_list_admin {
++    my $self    = shift;
++    my $role    = shift;
++    my $user    = shift;
++    my %options = @_;
+ 
+-        my $sdm = Sympa::DatabaseManager->instance;
++    my $who = Sympa::Tools::Text::canonic_email($user->{'email'});
++    return undef unless defined $who;
+ 
+-        # Update Admin Table
++    unless ($user->{'included'}) {
++        # Is the email in user_table? Insert it.
++        #FIXME: Is it required?
+         unless (
+-            $sdm
+-            and $sdm->do_prepared_query(
+-                q{INSERT INTO admin_table
+-                  (user_admin, comment_admin, list_admin, robot_admin,
+-                   date_epoch_admin, update_epoch_admin, reception_admin,
+-                   visibility_admin,
+-                   subscribed_admin,
+-                   included_admin, include_sources_admin,
+-                   role_admin, info_admin, profile_admin)
+-                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)},
++            Sympa::User->new(
+                 $who,
+-                $new_admin_user->{'gecos'},
+-                $name,
+-                $self->{'domain'},
+-                $new_admin_user->{'date'},
+-                $new_admin_user->{'update_date'},
+-                $new_admin_user->{'reception'},
+-                $new_admin_user->{'visibility'},
+-                $new_admin_user->{'subscribed'},
+-                $new_admin_user->{'included'},
+-                $new_admin_user->{'id'},
+-                $role,
+-                $new_admin_user->{'info'},
+-                $new_admin_user->{'profile'}
++                'gecos'    => $user->{'gecos'},
++                'lang'     => $user->{'lang'},
++                'password' => $user->{'password'},
+             )
+             ) {
+-            $log->syslog(
+-                'err',
+-                'Unable to add admin %s to table admin_table for list %s: %s',
+-                $who,
+-                $self
+-            );
+-            next;
++            $log->syslog('err', 'Unable to add admin %s to user_table', $who);
++            return undef;
+         }
+-        $total++;
+     }
+ 
+-    $self->_cache_publish_expiry('admin_user');
++    # Either is_included or is_subscribed must be set.
++    # Default is is_subscriber for backward compatibility reason.
++    $user->{'subscribed'} = 1 unless $user->{'included'};
++    $user->{'subscribed'} ||= 0;
++    $user->{'included'}   ||= 0;
++    $user->{'reception'}  ||= 'mail';
++    $user->{'visibility'} ||= 'noconceal';
++    $user->{'profile'}    ||= 'normal';
+ 
+-    return $total;
++    $user->{'date'} ||= time;
++    $user->{'update_date'} ||= $user->{'date'};
++
++    my $sdm = Sympa::DatabaseManager->instance;
++    my $sth;
++    my %map_field = _map_list_admin_cols();
++    my @key_list =
++        grep { $_ ne 'email' and $_ ne 'role' } sort keys %map_field;
++    my (@set_list, @val_list);
++
++    # Update Admin Table
++    @set_list = @map_field{grep { exists $user->{$_} } @key_list};
++    @val_list = @{$user}{grep   { exists $user->{$_} } @key_list};
++    if (    $options{replace}
++        and @set_list
++        and $sdm
++        and $sth = $sdm->do_prepared_query(
++            sprintf(
++                q{UPDATE admin_table
++                  SET %s
++                  WHERE role_admin = ? AND user_admin = ? AND
++                        list_admin = ? AND robot_admin = ?},
++                join(', ', map { sprintf '%s = ?', $_ } @set_list)
++            ),
++            @val_list,
++            $role,
++            $user->{email},
++            $self->{'name'},
++            $self->{'domain'}
++        )
++        and $sth->rows    # If no affected rows, then insert a new row
++        ) {
++        return 1;
++    }
++    @set_list = @map_field{@key_list};
++    @val_list = @{$user}{@key_list};
++    if (    @set_list
++        and $sdm
++        and $sdm->do_prepared_query(
++            sprintf(
++                q{INSERT INTO admin_table
++                  (%s, role_admin, user_admin, list_admin, robot_admin)
++                  VALUES (%s, ?, ?, ?, ?)},
++                join(', ', @set_list),
++                join(', ', map {'?'} @set_list)
++            ),
++            @val_list,
++            $role,
++            $who,
++            $self->{'name'},
++            $self->{'domain'}
++        )
++        ) {
++        return 1;
++    }
++
++    $log->syslog('err',
++        'Unable to add %s %s to table admin_table for list %s',
++        $role, $who, $self);
++    return undef;
+ }
+ 
+ # Moved to: (part of) Sympa::Request::Handler::move_list::_move().
+@@ -4406,9 +4426,8 @@ sub restore_users {
+     die 'bug in logic. Ask developer'
+         unless grep {$role eq $_} qw(member owner editor);
+ 
+-    my $file = $self->{'dir'} . '/' . $role . '.dump';
+-
+     # Open the file and switch to paragraph mode.
++    my $file = $self->{'dir'} . '/' . $role . '.dump';
+     my $lock_fh = Sympa::LockedFile->new($file, 5, '<') or return;
+     local $RS = '';
+ 
+@@ -4436,6 +4455,9 @@ sub restore_users {
+             $self->add_list_member($user);
+         }
+     } else {
++        my $time    = time;
++        my $changed = 0;
++
+         while (my $para = <$lock_fh>) {
+             my $user = {
+                 map {
+@@ -4453,10 +4475,50 @@ sub restore_users {
+                     }
+                     } split /\n/, $para
+             };
+-            next unless $user->{email};
++            $user->{update_date} = $time;
++            $self->_add_list_admin($role, $user, replace => 1)
++                and $changed++;
++        }
+ 
+-            $self->add_list_admin($role, $user);
++        # Remove outdated permanent users.
++        # Included users will be cleared in the next time of sync.
++        my $sdm = Sympa::DatabaseManager->instance;
++        my $sth;
++        unless (
++            $sdm
++            and $sth = $sdm->do_prepared_query(
++                q{DELETE FROM admin_table
++                  WHERE role_admin = ? AND
++                        list_admin = ? AND robot_admin = ? AND
++                        subscribed_admin = 1 AND
++                        (included_admin IS NULL OR included_admin = 0) AND
++                        (update_epoch_admin IS NULL OR update_epoch_admin < ?)},
++                $role, $self->{'name'}, $self->{'domain'},
++                $time
++            )
++            ) {
++            $log->syslog('err', '(%s) Failed to delete %s %s(s)', $self, $role);
++        }
++        $changed++ if $sth and $sth->rows;
++        unless (
++            $sdm
++            and $sth = $sdm->do_prepared_query(
++                q{UPDATE admin_table
++                  SET subscribed_admin = 0, update_epoch_admin = ?
++                  WHERE role_admin = ? AND
++                        list_admin = ? AND robot_admin = ? AND
++                        subscribed_admin = 1 AND included_admin = 1 AND
++                        (update_epoch_admin IS NULL OR update_epoch_admin < ?)},
++                $time,
++                $role, $self->{'name'}, $self->{'domain'},
++                $time
++            )
++            ) {
++            $log->syslog('err', '(%s) Failed to delete %s', $self, $role);
+         }
++        $changed++ if $sth and $sth->rows;
++
++        $self->_cache_publish_expiry('admin_user') if $changed;
+     }
+ 
+     $lock_fh->close;
+diff --git a/src/lib/Sympa/Request/Handler/update_automatic_list.pm b/src/lib/Sympa/Request/Handler/update_automatic_list.pm
+index 5f67a3c19..75d5f699a 100644
+--- a/src/lib/Sympa/Request/Handler/update_automatic_list.pm
++++ b/src/lib/Sympa/Request/Handler/update_automatic_list.pm
+@@ -21,6 +21,8 @@
+ # You should have received a copy of the GNU General Public License
+ # along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ 
++package Sympa::Request::Handler::update_automatic_list;
++
+ use strict;
+ use warnings;
+ use English qw(-no_match_vars);
+@@ -84,7 +86,7 @@ sub _twist {
+         return undef;
+     }
+ 
+-    # Write config.
++    # Write config. NOTE: Unlike list creation, files will be overwritten.
+     # - Write out permanent owners/editors in <role>.dump files.
+     # - Write remainder to config file.
+     $config =~ s/(\A|\n)[\t ]+(?=\n)/$1/g;      # normalize empty lines
+@@ -93,7 +95,9 @@ sub _twist {
+     close $ifh;
+     foreach my $role (qw(owner editor)) {
+         my $file = $list->{'dir'} . '/' . $role . '.dump';
+-        if (!-e $file and open my $ofh, '>', $file) {
++        unlink "$file.old";
++        rename $file, "$file.old";
++        if (open my $ofh, '>', $file) {
+             my $admins = join '', grep {/\A\s*$role\b/} @config;
+             print $ofh $admins;
+             close $ofh;
+
+From ff453755804c40da82bbe20d3a92212ec196314a Mon Sep 17 00:00:00 2001
+From: IKEDA Soji <ikeda@conversion.co.jp>
+Date: Tue, 22 May 2018 12:13:14 +0900
+Subject: [PATCH 4/7] [-bug] Even if it is obsoleted, parameters with
+ occurrence '1' or '1-n' in config file log warnings.
+
+---
+ src/lib/Sympa/List.pm | 13 +++++++------
+ 1 file changed, 7 insertions(+), 6 deletions(-)
+
+diff --git a/src/lib/Sympa/List.pm b/src/lib/Sympa/List.pm
+index 1988403df..c9c5284e3 100644
+--- a/src/lib/Sympa/List.pm
++++ b/src/lib/Sympa/List.pm
+@@ -6491,8 +6491,8 @@ sub _load_include_admin_user_file {
+                     }
+                 }
+                 ## Required fields
+-                if ($pinfo->{$pname}{'file_format'}{$k}{'occurrence'} eq '1')
+-                {
++                if ($pinfo->{$pname}{'file_format'}{$k}{'occurrence'} eq '1'
++                    and not $pinfo->{$pname}{'file_format'}{$k}{'obsolete'}) {
+                     unless (defined $hash{$k}) {
+                         $log->syslog('info',
+                             'Missing key "%s" in param "%s" in %s',
+@@ -8503,8 +8503,8 @@ sub _load_list_config_file {
+                 }
+ 
+                 ## Required fields
+-                if ($pinfo->{$pname}{'file_format'}{$k}{'occurrence'} eq '1')
+-                {
++                if ($pinfo->{$pname}{'file_format'}{$k}{'occurrence'} eq '1'
++                    and not $pinfo->{$pname}{'file_format'}{$k}{'obsolete'}) {
+                     unless (defined $hash{$k}) {
+                         $log->syslog('info',
+                             'Missing key "%s" in param "%s" in %s',
+@@ -8601,8 +8601,9 @@ sub _load_list_config_file {
+         }
+ 
+         ## Required fields
+-        if (   $pinfo->{$p}{'occurrence'}
+-            && $pinfo->{$p}{'occurrence'} =~ /^1(-n)?$/) {
++        if (    $pinfo->{$p}{'occurrence'}
++            and $pinfo->{$p}{'occurrence'} =~ /^1(-n)?$/
++            and not $pinfo->{$p}{'obsolete'}) {
+             unless (defined $admin{$p}) {
+                 $log->syslog('info', 'Missing parameter "%s" in %s',
+                     $p, $config_file);
+
+From 6431db407e173ebb4b3fb6acee38f211dc7500fa Mon Sep 17 00:00:00 2001
+From: IKEDA Soji <ikeda@conversion.co.jp>
+Date: Tue, 22 May 2018 14:12:23 +0900
+Subject: [PATCH 5/7] small fix: don't sync users of updated list before
+ restoring users.
+
+---
+ src/lib/Sympa/Request/Handler/update_automatic_list.pm | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/src/lib/Sympa/Request/Handler/update_automatic_list.pm b/src/lib/Sympa/Request/Handler/update_automatic_list.pm
+index 75d5f699a..39400e672 100644
+--- a/src/lib/Sympa/Request/Handler/update_automatic_list.pm
++++ b/src/lib/Sympa/Request/Handler/update_automatic_list.pm
+@@ -150,7 +150,8 @@ sub _twist {
+ 
+     ## Create list object
+     my $listname = $list->{'name'};
+-    unless ($list = Sympa::List->new($listname, $robot_id)) {
++    unless ($list =
++        Sympa::List->new($listname, $robot_id, {skip_sync_admin => 1})) {
+         $log->syslog('err', 'Unable to create list %s', $listname);
+         $self->add_stash($request, 'intern');
+         return undef;
+
+From 028a727145ecca293aa15773094d5bbad8638d23 Mon Sep 17 00:00:00 2001
+From: IKEDA Soji <ikeda@conversion.co.jp>
+Date: Tue, 22 May 2018 14:14:59 +0900
+Subject: [PATCH 6/7] small fix: suppress warnings on uninitialized value.
+
+---
+ src/lib/Sympa/Family.pm | 17 +++++++++++------
+ 1 file changed, 11 insertions(+), 6 deletions(-)
+
+diff --git a/src/lib/Sympa/Family.pm b/src/lib/Sympa/Family.pm
+index dc4a7465f..9971e5bf0 100644
+--- a/src/lib/Sympa/Family.pm
++++ b/src/lib/Sympa/Family.pm
+@@ -416,15 +416,19 @@ sub modify_list {
+ 
+     ## info file
+     unless ($config_changes->{'file'}{'info'}) {
++        unless (defined $hash_list->{'config'}{'description'}) {
++            $hash_list->{'config'}{'description'} = '';
++        }
+         $hash_list->{'config'}{'description'} =~ s/\r\n|\r/\n/g;
+ 
+-        unless (open INFO, '>', "$list->{'dir'}/info") {
++        my $fh;
++        unless (open $fh, '>', "$list->{'dir'}/info") {
+             push @{$return->{'string_info'}},
+                 sprintf('Impossible to create new %s/info file: %s',
+                 $list->{'dir'}, $ERRNO);
+         }
+-        print INFO $hash_list->{'config'}{'description'};
+-        close INFO;
++        print $fh $hash_list->{'config'}{'description'};
++        close $fh;
+     }
+ 
+     foreach my $f (keys %{$config_changes->{'file'}}) {
+@@ -1969,12 +1973,13 @@ sub _update_existing_list {
+         }
+         $hash_list->{'config'}{'description'} =~ s/\r\n|\r/\n/g;
+ 
+-        unless (open INFO, '>', $list->{'dir'} . '/info') {
++        my $fh;
++        unless (open $fh, '>', $list->{'dir'} . '/info') {
+             $log->syslog('err', 'Impossible to open %s/info: %m',
+                 $list->{'dir'});
+         }
+-        print INFO $hash_list->{'config'}{'description'};
+-        close INFO;
++        print $fh $hash_list->{'config'}{'description'};
++        close $fh;
+     }
+ 
+     foreach my $f (keys %{$config_changes->{'file'}}) {
+
+From b85ebce4a5a604f0acf7cb647d9f7f0d8950f83d Mon Sep 17 00:00:00 2001
+From: IKEDA Soji <ikeda@conversion.co.jp>
+Date: Tue, 22 May 2018 22:21:25 +0900
+Subject: [PATCH 7/7] Small fix.
+
+---
+ src/lib/Sympa/List.pm | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/src/lib/Sympa/List.pm b/src/lib/Sympa/List.pm
+index c9c5284e3..7ec9ab741 100644
+--- a/src/lib/Sympa/List.pm
++++ b/src/lib/Sympa/List.pm
+@@ -4051,8 +4051,10 @@ sub _add_list_admin {
+     my (@set_list, @val_list);
+ 
+     # Update Admin Table
+-    @set_list = @map_field{grep { exists $user->{$_} } @key_list};
+-    @val_list = @{$user}{grep   { exists $user->{$_} } @key_list};
++    @set_list =
++        @map_field{grep { $_ ne 'date' and exists $user->{$_} } @key_list};
++    @val_list =
++        @{$user}{grep   { $_ ne 'date' and exists $user->{$_} } @key_list};
+     if (    $options{replace}
+         and @set_list
+         and $sdm

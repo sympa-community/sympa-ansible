@@ -1,0 +1,32 @@
+---
+
+## Role to run functionnal tests on Sympa
+
+
+- name: Install required CPAN Perl modules
+  apt: name={{ item }} state=present
+  tags: test
+  with_items:
+#  - libtest-bdd-cucumber-perl # Cucumber-style acceptance testing framework in Perl
+#  - libwww-mechanize-perl # module to automate interaction with websites
+  - libfindbin-libs-perl # Perl module to use a relative path for lib directories
+  - libtap-parser-sourcehandler-pgtap-perl # Unit testing tools for pgTAP
+
+- name: Installing CPANM
+  tags: test
+  apt: name=cpanminus state=present
+
+- name: Downloading Test::BDD::Cucumber
+  tags: test
+  cpanm: name=Test::BDD::Cucumber
+
+- name: Downloading WWW::Mechanize
+  tags: test
+  cpanm: 
+    name: WWW::Mechanize
+    notest: True
+
+
+
+
+
