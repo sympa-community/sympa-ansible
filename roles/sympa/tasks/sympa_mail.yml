@@ -6,13 +6,79 @@
   with_items:
     - postfix
 
-- name: Install Postfix main.cf configuration file
-  template: src=postfix/main.cf.j2 dest=/etc/postfix/main.cf
-  notify: restart postfix
-  
-- name: Create required /etc/mail/ directory    
-  file: dest=/etc/mail state=directory mode=755 owner=sympa group=sympa
+- name: Install list aliases file
+  copy:
+    src: files/list_aliases.tt2
+    dest: "{{ sympa_install_prefix }}/etc/list_aliases.tt2"
+    owner: sympa
+    group: sympa
+    mode: 0644
 
-- name: Install Sympa mail aliases
-  template: src=postfix/sympa_aliases.j2 dest=/etc/mail/sympa_aliases owner=sympa group=sympa mode=0664 force=no
-  notify: update postfix aliases database
+- name: Creating Sympa aliases file (1/2)
+  file:
+    path: /etc/mail
+    state: directory
+    owner: sympa
+    group: sympa
+    mode: 0755
+
+- name: Creating Sympa aliases file (2/2)
+  file:
+    path: /etc/mail/{{ item }}
+    state: touch
+    owner: sympa
+    group: sympa
+    mode: 0644
+  with_items:
+    - sympa_transport
+    - sympa_transport.db
+
+- name: Compiling sympa_aliases
+  shell: postmap /etc/mail/sympa_transport
+
+- name: Adding required aliases to tranport
+  blockinfile:
+    path: /etc/postfix/transport.sympa
+    create: yes
+    state: present
+    marker: "# {mark} ANSIBLE MANAGED {{ item }} transports"
+    block: |
+      {{ item }}                error:User unknown in recipient table
+      sympa@{{ item }}          sympa:sympa@{{ item }}
+      listmaster@{{ item }}     sympa:listmaster@{{ item }}
+      bounce@{{ item }}         sympabounce:sympa@{{ item }}
+      abuse-feedback-report@{{ item }}  sympabounce:sympa@{{ item }}
+  with_items: "{{ mail_domains }}"
+
+- name: Compiling Sympa transport
+  shell: postmap /etc/postfix/transport.sympa
+
+- name: Adding required aliases to tranport
+  blockinfile:
+    path: /etc/postfix/virtual.sympa
+    create: yes
+    state: present
+    marker: "# {mark} ANSIBLE MANAGED {{ item }} transports"
+    block: |
+      sympa-request@{{ item }}  postmaster@localhost
+      sympa-owner@{{ item }}    postmaster@localhost
+  with_items: "{{ mail_domains }}"
+
+- name: Compiling Sympa transport
+  shell: postmap /etc/postfix/virtual.sympa
+
+- name: Master.cf configuration
+  blockinfile:
+    path: /etc/postfix/master.cf
+    block: |
+      sympa unix - n n - - pipe
+        flags=hqRu user=sympa argv={{ sympa_install_prefix }}/bin/queue ${nexthop}
+      sympabounce unix - n n - - pipe
+        flags=hqRu user=sympa argv={{ sympa_install_prefix }}/bin/bouncequeue ${nexthop}
+  notify: restart postfix
+
+- name: Setting up main.cf
+  template:
+    src: templates/postfix/main.cf.j2
+    dest: /etc/postfix/main.cf
+  notify: restart postfix

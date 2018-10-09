@@ -1,5 +1,11 @@
 ###\\\\ Site customization ////###
 
+sendmail_aliases /etc/mail/sympa_transport
+
+aliases_program postmap
+
+aliases_db_type hash
+
 ## Main robot hostname
 domain	{{ sympa_mail_hostname }}
 

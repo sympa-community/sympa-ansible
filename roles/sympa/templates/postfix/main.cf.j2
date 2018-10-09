@@ -29,8 +29,16 @@ smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 
 smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_unauth_destination
 myhostname = {{ sympa_mail_hostname }}
-alias_maps = hash:/etc/aliases hash:/etc/mail/sympa_aliases
-alias_database = hash:/etc/aliases hash:/etc/mail/sympa_aliases
+alias_database = hash:/etc/aliases
+# virtual(8) maps
+virtual_mailbox_domains = hash:/etc/postfix/transport.sympa
+virtual_mailbox_maps = hash:/etc/postfix/transport.sympa, hash:/etc/mail/sympa_transport, hash:/etc/postfix/virtual.sympa
+# virtual(5) maps
+virtual_alias_maps = hash:/etc/postfix/virtual.sympa,hash:/etc/postfix/virtual
+# transport maps
+transport_maps = hash:/etc/postfix/transport.sympa, hash:/etc/mail/sympa_transport
+# For VERP
+recipient_delimiter = +
 mydestination = $myhostname, local-sympa, localhost.localdomain, localhost 
 {% if sympa_force_smtp_route %}
 relayhost = {{ sympa_outgoing_server }}
@@ -39,6 +47,5 @@ relayhost =
 {% endif %}
 mynetworks = 127.0.0.0/8 [::ffff:127.0.0.0]/104 [::1]/128
 mailbox_size_limit = 0
-recipient_delimiter = +
 inet_interfaces = all
 inet_protocols = all
