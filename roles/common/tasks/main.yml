@@ -3,8 +3,10 @@
 - name: Set /etc/hostname to {{ inventory_hostname }}
   template: src='hostname.j2' dest='/etc/hostname'
 
-- name: Write /etc/hosts with {{ inventory_hostname }}
-  template: src='hosts.j2' dest='/etc/hosts'
+- name: Add hostname in /etc/hosts
+  lineinfile:
+    path: /etc/hosts
+    line: "{{ ansible_default_ipv4.address }} {{ inventory_hostname }}" 
 
 # Directory for keeping misc ansible files
 - name: Create managed files dir
