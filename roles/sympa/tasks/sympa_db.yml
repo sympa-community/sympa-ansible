@@ -19,11 +19,6 @@
     name: mysql
     state: started
 
-- debug: msg="{{ db.root_password | vault(vault_keydir) }}"
-
-- name: Testing MySQL connection
-  shell: "mysql -u root -p{{ db.root_password | vault(vault_keydir) }} -e 'show tables'"
-
 # localhost needs to be the last item for idempotency, see
 # http://ansible.cc/docs/modules.html#mysql-user
 - name: 'Update Mysql Root Password'
