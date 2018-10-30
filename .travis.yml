@@ -7,7 +7,9 @@ before_install:
 install:
   - sudo apt-get install software-properties-common
   - sudo apt-get -y install ansible
-  - sudo apt-get -y install pip
+  - sudo apt-get install python-pip python-dev build-essential 
+  - sudo pip install --upgrade pip 
+  - sudo pip install --upgrade virtualenv 
   - sudo pip install python-keyczar 
   - ansible --version
 script:
