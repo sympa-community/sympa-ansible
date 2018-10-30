@@ -148,7 +148,7 @@ for directory in "${directories[@]}"; do
 done
 
 
-# Copy directories from the template to the private sectoin of the new environment
+# Copy directories from the template to the private section of the new environment
 directories=("vhosts")
 for directory in "${directories[@]}"; do
     if [ -e ${TEMPLATE_DIR}/${directory} ]; then
