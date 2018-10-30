@@ -41,6 +41,8 @@ Vagrant.configure("2") do |config|
 
         ansible.groups = {
           "sympa" => ["local-sympa-ubuntu16"],
+          "apache" => ["local-sympa-ubuntu16"],
+          "postfix" => ["local-sympa-ubuntu16"],
         }
         ansible.playbook = "provision-vagrant-vm.yml"
         #ansible.verbose = "vvvv" # For troubleshooting ansible connection problems

@@ -43,7 +43,7 @@
 - name: Put Apache vhost keys
   tags: apache
   no_log: True
-  copy: content="{{ item.ssl.key }}" dest=/etc/ssl/private/{{ item.web.domain }}.key owner=root group=ssl-cert mode=640
+  copy: content="{{ item.ssl.key | vault(vault_keydir) }}" dest=/etc/ssl/private/{{ item.web.domain }}.key owner=root group=ssl-cert mode=640
   with_items: "{{ apache_vhosts }}"
   when: item.ssl.enabled
 

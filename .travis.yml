@@ -18,5 +18,11 @@ script:
   - echo "" >> environments/local/inventory
   - echo "[sympa]" >> environments/local/inventory
   - echo "localhost" >> environments/local/inventory
+  - echo "" >> environments/local/inventory
+  - echo "[postfix]" >> environments/local/inventory
+  - echo "localhost" >> environments/local/inventory
+  - echo "" >> environments/local/inventory
+  - echo "[apache]" >> environments/local/inventory
+  - echo "localhost" >> environments/local/inventory
   - sed -s -i 's/local-sympa-ubuntu16/localhost/' environments/local/private/vhosts/*
   - ansible-playbook site.yml --connection=local --become -i environments/local/inventory
