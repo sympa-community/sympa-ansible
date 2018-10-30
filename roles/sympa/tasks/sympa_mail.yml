@@ -14,7 +14,6 @@
     group: sympa
     mode: 0644
 
-<<<<<<< HEAD
 - name: Creating Sympa aliases file (1/2)
   file:
     path: /etc/mail
