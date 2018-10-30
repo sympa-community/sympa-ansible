@@ -10,7 +10,7 @@ install:
   - sudo apt-get install python-pip python-dev build-essential 
   - sudo pip install --upgrade pip 
   - sudo pip install --upgrade virtualenv 
-  - sudo pip install python-keyczar 
+  - pip install python-keyczar 
   - ansible --version
 script:
   - ./scripts/create_new_environment.sh environments/local
