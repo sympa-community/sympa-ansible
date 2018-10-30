@@ -7,12 +7,10 @@ before_install:
 install:
   - sudo apt-get install software-properties-common
   - sudo apt-get -y install ansible
-  - sudo apt-get install python-pip python-dev build-essential 
-  - sudo apt-get remove python-jinja2
+  - sudo apt-get install python-pip
   - sudo pip install --upgrade pip 
-  - sudo pip install --upgrade virtualenv 
   - pip install python-keyczar 
-  - pip install Jinja2
+  - sudo pip install --upgrade Jinja2
   - ansible --version
 script:
   - ./scripts/create_new_environment.sh environments/local
