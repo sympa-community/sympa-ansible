@@ -11,7 +11,7 @@ install:
   - sudo pip install --upgrade pip 
   - sudo pip install --upgrade virtualenv 
   - pip install python-keyczar 
-  - sudo pip install Jinja2
+  - pip install Jinja2
   - ansible --version
 script:
   - ./scripts/create_new_environment.sh environments/local
