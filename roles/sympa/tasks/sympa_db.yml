@@ -14,6 +14,8 @@
     name: mysql
     enabled: yes
 
+- debug: msg="{{ db.root_password | vault(vault_keydir) }}"
+
 # localhost needs to be the last item for idempotency, see
 # http://ansible.cc/docs/modules.html#mysql-user
 - name: 'Update Mysql Root Password'
