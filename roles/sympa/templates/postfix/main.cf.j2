@@ -31,12 +31,12 @@ smtpd_relay_restrictions = permit_mynetworks permit_sasl_authenticated defer_una
 myhostname = {{ sympa_mail_hostname | regex_replace('\..+$','') }}
 alias_database = hash:/etc/aliases
 # virtual(8) maps
-virtual_mailbox_domains = hash:/etc/postfix/transport.sympa
-virtual_mailbox_maps = hash:/etc/postfix/transport.sympa, hash:/etc/mail/sympa_transport, hash:/etc/postfix/virtual.sympa
+virtual_mailbox_domains = hash:/etc/postfix/domains.sympa
+virtual_mailbox_maps = hash:/etc/mail/sympa_transport, hash:/etc/postfix/virtual.sympa
 # virtual(5) maps
 virtual_alias_maps = hash:/etc/postfix/virtual.sympa,hash:/etc/postfix/virtual
 # transport maps
-transport_maps = hash:/etc/postfix/transport.sympa, hash:/etc/mail/sympa_transport
+transport_maps = hash:/etc/postfix/domains.sympa, hash:/etc/mail/sympa_transport
 # For VERP
 recipient_delimiter = +
 mydestination = $myhostname, local-sympa, localhost.localdomain, localhost 

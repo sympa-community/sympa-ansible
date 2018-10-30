@@ -75,3 +75,6 @@
 
 - name: Enable Apache on boot
   service: name=apache2 enabled=yes
+
+ # Include environment specific tasks
+- include: "{{ inventory_dir }}/tasks/apache.yml"

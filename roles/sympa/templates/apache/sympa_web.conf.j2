@@ -3,15 +3,18 @@
   Alias /static-sympa {{ sympa_root_directory }}/static_content
 
   <Location /static-sympa>
-    # required for Apache 2.4
     Require all granted
   </Location>
 
   <Location /sympa>
-
     SetHandler fcgid-script
-
+    Require all granted
+  </Location>
+  
+  <Location /sympasoap>
+    SetHandler fcgid-script
     Require all granted
   </Location>
   
   ScriptAlias /sympa {{ sympa_root_directory }}/bin/wwsympa-wrapper.fcgi
+  ScriptAlias /sympasoap {{ sympa_root_directory }}/bin/sympa_soap_server-wrapper.fcgi
