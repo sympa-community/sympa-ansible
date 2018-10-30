@@ -21,7 +21,7 @@
     login_user: root
     login_password: "{{ db.root_password | vault(vault_keydir) }}"
     ## Useful to update root user only if it is in the initial configuration state
-    check_implicit_admin: true
+    check_implicit_admin: yes
     name: root
     host: "{{ item }}"
     password: "{{ db.root_password | vault(vault_keydir) }}"
