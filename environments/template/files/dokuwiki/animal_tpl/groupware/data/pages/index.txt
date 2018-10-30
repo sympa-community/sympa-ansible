@@ -1,7 +1,0 @@
-====== Le wiki de la liste (%list%)@(%robot%) ======
-
-<note important>
-Le wiki associé à la liste (%list%)@(%robot%) vient d'être initialisé. Il appartient au gérant de la liste de le modifier, en particulier de modifier cette page d'accueil.
-
-Consultez [[https://services.renater.fr/groupware/wiki/index|la documentation sur ce service]] et n'hésitez pas à nous signaler les anomalies que vous pourriez constater.
-</note>

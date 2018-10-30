@@ -1,7 +1,0 @@
-base motd
-author Etienne MELEARD
-email etienne.meleard@renater.fr
-date 2018-09-19
-name RENATER's MOTD
-desc Display MOTDs from RENATER's MOTD broadcast service
-url https://no.url.yet/todo
