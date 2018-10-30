@@ -2,25 +2,29 @@
 # Install and configure Sympa database
 
 - name: Install required packages for MySQL
-  apt: name={{item}} state=present
+  apt: 
+    name: "{{item}}"
+    state: present
   with_items:
     - mysql-server
     - python-mysqldb # Required by Ansible
 
 - name: Enable MySQL server on boot
-  service: name=mysql enabled=yes
-  
+  service:
+    name: mysql
+    enabled: yes
+
 # localhost needs to be the last item for idempotency, see
 # http://ansible.cc/docs/modules.html#mysql-user
 - name: 'Update Mysql Root Password'
   mysql_user:
     login_user: root
-    login_password: "{{ sympa_db_root_password }}"
+    login_password: "{{ db.root_password | vault(vault_keydir) }}"
     ## Useful to update root user only if it is in the initial configuration state
     check_implicit_admin: true
     name: root
     host: "{{ item }}"
-    password: "{{ sympa_db_root_password }}"
+    password: "{{ db.root_password | vault(vault_keydir) }}"
     priv: "*.*:ALL,GRANT"
     state: present
   with_items:
@@ -29,14 +33,18 @@
     - localhost
 
 - name: Create sympa database if needed
-  mysql_db: name=sympa login_user=root login_password={{sympa_db_root_password }} state=present
-  
+  mysql_db:
+    name: sympa
+    login_user: root
+    login_password: "{{ db.root_password | vault(vault_keydir) }}"
+    state: present
+
 - name: Configure sympa user for MySQL server
   mysql_user:
     login_user: root
-    login_password: "{{ sympa_db_root_password }}"
-    name: "{{ sympa_db_app_user }}"
-    password: "{{ sympa_db_app_password }}"
+    login_password: "{{ db.root_password | vault(vault_keydir) }}"
+    name: "{{ sympa.db.app_user }}"
+    password: "{{ sympa.db.app_password | vault(vault_keydir) }}"
     host: "{{ item }}"
     priv: "sympa.*:ALL"
   with_items:
@@ -45,4 +53,7 @@
     - localhost
 
 - name: Create required /etc/mail/ directory    
-  file: dest=/etc/mail state=directory mode=755
+  file:
+    dest: /etc/mail
+    state: directory
+    mode: 755

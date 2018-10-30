@@ -1,22 +1,15 @@
 ---
-# Configure postfix and mail aliases
-
-- name: Install required packages
-  apt: name={{ item }} state=present
-  with_items:
-    - postfix
-
 - name: Install list aliases file
   copy:
     src: files/list_aliases.tt2
-    dest: "{{ sympa_install_prefix }}/etc/list_aliases.tt2"
+    dest: "{{ install_prefix }}/{{ sympa.install_dir_name }}/etc/list_aliases.tt2"
     owner: sympa
     group: sympa
     mode: 0644
 
 - name: Creating Sympa aliases file (1/2)
   file:
-    path: /etc/mail
+    path: "{{ sympa.mail.alias_directory }}"
     state: directory
     owner: sympa
     group: sympa
@@ -24,41 +17,37 @@
 
 - name: Creating Sympa aliases file (2/2)
   file:
-    path: /etc/mail/{{ item }}
+    path: "{{ sympa.mail.alias_directory }}/{{ item }}"
     state: touch
     owner: sympa
     group: sympa
     mode: 0644
   with_items:
-    - sympa_transport
-    - sympa_transport.db
+    - "{{ sympa.mail.alias_file }}"
+    - "{{ sympa.mail.alias_file }}.db"
 
 - name: Compiling sympa_aliases
-  shell: postmap /etc/mail/sympa_transport
+  shell: "postmap {{ sympa.mail.alias_directory }}/{{ sympa.mail.alias_file }}"
 
-- name: Adding required aliases to tranport
+- name: Adding list domains as virtual domains
   blockinfile:
-    path: /etc/postfix/transport.sympa
+    path: /etc/postfix/domains.sympa
     create: yes
     state: present
-    marker: "# {mark} ANSIBLE MANAGED {{ item }} transports"
+    marker: "# {mark} ANSIBLE MANAGED {{ item }} domain"
     block: |
-      {{ item }}                error:User unknown in recipient table
-      sympa@{{ item }}          sympa:sympa@{{ item }}
-      listmaster@{{ item }}     sympa:listmaster@{{ item }}
-      bounce@{{ item }}         sympabounce:sympa@{{ item }}
-      abuse-feedback-report@{{ item }}  sympabounce:sympa@{{ item }}
+      {{ item }}                # {{ item }} is a mailing list domain.
   with_items: "{{ mail_domains }}"
 
 - name: Compiling Sympa transport
-  shell: postmap /etc/postfix/transport.sympa
+  shell: postmap /etc/postfix/domains.sympa
 
-- name: Adding required aliases to tranport
+- name: Adding required generic aliases
   blockinfile:
     path: /etc/postfix/virtual.sympa
     create: yes
     state: present
-    marker: "# {mark} ANSIBLE MANAGED {{ item }} transports"
+    marker: "# {mark} ANSIBLE MANAGED {{ item }} aliases"
     block: |
       sympa-request@{{ item }}  postmaster@localhost
       sympa-owner@{{ item }}    postmaster@localhost
@@ -67,18 +56,49 @@
 - name: Compiling Sympa transport
   shell: postmap /etc/postfix/virtual.sympa
 
+- name: Adding required generic transports
+  blockinfile:
+    path: /etc/postfix/transport
+    create: yes
+    state: present
+    marker: "# {mark} ANSIBLE MANAGED {{ item }} transports"
+    block: |
+      sympa@{{ item }}          sympa:sympa@{{ item }}
+      listmaster@{{ item }}     sympa:listmaster@{{ item }}
+      bounce@{{ item }}         sympabounce:sympa@{{ item }}
+      abuse-feedback-report@{{ item }}  sympabounce:sympa@{{ item }}
+  with_items: "{{ mail_domains }}"
+
+- name: Compiling Sympa transport
+  shell: postmap /etc/postfix/transport
+
 - name: Master.cf configuration
   blockinfile:
     path: /etc/postfix/master.cf
+    marker: "# {mark} ANSIBLE MANAGED sympa transports"
     block: |
       sympa unix - n n - - pipe
-        flags=hqRu user=sympa argv={{ sympa_install_prefix }}/bin/queue ${nexthop}
+        flags=hqRu user=sympa argv={{ install_prefix }}/{{ sympa.install_dir_name }}/bin/queue ${nexthop}
       sympabounce unix - n n - - pipe
-        flags=hqRu user=sympa argv={{ sympa_install_prefix }}/bin/bouncequeue ${nexthop}
+        flags=hqRu user=sympa argv={{ install_prefix }}/{{ sympa.install_dir_name }}/bin/bouncequeue ${nexthop}
   notify: restart postfix
 
 - name: Setting up main.cf
-  template:
-    src: templates/postfix/main.cf.j2
-    dest: /etc/postfix/main.cf
+  blockinfile:
+    path: /etc/postfix/main.cf
+    marker: "# {mark} ANSIBLE MANAGED sympa configuration"
+    block: |
+      virtual_mailbox_domains =
+        hash:/etc/postfix/domains.sympa
+      virtual_mailbox_maps =
+        hash:/etc/postfix/transport,
+        hash:/etc/postfix/virtual.sympa,
+        hash:{{ sympa.mail.alias_directory }}/{{ sympa.mail.alias_file }}
+      virtual_alias_maps =
+        hash:/etc/postfix/virtual.sympa
+      transport_maps =
+        hash:/etc/postfix/transport,
+        hash:/etc/postfix/virtual.sympa,
+        hash:{{ sympa.mail.alias_directory }}/{{ sympa.mail.alias_file }}
   notify: restart postfix
+

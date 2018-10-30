@@ -1,0 +1,13 @@
+====== Créer une nouvelle page ======
+
+<WRAP center>
+    ** Pour créer facilement une nouvelle page dans le wiki, vous pouvez suivre la procédure ci-dessous : **
+
+    <WRAP round tip 60%>
+      - Sélectionner le namespace (liste déroulante de gauche) dans lequel vous voulez ajouter une nouvelle page,
+      - Saissez le nom de la page à créer (dans la case de droite)
+      - Cliquez sur "Créer"
+    </WRAP>
+    
+    {{NEWPAGE}}
+</WRAP>

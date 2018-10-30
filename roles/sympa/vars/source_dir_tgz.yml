@@ -1,1 +1,1 @@
-source_dir: sympa-{{ sympa_version }}
+source_dir: sympa-{{ sympa.version }}

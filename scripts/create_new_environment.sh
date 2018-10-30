@@ -127,7 +127,7 @@ fi
 
 
 # Copy directories from the template to the new environment
-directories=("group_vars" "sympa_virtual_robots" "tasks" "templates")
+directories=("group_vars" "host_vars" "handlers" "tasks" "templates" "vhosts")
 for directory in "${directories[@]}"; do
     if [ -e ${TEMPLATE_DIR}/${directory} ]; then
         if [ ! -e ${ENVIRONMENT_DIR}/${directory} ]; then
@@ -139,6 +139,28 @@ for directory in "${directories[@]}"; do
             cp -r ${TEMPLATE_DIR}/${directory}/* ${ENVIRONMENT_DIR}/${directory}
             if [ $? -ne "0" ]; then
                 rm -r ${ENVIRONMENT_DIR}/${directory}
+                error_exit "Error copying files to the ${directory} directory"
+            fi
+        else
+            echo "Skipping creating/copying the ${directory} directory because it already exists"
+        fi
+    fi
+done
+
+
+# Copy directories from the template to the private sectoin of the new environment
+directories=("vhosts")
+for directory in "${directories[@]}"; do
+    if [ -e ${TEMPLATE_DIR}/${directory} ]; then
+        if [ ! -e ${ENVIRONMENT_DIR}/private/${directory} ]; then
+            echo "Creating/copying ${directory} directory"
+            mkdir -p ${ENVIRONMENT_DIR}/private/${directory}
+            if [ $? -ne "0" ]; then
+                error_exit "Error creating ${directory} directory"
+            fi
+            cp -r ${TEMPLATE_DIR}/${directory}/* ${ENVIRONMENT_DIR}/private/${directory}
+            if [ $? -ne "0" ]; then
+                rm -r ${ENVIRONMENT_DIR}/private/${directory}
                 error_exit "Error copying files to the ${directory} directory"
             fi
         else
@@ -167,7 +189,7 @@ fi
 
 # Generate passwords
 if [ ${#PASSWORDS[*]} -gt 0 ]; then
-    PASSWORD_DIR=${ENVIRONMENT_DIR}/password
+    PASSWORD_DIR=${ENVIRONMENT_DIR}/private/password
     if [ ! -e ${PASSWORD_DIR} ]; then
         echo "Creating password directory"
         mkdir -p ${PASSWORD_DIR}
@@ -191,7 +213,7 @@ if [ ${#PASSWORDS[*]} -gt 0 ]; then
         if [ $? -ne "0" ]; then
             error_exit "Error creating password"
         fi
-        echo "${generated_password}" > ${PASSWORD_DIR}/empty_placeholder
+        echo "${generated_password}" > ${PASSWORD_DIR}/private/empty_placeholder
     fi
 else
     echo "Skipping generation of passwords because none are defined in the environment.conf"
@@ -200,7 +222,7 @@ fi
 
 # Generate secrets
 if [ ${#SECRETS[*]} -gt 0 ]; then
-    SECRET_DIR=${ENVIRONMENT_DIR}/secret
+    SECRET_DIR=${ENVIRONMENT_DIR}/private/secret
     if [ ! -e ${SECRET_DIR} ]; then
         echo "Creating secret directory"
         mkdir -p ${SECRET_DIR}
@@ -225,7 +247,7 @@ fi
 
 # Generate self-signed certs for SAML use
 if [ ${#SAML_CERTS[*]} -gt 0 ]; then
-    SAML_CERT_DIR=${ENVIRONMENT_DIR}/saml_cert
+    SAML_CERT_DIR=${ENVIRONMENT_DIR}/private/saml_cert
     if [ ! -e ${SAML_CERT_DIR} ]; then
         echo "Creating saml_cert directory"
         mkdir -p ${SAML_CERT_DIR}
@@ -253,7 +275,7 @@ fi
 # Create SSL server certificates
 if [ ${#SSL_CERTS[*]} -gt 0 ]; then
     # Create Root CA for issueing SSL Server certs
-    CA_DIR=${ENVIRONMENT_DIR}/ca
+    CA_DIR=${ENVIRONMENT_DIR}/private/ca
     if [ ! -e ${CA_DIR} ]; then
         echo "Creating Root CA with DN: ${SSL_ROOT_DN}"
         ${BASEDIR}/create_ca.sh ${CA_DIR} "${SSL_ROOT_DN}"
@@ -263,7 +285,7 @@ if [ ${#SSL_CERTS[*]} -gt 0 ]; then
     fi
 
     # Create SSL server certificates
-    SSL_CERT_DIR=${ENVIRONMENT_DIR}/ssl_cert
+    SSL_CERT_DIR=${ENVIRONMENT_DIR}/private/ssl_cert
     if [ ! -e ${SSL_CERT_DIR} ]; then
         echo "Creating ssl_cert directory"
         mkdir -p ${SSL_CERT_DIR}
@@ -291,7 +313,7 @@ fi
 
 # Generate SSH keys
 if [ ${#SSH_KEYS[*]} -gt 0 ]; then
-    SSH_KEY_DIR=${ENVIRONMENT_DIR}/ssh
+    SSH_KEY_DIR=${ENVIRONMENT_DIR}/private/ssh
     if [ ! -e ${SSH_KEY_DIR} ]; then
         echo "Creating ssh directory"
         mkdir -p ${SSH_KEY_DIR}

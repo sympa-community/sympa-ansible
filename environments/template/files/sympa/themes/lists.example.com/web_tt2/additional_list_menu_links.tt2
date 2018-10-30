@@ -1,0 +1,14 @@
+[% TRY %]
+[% USE Dokuwiki("groupware_wikis", "${list}") %]
+<li><a href="/wiki/[%list%]/">Wiki</a></li>
+[% CATCH %]
+[% END %]
+
+[% surveys = Limesurvey.get_all("${list}") %]
+[% IF surveys.size %]
+<li><a href="[% 'lca/surveys' | url_rel([list]) %]">[% IF lang.match('^fr') %]Sondages[% ELSE %]Surveys[%END%]</a></li>
+[% END %]
+
+<!-- Evento link -->
+[% IF action == 'rss_request' %][% SET class = 'active' %][% ELSE %][% SET class = '' %][% END %]
+<li><a class="[% class %]" href="https://evento.renater.fr" target="_blank" title="Evento">[% IF lang.match('^fr') %]Planifier un évènement sur Evento[% ELSE %]Plan an event on Evento[%END%]</a></li>

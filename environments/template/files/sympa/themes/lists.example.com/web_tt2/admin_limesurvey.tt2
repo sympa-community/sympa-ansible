@@ -1,0 +1,34 @@
+<!-- admin_limesurvey.tt2 -->
+[% TRY %]
+    [% USE Limesurvey("groupware_surveys") %]
+<h3>[% IF lang.match('^fr') %]Créer un sondage pour votre liste de diffusion[% ELSE %]Create a survey for your mailing list[%END%]</h3>
+<form name="manage_list_wiki" action="[% path_cgi %]" method="post">
+    <input type="hidden" name="action" value="admin" />
+    <input type="hidden" name="list" value="[% list %]" />
+    <input type="hidden" name="plugin.limesurvey.language" value="[% lang.replace('-.+$', '') %]" />
+    <fieldset>
+    [% TRY %]
+        [% done = Limesurvey.handleform("${list}", "${session.email}") %]
+        [% IF done %]
+        <div class="callout small success small-12 medium-9"><p>[% IF lang.match('^fr') %]Le sondage a été créé[% ELSE %]The survey has been created[%END%], <a href="[% done.admin_url %]">[% IF lang.match('^fr') %]vous pouvez y accéder ici[% ELSE %]go set it up[%END%]</a>.</p></div>
+        [% END %]
+        <input type="text" name="plugin.limesurvey.title" value="" placeholder="[% IF lang.match('^fr') %]Titre du sondage[% ELSE %]Survey title[%END%]" required aria-required="true"/>
+        <input class="MainMenuLinks" type="submit" name="plugin.limesurvey.create_survey" value="[% IF lang.match('^fr') %]Créer le sondage[% ELSE %]Create survey[%END%]" />
+        <p>[% IF lang.match('^fr') %]Veuillez consulter[% ELSE %]Please check out[%END%] <a href="https://services.renater.fr/groupware/enquetes/conditions">[% IF lang.match('^fr') %]les conditions d'utilisation du service de sondages[% ELSE %]the survey service terms and conditions[%END%]</a></p>
+    [% CATCH %]
+        <p class="form-error is-visible">[% error.info %]</p>
+    [% END %]
+
+    [% surveys = Limesurvey.get_all("${list}") %]
+    [% IF surveys.size %]
+        <div class="callout small primary small-12 medium-9">
+            <p>[% IF lang.match('^fr') %]Un ou des sondages existent pour votre liste, vous pouvez y  <a href="[% 'lca/surveys' | url_rel([list]) %]">accéder ici</a>[% ELSE %]Some Surveys exist for your list and you can <a href="[% 'lca/surveys' | url_rel([list]) %]">access here</a>[%END%]</p>
+        </div>
+        [% END %]
+    </fieldset>
+</form>
+[% CATCH %]
+    <div class="callout alert small-12 medium-9"><p>[% error.info %]</p></div>
+[% END %]
+<!-- end admin_limesurvey.tt2 -->
+

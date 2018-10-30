@@ -1,0 +1,67 @@
+
+footer {
+    display: table-row;
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height:80px;
+    min-height:auto;
+    width:100%;
+    background-color:[% color_5 %];
+    padding:0!important;
+    font-size: 0.85rem;
+}
+footer aside p, footer article p, footer a, footer a:hover, footer a:visited, footer a:link, footer a:focus{
+    color:[% color_7 %];
+}
+footer article {
+    height:50px;
+    padding: 1em;
+}
+footer article p span{
+    padding:0 10px;
+}
+footer article p span:nth-child(1) img{
+    width:95px;
+}
+footer article p span:nth-child(2) {
+    margin-left:0.975rem;
+    font-size:0.7rem;
+    line-height:0.9;
+    border-left: 1px solid [% color_7 %];
+}
+
+footer aside {
+    height:30px;
+    background-color:[% color_6 %];
+    font-size:11px;
+    padding: 0.5rem!important;
+}
+footer aside p span:nth-child(1).columns, footer article p span:nth-child(1).columns{
+    padding-left:0;
+    padding-right:0;
+}
+footer aside p span:nth-child(2).columns{
+    text-align:right;
+}
+footer aside *{
+    font-family: 'LatoWeb';
+    letter-spacing: 1px;
+}
+
+
+
+/* max-width 640px, mobile-only styles, use when QAing mobile issues */
+@media only screen and (max-width: 40em) {
+    footer {
+        height: auto;
+        bottom: 0;
+    }
+    footer aside {
+        height: auto;
+}
+    footer aside p span:nth-child(2).columns{
+        text-align:left;
+    }
+}

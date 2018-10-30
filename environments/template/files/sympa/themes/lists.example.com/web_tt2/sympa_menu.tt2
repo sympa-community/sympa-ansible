@@ -1,0 +1,88 @@
+<!-- sympa_menu.tt2 -->
+		<li >
+			<a href="[% 'home' | url_rel %]" class="left" title="[%|loc%]Home[%END%]" data-tooltip data-show-on="medium">
+				<img class="hide-for-small-only home_img" src="[% icons_url %]/../lists.example.com/icons/menu/home.svg" alt="[%|loc%]Home[%END%]" data-options="disable_for_touch:true"/>
+				<label class="show-for-small-only">[%|loc%]Home[%END%]</label>
+			</a>
+		</li>
+		
+	[% IF may_create_list %]
+		<li >
+			<a href="[% 'create_list_request' | url_rel %]" class="heavyWork left" title="[%|loc%]Request a List[%END%]" data-tooltip data-show-on="medium">
+				<img class="hide-for-small-only home_img" src="[% icons_url %]/../lists.example.com/icons/menu/create_list.svg" alt="[%|loc%]Request a List[%END%]" data-options="disable_for_touch:true"/>
+				<label class="show-for-small-only">[%|loc%]Request a List[%END%]</label>
+			</a>
+		</li>
+	[% END %]
+
+	[% IF is_listmaster %]
+		<li >
+			<a href="[% 'serveradmin' | url_rel %]"  class="left" title="[%|loc%]Listmaster Admin[%END%]" data-tooltip data-show-on="medium">
+				<img class="hide-for-small-only managers_img" src="[% icons_url %]/../lists.example.com/icons/menu/listmaster.svg" alt="[%|loc%]Listmaster Admin[%END%]" data-options="disable_for_touch:true"/>
+				<label class="show-for-small-only">[%|loc%]Listmaster Admin[%END%]</label>
+			</a>
+		</li>
+	[% END %]
+		<li class="has-submenu">
+			<a href="#" class="left" title="[%|loc%]Search for List(s)[%END%]" data-tooltip data-show-on="medium">
+				<img class="hide-for-small-only" src="[% icons_url %]/../lists.example.com/icons/menu/search.svg" alt="[%|loc%]Search for List(s)[%END%]" data-options="disable_for_touch:true"/>
+				<label class="show-for-small-only">[%|loc%]Search for List(s)[%END%]</label>
+			</a>
+			<ul class="submenu  vertical" data-submenu>
+				<li ><a href="[% 'search_list_request' | url_rel %]">[%|loc%]Search form[%END%]</a></li>
+				<li ><a class="heavyWork" href="[% 'lists' | url_rel %]">[%|loc%]Index of Lists[%END%]</a></li>
+				<li ><a href="[% 'lists_categories' | url_rel %]" target="">[%|loc%]Browse lists by categories[%END%]</a>
+			</ul>
+		</li>
+		<li class="has-submenu  ">
+			<a href="#" class="left" title="[%|loc%]Support[%END%]" data-tooltip data-show-on="medium">
+				<img class="hide-for-small-only home_img" src="[% icons_url %]/../lists.example.com/icons/menu/support.svg" alt="[%|loc%]Support[%END%]" data-options="disable_for_touch:true"/>
+				<label class="show-for-small-only">[%|loc%]Support[%END%]</label>
+			</a>
+			<ul class="submenu  vertical">
+				[% IF action == 'help' && help_topic != 'faq' %][% SET class = 'active' %][% ELSE %][% SET class = '' %][% END %]
+				<li ><a href="[% 'help' | url_rel %]" title="[%|loc%]Documentation[%END%]">[%|loc%]Documentation[%END%]</a></li>
+				[% IF help_topic == 'faq' %][% SET class = 'active' %][% ELSE %][% SET class = '' %][% END %]
+				<li ><a href="[% 'help/faq' | url_rel %]" title="[%|loc%]Frequently asked questions[%END%]">[%|loc%]FAQ[%END%]</a></li>
+				[% SET class = '' %]
+				<li><a href="https://feedback.renater.fr?service=Universalistes" target="_blank" data-tooltip aria-haspopup="true" title="[%|loc%]Give us feedback about this new Universalistes version[%END%]">[%|loc%]Feedback[%END%]</a></li>
+			</ul>
+		</li>
+	[% IF conf.main_menu_custom_button_1_title %]
+		<li><a class="MainMenuLinks" [% IF conf.main_menu_custom_button_1_target %] target ="[% conf.main_menu_custom_button_1_target %]"[% END %] href="[% conf.main_menu_custom_button_1_url %]">[% conf.main_menu_custom_button_1_title %]</a></li>
+	[%END%]
+		
+	[% IF conf.main_menu_custom_button_2_title %]
+		<li><a class="MainMenuLinks" [% IF conf.main_menu_custom_button_2_target %] target ="[% conf.main_menu_custom_button_2_target %]"[% END %] href="[% conf.main_menu_custom_button_2_url %]">[% conf.main_menu_custom_button_2_title %]</a></li>
+	[%END%]
+	
+	[% IF conf.main_menu_custom_button_3_title %]
+		<li><a class="MainMenuLinks" [% IF conf.main_menu_custom_button_3_target %] target ="[% conf.main_menu_custom_button_3_target %]"[% END %] href="[% conf.main_menu_custom_button_3_url %]">[% conf.main_menu_custom_button_3_title %]</a></li>
+	[%END%]
+
+	[% IF conf.automatic_list_families.keys && user.email %]
+		[% SET family_li = '' %]
+		[% SET owns_family = 0 %]
+		[% FOREACH alf IN conf.automatic_list_families.keys %]
+			[% IF action == 'create_automatic_list_request' && family.name == conf.automatic_list_families.$alf.name %][% SET class = 'active' %][% ELSE %][% SET class = '' %][% END %]  
+			[% IF may_create_automatic_list.$alf %]
+			[% display = conf.automatic_list_families.$alf.display %]
+			[% name = conf.automatic_list_families.$alf.name %]
+			[% family_li = BLOCK ~%]
+			  [% family_li ~%]
+			  <li ><a href="[% 'create_automatic_list_request' | url_rel([name]) %]" >[% display %]</a></li>
+			[%~ END %]
+			[% owns_family = 1 %]
+			[% END %]
+		[% END %]
+			[% IF top_menu %][% IF action == 'create_automatic_list_request' %][% SET class = 'active' %][% ELSE %][% SET class = '' %][% END %][% END %]
+			[% IF owns_family %]
+			<li class="has-submenu ">
+				<a href="#"></i> [%|loc%]Lists Families[%END%]</a>
+				<ul class="submenu  vertical">
+					[% family_li %]
+				 </ul>
+			</li>
+			[% END %]
+	[% END %]
+<!-- end sympa_menu.tt2 -->	

@@ -1,0 +1,27 @@
+---
+# Install Sympa tools
+
+- name: Install required packages
+  apt: 
+    name: "{{item}}"
+    state: present
+  with_items:
+    - php
+    - php-cli
+    - php-pdo
+    - php-mysql
+    - php-pgsql
+
+- name: Create tools directory
+  file:
+    dest: "{{ install_prefix }}/{{ sympa.install_dir_name }}/tools"
+    state: directory
+    mode: 0755
+    owner: root
+
+- name: Copy datasources tool
+  copy:
+    src: files/tools/datasources
+    dest: "{{ install_prefix }}/{{ sympa.install_dir_name }}/tools/"
+    mode: 0740
+    owner: root

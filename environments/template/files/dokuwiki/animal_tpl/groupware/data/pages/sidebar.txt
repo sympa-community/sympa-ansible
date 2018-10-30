@@ -1,0 +1,7 @@
+Liste de liens :
+
+  * [[:|Accueil wiki]]
+  * [[(%sympa_url%)/info/(%list%)/|Liste (%list%)@(%robot%)]]
+  * [[prive:index|Intranet de (%list%)]]
+  * [[public:index|Les pages publiques]]
+  * [[:playground:index|Page pour vous entrainer]]

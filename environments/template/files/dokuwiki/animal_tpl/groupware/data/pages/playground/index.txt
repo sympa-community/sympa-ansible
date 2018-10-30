@@ -1,0 +1,3 @@
+===== Page de test =====
+
+Utilisez cette page pour tester le mode édition du wiki.

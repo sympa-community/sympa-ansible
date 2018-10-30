@@ -1,0 +1,531 @@
+/*
+ * This file is part of the eduroam project.
+ * 2013 - 2018 / RENATER
+ */
+
+header { 
+    width: 100%;
+    margin:0;
+    margin-top: 10px;
+    padding:0;
+    background-color: #fff;
+    -webkit-box-shadow: 0px 2px 45px -10px rgba(0,0,0,0.75);
+    -moz-box-shadow: 0px 2px 45px -10px rgba(0,0,0,0.75);
+    box-shadow: 0px 2px 35px -10px rgba(0,0,0,0.6)
+}
+
+header img {
+    background-color: transparent;
+    border-width: 0;
+    vertical-align:middle;
+}
+
+/*top-bar*/
+header .top-bar, .top-bar ul {
+    background-color: transparent;
+}
+header .top-bar {
+    display: block;
+    padding:0;
+    line-height: inherit;
+}
+header .top-bar-left {
+    float: left;
+}
+header .top-bar-right {
+    float: right;
+    margin-right: 5%;
+}
+header menu.top-bar-right > ul > li {
+    padding-right: 1.5rem;
+    display: table-cell;
+    text-align: center;
+    vertical-align: middle;
+}
+header menu.top-bar-right > ul > li:last-child {
+    margin-right: 0;
+}
+header .top-bar .top-bar-right > * label {
+    color: #fff;
+}
+header .top-bar button{
+    top:0;
+    background-color:[% color_7 %];
+    color:[% color_6 %];
+    font-family: 'Helvetica Neue', Helvetica, Helvetica, Arial, sans-serif;
+    font-size:13px;
+}
+header .menu{
+    display:table;
+}
+header .menu > li > b.current, header .menu > li > a {
+    padding: 0;
+    line-height: 1;
+}
+header .menu .menu-text {
+    padding: 0;
+    display: table-cell;
+    height: 90px;
+    vertical-align: middle;
+}
+header li.menu-text > a {
+    padding: 0;
+    display: table-cell;
+    vertical-align: middle;
+}
+header .menu.icon-top a, header .menu.icon-right a, header .menu.icon-bottom a, header .menu.icon-left a {
+    display: unset;
+}
+header .menu.icon-top > li > a img.lang_img, header .menu.icon-top > li > a img.support_img {
+    margin-top: 16px;
+}
+header .menu.icon-top > li > a img.user_img {
+    margin-top: 9px;
+}
+header .menu.icon-top > li > a img.managers_img {
+    margin-top:9px;
+    margin-left:12px;
+}
+header .menu.icon-top > li > a img.user_connected_img {
+    margin-top:10px;
+    margin-left:12px;
+}
+header .menu.icon-top > li > a img.ressources_img {
+    margin-top:7px;
+}
+
+header .menu.icon-top li a {
+    -ms-flex-flow: unset;
+    flex-flow: unset;
+}
+/**
+ * Dropdown menus
+ */
+
+header .dropdown {
+    display:table;
+    height:90px;
+    vertical-align: middle;
+    margin-right: -1.5rem;
+}
+header .dropdown.menu > li > a {
+    display: table-cell;
+    vertical-align: middle;
+    padding: 0;
+    background-color: [% color_6 %] !important;
+    color: [% color_7 %];
+    width: 70px;
+    height: 70px;
+    cursor: pointer;
+}
+header .dropdown.menu a {
+    color: [% color_7 %];
+}
+header .dropdown.menu > li >  a:hover, header .dropdown.menu > li:hover > a, header .dropdown.menu > li:hover > a:hover {
+    background-color: [% color_6 %];
+}
+
+header .dropdown.menu > li.is-dropdown-submenu-parent > a {
+    padding: 0;
+    color: [% color_7 %];
+}
+
+header .dropdown.menu > li.is-dropdown-submenu-parent > a::after {
+    display:none;
+}
+
+header .dropdown.menu > li.opens-left > .is-dropdown-submenu {
+    right: 1.5rem;
+    background-color:[% color_6 %];
+    border:none;
+    margin-top:0;
+    padding-left:0;
+transition: opacity 1s ease-out;
+}
+header .dropdown.menu > li.opens-left:hover > .is-dropdown-submenu {
+    display: block;
+    position: absolute;
+    animation-name: theTranslate; /* nom de l'animation */
+    animation-duration: 0.6s; /* temps de l'animation (4s) */
+    animation-iteration-count: 1; /* nombre de boucles (infinie) */
+    animation-timing-function: linear; /* accelération de l'animation (constant) */
+    width:100%;
+    width: intrinsic;           /* Safari/WebKit uses a non-standard name */
+    width: -moz-max-content;    /* Firefox/Gecko */
+    width: -webkit-max-content; /* Chrome */
+    width: -max-content; /* Opera */
+    width:max-content;
+    cursor:pointer;
+}
+
+/* animation dropdown */
+@keyframes theTranslate {
+0% {opacity:0;transform:translateY(-100%);}
+80% {opacity:0;transform:translateY(-10%);}
+90% {opacity:0.2;transform:translateY(-1%);}
+100% {opacity:0.5;transform:translateY(0);}
+100% {opacity:1!important;}
+}
+
+header .dropdown.menu > li.opens-left > .is-dropdown-submenu:before {
+    content: ' ';
+    height: 0;
+    position: absolute;
+    width: 0;
+    top: 0;
+    right: 25px;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-top: 10px solid [% color_7 %];
+    font-size: 0;
+    line-height: 0;
+
+}
+
+header .dropdown.menu > li.opens-left > .is-dropdown-submenu > .is-dropdown-submenu-item {
+    /*float: left;*/
+    padding: 0.5rem;
+    list-style-type: none;
+    width: 100%;
+    text-align: left;
+}
+header .dropdown.menu > li.opens-left > .is-dropdown-submenu > .is-dropdown-submenu-item:hover {
+    background-color:[% color_5 %];
+    animation-name: theFade; /* nom de l'animation */
+    animation-duration: 0.3s; /* temps de l'animation (4s) */
+    animation-iteration-count: 1; /* nombre de boucles (infinie) */
+    animation-timing-function: linear; /* accelération de l'animation (constant) */
+
+}
+
+header .top-bar .top-bar-right > ul > li > a [class*="fi-"]::before,
+header .top-bar .top-bar-right > ul > li > a [class*="fa-"]::before {
+    color: [% color_7 %];
+}
+header .dropdown.menu > li.opens-left > .is-dropdown-submenu > .nolink span{
+    color: [% color_7 %];
+}
+header .dropdown.menu > li.opens-left > .is-dropdown-submenu > .is-dropdown-submenu-item form {
+    margin:0;
+    padding:0;
+}
+
+header .dropdown.menu > li.opens-left > .is-dropdown-submenu > .is-dropdown-submenu-item form button{
+    background:transparent;
+    margin:0;
+    padding:0 1rem;
+    color: [% color_7 %];
+}
+header li.is-dropdown-submenu-item a label{
+    cursor:pointer;
+}
+header li.is-dropdown-submenu-item a label{
+    display:inline-block;
+}
+
+/* For SSO login */
+header .dropdown.menu > li > form > fieldset > button[name="action_sso_login"] {
+display: table-cell;
+vertical-align: middle;
+background-color: #304c6f !important;
+color: #fff;
+width: 70px;
+height: 70px;
+cursor: pointer;
+padding: 0;
+margin: 0;
+border-radius: 0;
+}
+/* For SSO login */
+header .dropdown.menu > li > form > fieldset > button[name="action_sso_login"]:hover {
+opacity:1;
+}
+
+header li > form[id="use-sso"] {
+    margin:0;
+}
+
+/**
+ * Title bar only shown for < medium screens
+ */
+header .title-bar {
+    display:block;
+    height: 50px;
+    background: transparent;
+    color: [% color_6 %];
+}
+
+header .title-bar .menu-icon {
+    height: 35px;
+    background-color:transparent;
+}
+
+header .title-bar .menu-icon::after {
+    height: 3px;
+    width: 120%;
+    margin-top: 8px;
+    background: [% color_6 %];
+    box-shadow: 0 8px 0 [% color_6 %], 0 16px 0 [% color_6 %];
+    border-radius: 5px;
+}
+
+header .title-bar-title {
+    margin-top:12px;
+    font-family: LatoWebItalic;
+    margin-right: 0.2rem !important;
+}
+
+header .top-bar .top-bar-right .fa::before,
+header .top-bar .top-bar-right [class^="fi-"]::before {
+    color: [% color_7 %]!important;
+}
+
+header .menu .active>a {
+    background: transparent;
+    color: [% color_7 %];
+}
+
+/* Small screens */
+
+/* Define mobile styles */
+
+/* max-width 450px, mobile-only styles, use when QAing mobile issues */
+@media only screen and (max-width: 28em){
+
+}
+
+/* max-width 640px, mobile-only styles, use when QAing mobile issues */
+@media only screen and (max-width: 40em) {
+    header {
+        margin-top: 0;
+        -webkit-box-shadow: 0px 2px 15px -5px rgba(0,0,0,0.6);
+        -moz-box-shadow: 0px 2px 15px -5px rgba(0,0,0,0.6);
+        box-shadow: 0px 2px 15px -5px rgba(0,0,0,0.6);
+        height: 50px;
+    }
+    header .top-bar-left a img {
+        height: 35px;
+    }
+    header .top-bar .top-bar-left, header .top-bar .top-bar-right {
+        margin-left: 0;
+    }
+    header .top-bar .top-bar-right {
+        width: 100%;
+        position: absolute;
+        z-index: 100;
+        animation-name: theFade; /* nom de l'animation */
+        animation-duration: 0.25s; /* temps de l'animation (4s) */
+        animation-iteration-count: 1; /* nombre de boucles (infinie) */
+        animation-timing-function: linear; /* accelération de l'animation (constant) */
+        box-shadow: rgba(0, 0, 0, 0.5) 0px 10px 10px -2px;
+    }
+    header ul.menu {
+        width: 100%;
+    }
+    header ul.menu a label{
+        cursor: pointer;
+    }
+    header .menu li.has-submenu ul.submenu{
+        margin-left:0;
+    }
+    header menu.top-bar-right div.is-drilldown ul.drilldown li{
+        background-color:[% color_7 %];
+        line-height: 1.5;
+        padding: 0.5rem;
+        color:[% color_6 %];
+    }
+    header .top-bar .top-bar-right > * label {
+        color: [% color_6 %];
+        display:inline-block;
+    }
+    header .menu.icon-top > li > a img,
+    header .menu.icon-top > li > a i,
+    header .menu.icon-top > li > a span {
+        display: inline-block;
+        margin: 0 0.25rem;
+    }
+    header .is-drilldown {
+        min-height: auto !important;
+        width:100%;
+    }
+    header .is-drilldown li.hide-for-small-only {
+        display: none!important;
+    }
+    header .is-drilldown li.show-for-small-only {
+        display: block!important;
+    }
+
+    header .drilldown .is-drilldown-submenu-parent > a::after {
+        position: relative;
+        right: 0;
+        display: inline-block;
+        border-color: transparent transparent transparent [% color_6 %];
+    }
+    header .top-bar .top-bar-right .fa::before,
+    header .top-bar .top-bar-right [class^="fi-"]::before {
+        width: 1rem;
+        color:[% color_6 %]!important;
+    }
+    header button[name="action_sso_login"] {
+        padding: 0;
+        margin: 0;
+        font-size:inherit;
+    }
+    header button[name="action_sso_login"] span{
+        font-weight:700;
+    }
+}
+
+/* Medium screens */
+
+/* min-width 641px, medium screens */
+@media only screen and (min-width: 40.063em) {
+
+}
+
+@media only screen and (max-width: 64em) {
+    header .top-bar-right {
+        margin-right: 0;
+    }
+    header .dropdown {
+        height:75px;
+        vertical-align: middle;
+        margin-right: 0;
+
+    }
+    header .dropdown.menu > li > a, header .dropdown.menu > li > form > fieldset > button[name="action_sso_login"] {
+        width: 60px;
+        height: 60px;
+    }
+    header .menu.icon-top > li > a img.lang_img,.menu.icon-top > li > a img.support_img {
+        margin-top: 13px;
+    }
+    header .menu.icon-top > li > a img.user_img {
+        margin-top: 6px;
+    }
+    header .menu.icon-top > li > a img.managers_img {
+        margin-top:6px;
+        margin-left:8px;
+    }
+    header .menu.icon-top > li > a img.user_connected_img {
+        margin-top:7px;
+        margin-left:8px;
+    }
+    header .menu.icon-top > li > a img.ressources_img {
+        margin-top:2px;
+    }
+    header .top-bar .top-bar-left, .top-bar .top-bar-right {
+        margin-left: 0;
+    }
+    header .tooltip-for-small{
+        display:inherit;
+    }
+    header .dropdown.menu > li.opens-left > .is-dropdown-submenu:before {
+        content: ' ';
+        height: 0;
+        position: absolute;
+        width: 0;
+        right:23px;
+        border-left: 7px solid transparent;
+        border-right: 7px solid transparent;
+        border-top: 7px solid #fff;
+        font-size: 0;
+        line-height: 0;
+    }
+}
+
+@media only screen and (min-width:  40.063em) and (max-width: 800px)
+{
+    header .menu-text a img {
+        height: 40px;
+    }
+    header .top-bar .top-bar-right > * label {
+        display: none;
+    }
+}
+@media only screen and (min-width: 801px) and (max-width: 64em)
+{
+    header .menu-text a img {
+        height: 55px;
+    }
+    header .top-bar .top-bar-right > * label {
+        font-size: 0.7rem;
+    }
+}
+
+/* min-width 641px and max-width 1024px, use when QAing tablet-only issues */
+@media only screen and (min-width: 40.063em) and (max-width: 50em) {
+
+}
+
+/* min-width 641px and max-width 1024px, use when QAing tablet-only issues */
+@media only screen and (min-width: 40.063em) and (max-width: 64em) {
+    header > h1 {
+        font-size:1.9rem;
+    }
+    header, .menu .menu-text{
+        height:75px;
+    }
+    header menu.top-bar-right > ul > li {
+        padding-right: .5rem;
+    }
+}
+
+/* Large screens */
+
+/* min-width 1025px, large screens */
+@media only screen and (min-width: 64.063em) {
+    header .menu-text a img{
+        height:70px;
+    }
+    header > h1 {
+        font-size:2.2rem;
+    }
+    header{
+        height:90px!important;
+    }
+}
+
+/* min-width 1025px and max-width 1440px, use when QAing large screen-only issues */
+@media only screen and (min-width: 64.063em) and (max-width: 90em) {
+    header .top-bar-right {
+        margin-right: 5%;
+    }
+    header .top-bar .top-bar-left, .top-bar .top-bar-right {
+        margin-left: 5%;
+    }
+    header menu.top-bar-right > ul > li {
+        padding-right: 1rem;
+    }
+    header .top-bar-right {
+        margin-right: 2%;
+        margin-left: 0;
+    }
+    header .top-bar .top-bar-left {
+        margin-left: 3%;
+    }
+}
+
+
+/* XLarge screens */
+
+/* min-width 1441px, xlarge screens */
+@media only screen and (min-width: 90.063em) {
+    header .top-bar-right {
+        margin-right: 10%;
+    }
+    header .top-bar .top-bar-left, .top-bar .top-bar-right {
+        margin-left: 10%;
+    }
+}
+
+/* min-width 1441px and max-width 1920px, use when QAing xlarge screen-only issues */
+@media only screen and (min-width: 90.063em) and (max-width: 120em) {
+
+}
+
+
+/* XXLarge screens*/
+
+/* min-width 1921px, xxlarge screens */
+@media only screen and (min-width: 120.063em) {}

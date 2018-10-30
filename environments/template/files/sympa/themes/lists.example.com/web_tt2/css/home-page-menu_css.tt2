@@ -1,0 +1,74 @@
+main.home nav ul {
+    display:table;
+    list-style: none;
+    margin: 0 auto;
+    padding: 0;
+}
+main.home nav li {
+    margin-bottom: 1.5rem;
+    transition: all 0.3s;
+    text-align: center;
+}
+main.home nav li:hover {
+    transform: scale(1.10);
+}
+main.home nav li a {
+    display: inline;
+    color: [% color_7 %];
+    text-decoration: none;
+    font-size: 0.8rem;
+    height: 110px;
+}
+main.home nav li a, main.home nav li a:hover {
+    position: relative;
+    background-image: none;
+}
+main.home nav li a span {
+    display:table-cell;
+    width: 110px;
+    height: 110px;
+    vertical-align: middle;
+    margin: 0 auto;
+    border: 5px solid #6c79b8;
+    background-color: #6c79b8;
+    box-shadow: -1px 2px 5px 1px rgba(0, 0, 0, 0.5);
+}
+main.home nav li button[name="action_sso_login"] {
+    display: table-cell;
+    width: 110px;
+    height: 110px;
+    vertical-align: middle;
+    margin: 0 auto;
+    border: 5px solid #6c79b8;
+    background-color: #6c79b8;
+    box-shadow: -1px 2px 5px 1px rgba(0, 0, 0, 0.5);
+    border-radius:0;
+}
+main.home nav li a span img {
+    width: 70px;
+    margin-top: 0;
+    margin-left:0;
+    /*-webkit-filter: invert(100%);
+    filter: invert(100%);*/
+}
+main.home nav li:nth-child(1) a span img {
+    width: 80px;
+}
+main.home nav li a:hover span, main.home nav li button[name="action_sso_login"]:hover {
+    border: 5px solid [% color_6 %];
+}
+
+main.home nav li a label {
+    color: #6c79b8;
+    line-height: 1.2;
+    margin-top: 0.25rem;
+    font-size: 1.2rem;
+    cursor: pointer;
+    font-family: LatoWebBold;
+    font-variant: all-small-caps;
+    text-decoration: underline;
+}
+main nav li a:hover label {
+    color: [% color_6 %];
+    text-decoration:none;
+}

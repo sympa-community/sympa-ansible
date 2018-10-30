@@ -1,0 +1,97 @@
+<!-- home.tt2 -->
+
+<!-- $Id: home.tt2 11846 2015-10-19 04:15:17Z lumineau $ -->
+<main class="row home" role="main">
+    <article>
+        <!--<h1 class="small-12 text-center columns">[% main_title %]</h1>-->
+        <h1 class="small-12 text-center columns">Universalistes is a mailing list hosting service.</h1>
+    </article>
+    [% IF not user.email %]
+    <article class="disclamer small-12 columns text-center">
+        <!--<p>
+            Universalistes est un service d’hébergement de listes de diffusion.
+        </p>-->
+        <p>
+            To access all Universalistes functions, you must be authentified!
+        </p>
+    </article>
+    [% END %]
+<!--    <article class="disclamer small-12 columns text-center">
+        <h3></h3>
+    </article>-->
+
+
+    <nav class="row">
+        [% IF user.email %]
+        <ul class="small-12 medium-8 small-centered">
+            <li class="small-12 medium-4 columns">
+                <a href="[% path_cgi %]/my" title="[%|loc%]My lists[%END%]" aria-haspopup="true">
+            <span>
+                    <img src="[% icons_url %]/../lists.example.com/icons/menu/lists_home.svg" alt="[%|loc%]My lists[%END%]"/>
+                </span>
+                    <label aria-hidden="true">[%|loc%]My lists[%END%]</label>
+                </a>
+            </li>
+            <li class="small-12 medium-4 columns">
+                <a href="[% path_cgi %]/create_list_request" title="[%|loc%]Create list[%END%]" aria-haspopup="true">
+            <span>
+                    <img src="[% icons_url %]/../lists.example.com/icons/menu/create_list_home.svg" alt="[%|loc%]Create list[%END%]"/>
+                </span>
+                    <label aria-hidden="true">[%|loc%]Create list[%END%]</label>
+                </a>
+            </li>
+            <li class="small-12 medium-4 columns">
+                <a href="[% path_cgi %]/search_list_request" title="[%|loc%]Search for List(s)[%END%]" aria-haspopup="true">
+            <span>
+                    <img src="[% icons_url %]/../lists.example.com/icons/menu/search_home.svg" alt="[%|loc%]Search for List(s)[%END%]"/>
+                </span>
+                    <label aria-hidden="true">[%|loc%]Search for List(s)[%END%]</label>
+                </a>
+            </li>
+
+        </ul>
+
+        [% ELSE %]
+        <ul class="small-12 medium-8 small-centered">
+            <li class="small-6 columns">
+                <form id="use-sso1" action="[% path_cgi %]" method="post">
+                    <fieldset>
+                        <input type="hidden" name="previous_action" value="[% previous_action %]" />
+                        <input type="hidden" name="previous_list" value="[% previous_list %]" />
+                        <input type="hidden" name="referer" value="[% referer %]" />
+                        <input type="hidden" name="list" value="[% list %]" />
+                        <input type="hidden" name="action" value="sso_login" />
+                        [% IF sso_number == 1 %]
+                        [% FOREACH server = sso %]
+                        <input type="hidden" name="auth_service_name" value="[% server.key %]" />
+                        <a href="#" class="left" aria-haspopup="true" data-reveal-id="home_modal" onclick="document.getElementById('use-sso1').submit();return false;"  title="[%|loc%]Login[%END%]" data-tooltip data-show-on="medium">
+                            <span>
+                                <img src="[% icons_url %]/../lists.example.com/icons/menu/disconnected_user_home.svg" alt="[%|loc%]Login[%END%]"/>
+                            </span>
+                            <label aria-hidden="true">[%|loc%]Login[%END%]</label>
+                       </a>
+                        [% END %]
+                        [% END %]
+                    </fieldset>
+                </form>
+            </li>
+            <li class="small-6 columns">
+                <a href="[% path_cgi %]/search_list_request" title="[%|loc%]Search for List(s)[%END%]" aria-haspopup="true">
+            <span>
+                    <img src="[% icons_url %]/../lists.example.com/icons/menu/search_home.svg" alt="[%|loc%]Search for List(s)[%END%]"/>
+                </span>
+                    <label aria-hidden="true">[%|loc%]Search for List(s)[%END%]</label>
+                </a>
+            </li>
+        </ul>
+        [% END %]
+    </nav>
+</main>
+
+<div id="home_modal" class="reveal-modal medium " data-alert data-reveal aria-labelledby="modalTitle" aria-hidden="true" role="dialog">
+    <article class="alert-box info">
+        <i class="fi-eye"></i> [% PROCESS loginrequest.tt2 %]
+    </article>
+    <a class="close-reveal-modal" aria-label="Close">&#215;</a>
+</div>
+<!-- end home.tt2 -->

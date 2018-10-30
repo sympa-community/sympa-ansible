@@ -1,7 +1,9 @@
   DocumentRoot "/var/www/html/"
   
-  Alias /static-sympa {{ sympa_root_directory }}/static_content
+  Alias /static-sympa {{ install_prefix }}/{{ sympa.install_dir_name }}/static_content
 
+  Redirect 302 /sympa/sso_login/groupware/init /Shibboleth.sso/Login?target=/sympa/sso_login/groupware
+  
   <Location /static-sympa>
     Require all granted
   </Location>
@@ -16,5 +18,5 @@
     Require all granted
   </Location>
   
-  ScriptAlias /sympa {{ sympa_root_directory }}/bin/wwsympa-wrapper.fcgi
-  ScriptAlias /sympasoap {{ sympa_root_directory }}/bin/sympa_soap_server-wrapper.fcgi
+  ScriptAlias /sympa {{ install_prefix }}/{{ sympa.install_dir_name }}/bin/wwsympa-wrapper.fcgi
+  ScriptAlias /sympasoap {{ install_prefix }}/{{ sympa.install_dir_name }}/bin/sympa_soap_server-wrapper.fcgi

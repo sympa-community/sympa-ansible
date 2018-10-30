@@ -1,0 +1,66 @@
+<div class="background"></div>
+<!-- header.tt2 -->
+<header>
+
+[%# Remove the class "menu-icon" to get rid of menu icon.
+    Take out inner text of span element to just have icon alone. ~%]
+    <div class="title-bar" data-toggle="top-menu" data-responsive-toggle="top-menu" data-hide-for="medium">
+        <button class="menu-icon top-bar-right" type="button" data-toggle></button>
+        <div class="title-bar-title top-bar-right"></div>
+        <div class="top-bar-left">
+            [% IF  conf.logo_html_definition %]
+            [% conf.logo_html_definition %]
+            [% ELSE %]
+            <a href="[% conf.wwsympa_url %]" title="[% conf.wwsympa_url %]"><img src="[% icons_url %]/../lists.example.com/icons/logo-universalistes.svg" alt="[%|loc%]Universalistes logo[%END%]" /></a>
+            [% END %]
+        </div>
+    </div>
+
+
+    <nav class="top-bar" id="top-menu" role="navigation" data-toggler data-animate="fade-in fade-out">
+        <menu class="top-bar-left">
+            <ul class="menu" data-dropdown-menu>
+                <li class="menu-text hide-for-small-only">
+                    [% IF  conf.logo_html_definition %]
+                    [% conf.logo_html_definition %]
+                    [% ELSE %]
+                    <a href="[% conf.wwsympa_url %]" title="[% conf.wwsympa_url %]"><img src="[% icons_url %]/../lists.example.com/icons/logo-universalistes.svg" alt="[%|loc%]Universalistes logo[%END%]" /></a>
+                    [% END %]
+                </li>
+            </ul>
+        </menu>
+        <menu class="top-bar-right">
+            <ul class="menu icon-top" data-back-button="<li class='js-drilldown-back'><a tabindex='0'>Back</a></li>" data-responsive-menu="drilldown medium-dropdown" data-disable-hover="true">
+                <!-- sympa menu start -->
+                [% PROCESS 'sympa_menu.tt2' %]
+                <!-- end of sympa menu-->
+                [% IF user.email %]
+                <li class="has-submenu">
+                    <a href="#" class="left" title="[% IF user.gecos %] [% user.gecos %][% ELSE %] [% user.email %] [% END %]" data-tooltip >
+                        <img class="hide-for-small-only home_img" src="[% icons_url %]/../lists.example.com/icons/menu/connected_user.svg" alt="[%|loc%]Connected user[%END%]" data-options="disable_for_touch:true"/>
+                        <label class="show-for-small-only">[% IF user.gecos %] [% user.gecos %][% ELSE %] [% user.email %] [% END %]</label>
+                    </a>
+                        <ul class="submenu vertical">
+                [% END %]
+                        <!-- login banner start -->
+                        [% PROCESS 'loginbanner.tt2' %]
+                        <!-- end of login banner-->
+                [% IF user.email %]
+                    </ul>
+                </li>
+                [% END %]
+            </ul>
+        </menu>
+    </nav>
+
+[% #IF top_menu %]
+[% #IF not list %]
+<!--<h1 class="row">[% main_title %]</h1>-->
+[% #ELSE %]
+<!--<h1 class="medium-offset-3 medium-9 columns">[% main_title %]</h1>-->
+[% #END %]
+[% #ELSE %]
+<!--<h1 class="medium-offset-3 medium-9 columns">[% main_title %]</h1>-->
+[% #END %]
+</header>
+<!-- end header.tt2 -->
