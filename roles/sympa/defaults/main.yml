@@ -3,9 +3,9 @@
 sympa_repository: https://github.com/sympa-community/sympa.git
 sympa_repository_version: HEAD
 sympa_install_from_repository: 0
-sympa_source: http://www.sympa.org/distribution/releases
-sympa_version: 6.2.32
-sympa_download_url: "{{ sympa_source }}/sympa-{{ sympa_version }}.tar.gz"
+sympa_source: https://github.com/sympa-community/sympa/releases/download/
+sympa_version: 6.2.36
+sympa_download_url: "{{ sympa_source }}/{{ sympa_version }}/sympa-{{ sympa_version }}.tar.gz"
 sympa_sha256:
     {
      "6.1.17": "a506ea6e9c88c4a91d22bf146acb06fae5c277e98312b957bdae974739145b79",
@@ -38,7 +38,11 @@ sympa_sha256:
      "6.2.24": "578224944370a0ea55f884591074f89d1b352628e9f39897dabea56bd7373310",
      "6.2.30": "84253a9227f7ee0cef064861455bd6bdda89d41a6012b97f6903fe827c7f2f61",
      "6.2.32": "e2990cbd57f931c4ca26c7b94db0090cac82bcc644be2f58bb48512af19fc52e",
-    }
+     "6.2.34": "ccd7744f0cd68ca1e968e0254624fffb5a186c71f218f881a0f07f88dd48ba0d",
+     "6.2.36": "b8012c8c33f72b33479a7f6a14501f112edf6560b997fa83224516308a237c95",
+     "6.2.37b.1": "b395744b8e3bdcfa25168176ab633def94e0d15f67a68cf1f461ed3da5240652",
+     "6.2.37b.2": "2f5eb71cf5d47b46fed6acf92489ae6793ec7579904239315f52ac9679bdb253",
+     }
 
 sympa_install_prefix: /usr/local/sympa
 sympa_apply_patches: 1
