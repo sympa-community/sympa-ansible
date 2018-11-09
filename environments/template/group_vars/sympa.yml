@@ -1,31 +1,11 @@
 # Group vars for sympa servers
 
-# FQDN for mail addresses
-sympa_mail_hostname: lists.example.com
 
-# FQDN of web interface
-sympa_web_hostname: "{{ sympa_mail_hostname }}"
-
-# Root directory to install Sympa software
-sympa_root_directory: /usr/local/sympa
-
-# Email addresses of listmasters (comma separated)
-sympa_listmaster_email: john.doe@my.domain
-
-# Root passwd for the Sympa database
-sympa_db_root_password: "{{ lookup('file',inventory_dir+'/password/sympa_db_root_password') }}"
-
-# App passwd for the Sympa database
-sympa_db_app_password: "{{ lookup('file',inventory_dir+'/password/sympa_db_app_password') }}"
-
-# SSL cert for Apache
-sympa_ssl_certificate: "{{ lookup('file',inventory_dir+'/ssl_cert/webserver.crt') }}"
-
-# SSL private key for Apache
-sympa_ssl_key: "{{ lookup('file',inventory_dir+'/ssl_cert/webserver.key') }}"
-
-sympa_force_smtp_route: 0
-
-sympa_incoming_smtp: '192.168.66.66'
-
-sympa_outgoing_server: "{{ sympa_incoming_smtp }}"
+sympa:
+  db:
+    app_user: sympa
+    app_password: "{{ lookup('file',inventory_dir+'/private/password/sympa_db_app_password') }}"
+    readonly_user: sympareadonly
+    readonly_password: "{{ lookup('file',inventory_dir+'/private/password/sympa_db_readonly_password') }}"
+  lists_path: /var/lib/sympa/list_data
+  arc_path: /var/lib/sympa/archives

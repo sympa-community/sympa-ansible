@@ -7,6 +7,10 @@ before_install:
 install:
   - sudo apt-get install software-properties-common
   - sudo apt-get -y install ansible
+  - sudo apt-get install python-pip
+  - sudo pip install --upgrade pip 
+  - pip install python-keyczar 
+  - sudo pip install --upgrade Jinja2
   - ansible --version
 script:
   - ./scripts/create_new_environment.sh environments/local
@@ -14,4 +18,11 @@ script:
   - echo "" >> environments/local/inventory
   - echo "[sympa]" >> environments/local/inventory
   - echo "localhost" >> environments/local/inventory
+  - echo "" >> environments/local/inventory
+  - echo "[postfix]" >> environments/local/inventory
+  - echo "localhost" >> environments/local/inventory
+  - echo "" >> environments/local/inventory
+  - echo "[apache]" >> environments/local/inventory
+  - echo "localhost" >> environments/local/inventory
+  - sed -s -i 's/local-sympa-ubuntu16/localhost/' environments/local/private/vhosts/*
   - ansible-playbook site.yml --connection=local --become -i environments/local/inventory

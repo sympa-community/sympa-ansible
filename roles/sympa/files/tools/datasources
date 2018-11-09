@@ -1,0 +1,2059 @@
+#!/usr/bin/php
+<?php
+
+/**
+ * Options handling
+ */
+class Arguments {
+    /** @var array */
+    private static $definitions = array(
+        'help' => array(
+            'short' => 'h', 'long' => 'help', 'has_value' => false, 'validate' => '',
+            'description' => 'this help'
+        ),
+        'verbose' => array(
+            'short' => 'v', 'long' => 'verbose', 'has_value' => false, 'validate' => '',
+            'description' => 'verbose mode, outputs all kinds of info'
+        ),
+        'quiet' => array(
+            'short' => 'q', 'long' => 'quiet', 'has_value' => false, 'validate' => '',
+            'description' => 'quiet mode, outputs nothing, only set return code depending on success of operation'
+        ),
+        'list_config' => array(
+            'short' => 'c', 'long' => 'list-config', 'has_value' => true, 'validate' => '',
+            'description' => 'list config file path, set to - if config given through stdin (in this case you might want to also give -l|--list_name and -d|--lists_dir)'
+        ),
+        'datasource_index' => array(
+            'short' => 'i', 'long' => 'datasource-index', 'has_value' => true, 'validate' => 'is_int',
+            'description' => 'index of datasource to test (given in datasources list), will list all datasources without it'
+        ),
+        'test_all' => array(
+            'short' => 'a', 'long' => 'test-all', 'has_value' => false, 'validate' => '',
+            'description' => 'index of datasource to test (given in datasources list), will list all datasources without it'
+        ),
+        'lists_dir' => array(
+            'short' => 'd', 'long' => 'lists-dir', 'has_value' => true, 'validate' => 'is_dir',
+            'description' => 'sympa lists directory, not needed if list config file under it given through -c|--config-file'
+        ),
+        'list_name' => array(
+            'short' => 'l', 'long' => 'list-name', 'has_value' => true, 'validate' => 'is_email',
+            'description' => 'list name (full, like list@domain), not needed if list config file given through -c|--config-file'
+        ),
+        'robot_config' => array(
+            'short' => 'r', 'long' => 'robot-config', 'has_value' => true, 'validate' => 'is_dir',
+            'description' => 'robots config path (defaults to ../etc/ relative to -d|--lists-dir only needed if testing remote sympa list inclusion using robot certificate'
+        ),
+        'sensitive' => array(
+            'short' => '', 'long' => 'include-sensitive-info', 'has_value' => false, 'validate' => '',
+            'description' => 'include  sensitive info (like passwords) in output'
+        ),
+        'peers' => array(
+            'short' => 'p', 'long' => 'list-peers', 'has_value' => false, 'validate' => '',
+            'description' => 'list network peers'
+        ),
+        'json' => array(
+            'short' => 'j', 'long' => 'json', 'has_value' => false, 'validate' => '',
+            'description' => 'outputs info as JSON instead of human readable text'
+        ),
+        'csv' => array(
+            'short' => '', 'long' => 'csv', 'has_value' => false, 'validate' => '',
+            'description' => 'outputs info as CSV instead of human readable text (peers mode only)'
+        ),
+        'db_dsn' => array(
+            'short' => '', 'long' => 'db-dsn', 'has_value' => true, 'validate' => '',
+            'description' => 'Sympa database DSN, only used when testing local list inclusion'
+        ),
+        'db_user' => array(
+            'short' => '', 'long' => 'db-user', 'has_value' => true, 'validate' => '',
+            'description' => 'Sympa database user, only used when testing local list inclusion'
+        ),
+        'db_password' => array(
+            'short' => '', 'long' => 'db-password', 'has_value' => true, 'validate' => '',
+            'description' => 'Sympa database password, only used when testing local list inclusion'
+        ),
+    );
+    
+    /** @var array|null */
+    private static $values = null;
+    
+    /**
+     * Parse cli options
+     */
+    private static function parse() {
+        if(!is_null(self::$values)) return;
+        
+        $options = getopt(implode('', array_filter(array_map(function($opt) {
+            return $opt['short'] ? $opt['short'].($opt['has_value'] ? ':' : '') : null;
+        }, self::$definitions))), array_filter(array_map(function($opt) {
+            return $opt['long'] ? $opt['long'].($opt['has_value'] ? ':' : '') : null;
+        }, array_values(self::$definitions))));
+        
+        $argv = Env::get('argv');
+        array_shift($argv); // self
+        while(count($argv)) {
+            $arg = array_shift($argv);
+            $opt = self::findMatching($arg);
+            
+            if($opt) {
+                if($opt['has_value']) array_shift($argv);
+                
+            } else {
+                echo "Unsupported option $arg\n";
+                exit(1);
+            }
+        }
+        
+        foreach(self::$definitions as $name => $opt) {
+            self::$values[$name] = null;
+            foreach(array('short', 'long') as $src) {
+                if($opt['has_value']) {
+                    if(array_key_exists($opt[$src], $options))
+                        self::$values[$name] = $options[$opt[$src]];
+                } else {
+                    self::$values[$name] |= array_key_exists($opt[$src], $options);
+                }
+            }
+            
+            if(!self::$values[$name] || !$opt['validate']) continue;
+            
+            $desc = self::getDescriptor($name);
+            switch($opt['validate']) {
+                case 'file_exists':
+                    if(!file_exists(realpath(self::$values[$name])))
+                        die("$desc expects existing file path\n");
+                    break;
+                case 'is_dir':
+                    if(!is_dir(realpath(self::$values[$name])))
+                        die("$desc expects existing directory path\n");
+                    break;
+                case 'is_int':
+                    if(!preg_match('`^(0|[1-9][0-9]*)$`', self::$values[$name]))
+                        die("$desc expects positive integer\n");
+                    break;
+                case 'is_email':
+                    if(!filter_var(self::$values[$name], FILTER_VALIDATE_EMAIL))
+                        die("$desc expects valid email address\n");
+                    break;
+                default:
+                    if(is_callable($opt['validate'])) {
+                        if(!call_user_func($opt['validate'], self::$values[$name]))
+                            die("$desc does not validate {$opt['validate']}\n");
+                    } else {
+                        die("unknown validator {$opt['validate']} for $desc\n");
+                    }
+                    break;
+            }
+        }
+        
+        if(!array_filter(self::$values))
+            self::$values['help'] = true;
+    }
+    
+    /**
+     * Check that there is a value for given arg
+     * 
+     * @param string $name
+     */
+    public static function has($name) {
+        self::parse();
+        return array_key_exists($name, self::$values) && !is_null(self::$values[$name]);
+    }
+    
+    /**
+     * Get value for given arg
+     * 
+     * @param string $name
+     * 
+     * @return string|bool|null
+     */
+    public static function get($name) {
+        self::parse();
+        return array_key_exists($name, self::$values) ? self::$values[$name] : null;
+    }
+    
+    /**
+     * Get CLI descriptor
+     * 
+     * @param string $name
+     * @param bool $with_description
+     * 
+     * @return string|array
+     */
+    public static function getDescriptor($name = '', $with_description = false) {
+        if(!$name) {
+            $descs = array();
+            foreach(self::$definitions as $name => $opt)
+                $descs[] = self::getDescriptor($name, $with_description);
+            
+            return $with_description ? $descs : '['.implode('] [', $descs).']';
+        }
+        
+        if(!array_key_exists($name, self::$definitions))
+            return '???';
+        
+        $opt = self::$definitions[$name];
+        $desc = implode('|', array_filter(array(
+            $opt['short'] ? '-'.$opt['short'] : null,
+            $opt['long'] ? '--'.$opt['long'] : null,
+        )));
+        
+        if($opt['has_value'])
+            $desc .= ' '.$name;
+        
+        if($with_description)
+            $desc .= ': '.$opt['description'];
+        
+        return $desc;
+    }
+    
+    /**
+     * Get option matching either short or long arg
+     * 
+     * @param string $arg
+     * 
+     * @return array|null
+     */
+    private static function findMatching($arg) {
+        $arg = preg_replace('`^-+`', '', $arg);
+        
+        foreach(self::$definitions as $opt)
+            if($opt['short'] === $arg || $opt['long'] === $arg)
+                return $opt;
+        
+        return null;
+    }
+}
+
+/**
+ * Handles text output
+ */
+class Out {
+    /** @var int **/
+    private static $indent = 0;
+    
+    const QUIET = 0;
+    const NORMAL = 1;
+    const VERBOSE = 2;
+    const SENSITIVE = 3;
+    
+    /** @var string **/
+    private static $mode = 1;
+    
+    const PLAIN = 'plain';
+    const JSON = 'json';
+    const CSV = 'csv';
+    
+    /** @var string **/
+    private static $format = 'plain';
+    
+    /** @var array **/
+    private static $content = array();
+    
+    /**
+     * Increment/decrement indentation
+     * 
+     * @param int $n
+     * @param bool $absolute
+     * 
+     * @return int previous value
+     */
+    public static function indent($n, $absolute = true) {
+        $indent = self::$indent;
+        if($n) self::$indent = max(0, $absolute ? $n : self::$indent + $n);
+        return $indent;
+    }
+    
+    /**
+     * Set mode
+     * 
+     * @param int $mode
+     */
+    public static function setMode($mode) {
+        if(!preg_match('`^[0-3]$`', $mode))
+            throw new Exception('Unkown output mode '.$mode);
+        
+        self::$mode = $mode;
+    }
+    
+    /**
+     * Set format
+     * 
+     * @param string $format
+     */
+    public static function setFormat($format) {
+        if(!in_array($format, array(self::PLAIN, self::JSON, self::CSV)))
+            throw new Exception('Unkown output format '.$format);
+        
+        self::$format = $format;
+    }
+    
+    /**
+     * Check if need to include mode
+     * 
+     * @param int $mode
+     * 
+     * @return bool
+     */
+    public static function includeMode($mode) {
+        return self::$mode && ($mode <= self::$mode);
+    }
+    
+    /**
+     * Check if structured output
+     * 
+     * @return bool
+     */
+    public static function isStructured() {
+        return in_array(self::$format, array(self::JSON, self::CSV));
+    }
+    
+    /**
+     * Open sub-structure
+     * 
+     * @param string $name
+     * @param int $addlines
+     */
+    public static function openSub($name = '', $addlines = 0) {
+        if(self::$mode <= self::QUIET) return;
+        
+        if(self::isStructured()) {
+            self::$content[] = array('type' => 'opensub', 'name' => $name);
+            
+        } else {
+            echo str_repeat(str_repeat("\t", self::$indent)."\n", $addlines);
+            if($name) echo str_repeat("\t", self::$indent).$name."\n";
+            self::$indent++;
+        }
+    }
+    
+    /**
+     * Close current sub-structure
+     */
+    public static function closeSub() {
+        if(self::$mode <= self::QUIET) return;
+        
+        if(self::isStructured()) {
+            self::$content[] = array('type' => 'closesub');
+            
+        } else {
+            echo str_repeat("\t", self::$indent)."\n";
+            self::$indent--;
+        }
+    }
+    
+    /**
+     * Output in current structure
+     */
+    public static function put($thing) {
+        if(self::$mode <= self::QUIET) return;
+        
+        if(is_array($thing)) {
+            foreach($thing as $k => $sub) {
+                self::openSub(is_numeric($k) ? 0 : $k);
+                self::put($sub);
+                self::closeSub();
+            }
+            
+            return;
+        }
+        
+        if(self::isStructured()) {
+            self::$content[] = array('type' => 'content', 'content' => $thing);
+            
+        } else {
+            echo str_repeat("\t", self::$indent).$thing."\n";
+        }
+    }
+    
+    /**
+     * Print CSV data
+     * 
+     * @param mixed $data
+     * @param bool $inline
+     * @param int $l
+     */
+    private static function printCSV($data, $inline = false, $l = 0) {
+        if($inline) {
+            ksort($data);
+            echo implode(';', $data)."\n";
+            
+        } else {
+            $f = true;
+            foreach($data as $k => $v) {
+                if(is_scalar($v)) {
+                    echo "$k;$v\n";
+                    
+                } else {
+                    echo ($l && $f ? "\n" : '')."$k\n";
+                    if(!$v) continue;
+                    
+                    $keys = array_keys($v);
+                    if(count(array_filter($keys, 'is_numeric')) === count($keys)) {
+                        $h = reset($v);
+                        ksort($h);
+                        
+                        echo implode(';', array_keys($h))."\n";
+                        
+                        foreach($v as $s) {
+                            self::printCSV($s, true, $l+1);
+                        }
+                        
+                    } else {
+                        self::printCSV($v, false, $l+1);
+                    }
+                }
+                
+                $f = false;
+            }
+        }
+    }
+    
+    /**
+     * Flush contents
+     */
+    public static function flush() {
+        if(self::$mode <= self::QUIET) return;
+        
+        if(self::isStructured()) {
+            $src = self::$content;
+            $out = array();
+            $data = &$out;
+            $stack = array();
+            
+            while($src) {
+                $item = array_shift($src);
+                if($item['type'] === 'opensub') {
+                    array_push($stack, array('data' => $data, 'name' => $item['name']));
+                    $data = array();
+                    
+                } elseif($item['type'] === 'content') {
+                    $data = $item['content'];
+                    
+                } elseif($item['type'] === 'closesub') {
+                    $up = array_pop($stack);
+                    if($up['name']) {
+                        if(array_key_exists($up['name'], $up['data'])) {
+                            if(is_array($up['data'][$up['name']])) {
+                                $up['data'][$up['name']][] = $data;
+                                
+                            } else {
+                                $up['data'][$up['name']] = array($up['data'][$up['name']], $data);
+                            }
+                            
+                        } else {
+                            $up['data'][$up['name']] = $data;
+                        }
+                        
+                    } else {
+                        if(!is_array($up['data'])) {
+                            $up['name'] = $up['data'];
+                            $up['data'] = array();
+                        }
+                        
+                        $up['data'][] = $data;
+                    }
+                    
+                    $data = $up['data'];
+                }
+            }
+            
+            if(self::$format === self::JSON)
+                echo json_encode($out);
+            
+            if(self::$format === self::CSV)
+                self::printCSV($out);
+            
+        } else {
+            echo "\n";
+        }
+    }
+}
+
+/**
+ * Handles env
+ */
+class Env {
+    /** @var array **/
+    private static $data = array();
+    
+    /**
+     * Set env pair(s)
+     * 
+     * @param string|array $what
+     * @param mixed $value
+     */
+    public static function set($what, $value) {
+        if(!is_array($what)) $what = array($what => $value);
+        self::$data = array_merge(self::$data, $what);
+    }
+    
+    /**
+     * Get env data
+     * 
+     * @param string $key
+     * 
+     * @return mixed|null
+     */
+    public static function get($key) {
+        return array_key_exists($key, self::$data) ? self::$data[$key] : null;
+    }
+}
+
+/**
+ * Network stuff resolver
+ */
+class NetworkPeer {
+    /** @var array **/
+    private static $cache = array();
+    
+    /** @var string **/
+    private $host = '';
+    
+    /** @var string **/
+    private $ip = '';
+    
+    /** @var int **/
+    private $port = 0;
+    
+    /** @var string **/
+    private $protocol = '';
+    
+    /**
+     * Find ip for host
+     * 
+     * @param string $host
+     * 
+     * @return string
+     */
+    public static function getIp($host) {
+        if(preg_match('`^[1-9][0-9]{0,2}(\.[1-9][0-9]{0,2}){3}$`', $host)) return $host;
+        
+        $k = 'host:'.$host;
+        if(!array_key_exists($k, self::$cache)) {
+            self::$cache[$k] = '';
+            exec('nslookup '.escapeshellarg($host), $out, $err);
+            if(!$err) {
+                $lines = array();
+                while(!trim(end($out))) array_pop($out); // Skip empty lines at end
+                while(trim(end($out))) array_unshift($lines, array_pop($out)); // Skip request part if any
+                
+                $addr = preg_grep('`^address:`i', $lines);
+                $addr = preg_split('`:\s+`', (string)array_shift($addr));
+                if(count($addr) > 1) self::$cache[$k] = $addr[1];
+            }
+        }
+        
+        return self::$cache[$k];
+    }
+    
+    /**
+     * Get info from url
+     * 
+     * @param string $url
+     * 
+     * @return array
+     */
+    public static function analyseUrl($url) {
+        $k = 'url:'.$url;
+        
+        if(!array_key_exists($k, self::$cache)) {
+            $schemes = array('http' => 80, 'https' => 443, 'ldap' => 389, 'ldaps' => 636);
+            $url = parse_url($url);
+            
+            if(!array_key_exists('host', $url) && array_key_exists('path', $url) && (substr($url['path'], 0, 1) !== '/'))
+                $url['host'] = $url['path'];
+            
+            if(!array_key_exists('port', $url) || !$url['port']) {
+                $s = array_key_exists('scheme', $url) ? $url['scheme'] : null;
+                $url['port'] = ($s && array_key_exists($s, $schemes)) ? $schemes[$s] : 0;
+            }
+            
+            if(!array_key_exists('scheme', $url) || !$url['scheme']) {
+                $p = array_key_exists('port', $url) ? $url['port'] : null;
+                $url['scheme'] = ($p && in_array($p, $schemes)) ? array_search($p, $schemes) : '';
+            }
+            
+            self::$cache[$k] = (array_key_exists('host', $url) && $url['host']) ? new self($url['host'], $url['port'], $url['scheme']) : null;
+        }
+        
+        return self::$cache[$k];
+    }
+    
+    /**
+     * Constructor
+     * 
+     * @param string $host
+     * @param int $port
+     * @param string $protocol
+     */
+    public function __construct($host, $port, $protocol) {
+        $this->host = $host;
+        $this->ip = self::getIp($host);
+        $this->port = (int)$port;
+        $this->protocol = $protocol;
+    }
+    
+    /**
+     * Getter
+     * 
+     * @param string $property
+     * 
+     * @return mixed
+     */
+    public function __get($property) {
+        if(in_array($property, array('host', 'ip', 'port', 'protocol')))
+            return $this->$property;
+        
+        return null;
+    }
+    
+    /**
+     * Get info as array
+     * 
+     * @return array
+     */
+    public function toArray() {
+        return array(
+            'host' => $this->host,
+            'ip' => $this->ip,
+            'port' => $this->port,
+            'protocol' => $this->protocol,
+        );
+    }
+}
+
+/** LDAP client */
+class LDAPClient {
+    /** @var resource */
+    private $ldap = null;
+    
+    /**
+     * Try several servers
+     * 
+     * @param array $hosts
+     * @param string $user
+     * @param string $password
+     * @param string $use_tls
+     * @param callable $do
+     * 
+     * @return mixed
+     */
+    public static function tryHosts($hosts, $user, $password, $use_tls, $do) {
+        foreach($hosts as $host) {
+            try {
+                if($use_tls === 'ldaps' && substr($host, 0, 8) !== 'ldaps://') {
+                    $host = explode('://', $host);
+                    if(count($host) > 1) array_shift($host);
+                    array_unshift($host, 'ldaps');
+                    $host = implode('://', $host);
+                }
+                
+                $c = new self($host, null, $user, $password, $use_tls === 'starttls');
+                return $do($c);
+            } catch(Exception $e) {}
+        }
+        
+        throw new Exception('could not query any of the given hosts');
+    }
+    
+    /**
+     * Constructor
+     * 
+     * @param string $host
+     * @param int|null $port
+     * @param string $user
+     * @param string $password
+     * @param bool $use_tls
+     */
+    public function __construct($host, $port = null, $user = '', $password = '', $use_tls = false) {
+        if(is_null($port)) $port = 389;
+        
+        $this->ldap = ldap_connect($host, $port);
+        if(!$this->ldap) throw new Exception('Could not prepare LDAP client');
+        
+        if($use_tls && !ldap_start_tls($this->ldap))
+            throw new Exception('Could not setup STARTTLS for LDAP client');
+        
+        if($user)
+            if(!ldap_bind($this->ldap, $user, $password ? $password : null))
+                throw new Exception('Could not bind LDAP user : '.ldap_error($this->ldap));
+    }
+    
+    /**
+     * Search LDAP
+     * 
+     * @param string $suffix
+     * @param string $filter
+     * @param array $attrs pairs of attribute name and mandatory boolean
+     * @param bool $as_scalar get scalar attributes values (last one if multiple found)
+     * 
+     * @return array
+     */
+    public function search($suffix, $filter, $attrs, $as_scalar = true) {
+        $search = ldap_search($this->ldap, $suffix, $filter, array_keys($attrs));
+        if(!$search) throw new Exception('Could not search LDAP : '.ldap_error($this->ldap));
+        
+        $entries = ldap_get_entries($this->ldap, $search);
+        if($entries === false)
+            throw new Exception('Could not get LDAP search results : '.ldap_error($this->ldap));
+        
+        $results = array();
+        foreach($entries as $k => $entry) {
+            if($k === 'count') continue;
+            
+            $result = array();
+            foreach($attrs as $attr => $mandatory) {
+                if(!in_array($attr, $entry)) {
+                    if($mandatory)
+                        throw new Exception('Did not get expected attribute '.$attr);
+                    
+                    continue;
+                }
+                
+                $value = $entry[$attr];
+                array_shift($value); // count
+                
+                $result[$attr] = $as_scalar ? array_pop($value) : $value;
+            }
+            
+            $results[] = $result;
+        }
+        
+        return $results;
+    }
+    
+    /**
+     * Search LDAP 2 passes
+     * 
+     * @param string $suffix1
+     * @param string $filter1
+     * @param string $attrs1
+     * @param string $suffix2
+     * @param string $filter2
+     * @param array $attrs2 pairs of attribute name and mandatory boolean
+     * @param bool $as_scalar get scalar attributes values (last one if multiple found)
+     * 
+     * @return array
+     */
+    public function search2passes($suffix1, $filter1, $attrs1, $suffix2, $filter2, $attrs2, $as_scalar = true) {
+        $results_1 = $this->search($suffix1, $filter1, array($attrs1 => true), false);
+        $sub_searches = $results_1[0][$attrs1];
+        
+        if(!count($sub_searches))
+            return array();
+        
+        $results = array();
+        foreach(array_unique($sub_searches) as $sub_search) {
+            $sub_search = str_replace(
+                array('\\',   '(',    '*',    ')',    '\0'),
+                array('\\5C', '\\28', '\\2A', '\\29', '\\00'),
+                $sub_search
+            );
+            $suffix = str_replace('[attrs1]', $sub_search, $suffix2);
+            $filter = str_replace('[attrs1]', $sub_search, $filter2);
+            
+            $results = array_merge($results, $this->search($suffix, $filter, $attrs2, $as_scalar));
+        }
+        
+        return $results;
+    }
+}
+
+/** SQL client */
+class SQLClient {
+    /** @var PDO */
+    private $pdo = null;
+    
+    /** @var self */
+    private static $local = null;
+    
+    /**
+     * Setup / get local Sympa database client
+     * 
+     * @param string $dsn
+     * @param string $user
+     * @param string $password
+     * 
+     * @return self
+     */
+    public static function local($dsn = null, $user = null, $password = null) {
+        if($dsn) self::$local = new self($dsn, $user, $password);
+        
+        return self::$local;
+    }
+    
+    /**
+     * Constructor
+     * 
+     * @param string $type
+     * @param string $host
+     * @param string $dbname
+     * @param string $port
+     * @param string $user
+     * @param string $password
+     */
+    public function __construct($type, $dbname, $host = null, $port = null, $user = '', $password = '') {
+        $equiv = array('Pg' => 'pgsql');
+        
+        if(strpos($type, ':')) { // Shortcut
+            $dsn = $type;
+            $user = $dbname;
+            $password = $host;
+            
+        } else {
+            $dsn = array($type.':dbname='.$dbname);
+            if($host) $dsn[] = 'host='.$host;
+            if($port) $dsn[] = 'port='.$port;
+            $dsn = implode(';', $dsn);
+        }
+        
+        foreach($equiv as $k => $v)
+            $dsn = preg_replace('`^'.$k.':`', $v.':', $dsn);
+        
+        $this->pdo = new PDO($dsn, $user, $password);
+        $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    }
+    
+    /**
+     * Query for data
+     * 
+     * @param string $sql
+     * @param bool $assoc
+     * @param array $placeholders
+     * 
+     * @return array
+     */
+    public function query($sql, $assoc = false, $placeholders = array()) {
+        $statement = $this->pdo->prepare($sql);
+        $statement->execute($placeholders);
+        
+        $results = array();
+        while($row = $statement->fetch($assoc ? PDO::FETCH_ASSOC : PDO::FETCH_NUM))
+            $results[] = $row;
+        
+        return $results;
+    }
+}
+
+/** HTTP/HTTPS client */
+class HTTPClient {
+    /**
+     * Make HTTP/HTTPS request
+     * 
+     * @param string $url
+     * @param string $cert client certificate path for https
+     * @param string $key client private key path for https
+     * @param string $auth Auth basic user:password
+     */
+    public static function query($url, $cert = null, $key = null, $auth = null) {
+        $curl = curl_init();
+        
+        curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, FALSE);
+        curl_setopt($curl, CURLOPT_HEADER, false);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, true);
+        curl_setopt($curl, CURLOPT_URL, $url);
+        curl_setopt($curl, CURLOPT_REFERER, $url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, TRUE);
+        
+        if($cert)
+            curl_setopt($curl, CURLOPT_SSLCERT, $cert);
+        
+        if($key)
+            curl_setopt($curl, CURLOPT_SSLKEY, $key);
+        
+        if($auth)
+            curl_setopt($curl, CURLOPT_USERPWD, $auth);
+        
+        $error = curl_error($curl);
+        $result = curl_exec($curl);
+        curl_close($curl);
+        
+        if($error)
+            throw new Exception('HTTP/HTTPS client error : '.$error);
+        
+        return $result;
+    }
+}
+
+/** DataSource */
+abstract class DataSource {
+    /** @var array **/
+    protected $params = array();
+    
+    /** @var array **/
+    protected static $names = array(
+        'fetch_failed' => 'Fetching failed',
+    );
+    
+    /** @var array **/
+    protected static $sensitive = array();
+    
+    /** @var array **/
+    protected static $verbose = array();
+    
+    /**
+     * Get real datasource from its type
+     * 
+     * @param string $type
+     * @param array|string $params
+     * 
+     * @return self|null
+     */
+    public static function getFromType($type, $params) {
+        $class = implode('', array_map('ucfirst', explode('_', $type))).'DataSource';
+        if(!class_exists($class)) return null;
+        
+        return new $class($params);
+    }
+    
+    /**
+     * Parse config for datasources
+     * 
+     * @param string $config
+     * 
+     * @return self[]
+     */
+    public static function parse($config) {
+        $config = explode("\n", $config);
+        $datasources = array();
+
+        while(!is_null($line = array_shift($config))) {
+            if(!$line) continue;
+            $bits = preg_split('`\s+`', $line, 2);
+            $type = array_shift($bits);
+            
+            if(!in_array($type, array(
+                'member_include', 'include_file', 'include_remote_file', 'include_list', 'include_sympa_list',
+                'include_remote_sympa_list', 'include_ldap_query', 'include_ldap_2level_query',
+                'include_sql_query', 'include_voot_group', 'include_ldap_ca', 'include_ldap_2level_ca',
+                'include_sql_ca'
+            ))) continue;
+            
+            $params = array();
+            if(count($bits))
+                $params['arg'] = array_shift($bits);
+            
+            while($line = array_shift($config)) {
+                $bits = preg_split('`\s+`', $line, 2);
+                
+                $params[array_shift($bits)] = array_shift($bits);
+            }
+            
+            $datasources[] = self::getFromType($type, $params);
+        }
+        
+        return $datasources;
+    }
+    
+    /**
+     * Constructor
+     * 
+     * @param array|string $params
+     */
+    public function __construct($params) {
+        $this->params = is_array($params) ? $params : array('arg' => $params);
+    }
+    
+    /**
+     * Filter info
+     * 
+     * @param array $info
+     * @param array $names
+     * @param bool $keep
+     * 
+     * @return array
+     */
+    protected static function filter($info, $names, $keep = false) {
+        foreach(static::$sensitive as $name)
+            unset($info[$name]);
+        
+        if(get_called_class() !== 'DataSource') {
+            $parents = class_parents(get_called_class());
+            $parent = reset($parents);
+            return call_user_func($parent.'::filter', $info, $keep);
+        }
+        
+        return $info;
+    }
+    
+    /**
+     * Try to get human readable param name
+     * 
+     * @param string $name
+     * 
+     * @return string
+     */
+    protected static function humanReadableParamName($name) {
+        if(array_key_exists($name, static::$names))
+            return static::$names[$name];
+        
+        if(get_called_class() !== 'DataSource') {
+            $parents = class_parents(get_called_class());
+            $parent = reset($parents);
+            return call_user_func($parent.'::humanReadableParamName', $name);
+        }
+        
+        return ucfirst(str_replace('_', ' ', $name));
+    }
+    
+    /**
+     * Build human readable version
+     * 
+     * @param array $info
+     */
+    public static function humanReadable($info) {
+        foreach($info as $name => $value) {
+            $name = is_numeric($name) ? '' : static::humanReadableParamName($name);
+            if(is_scalar($value) || is_null($value)) {
+                if(strpos($name, '%') !== false) {
+                    Out::put(sprintf($name, $value));
+                    
+                } else {
+                    Out::put(($name ? $name.':' : '').' '.$value);
+                }
+                
+            } else {
+                if($name)
+                    Out::put($name.':');
+                
+                Out::openSub();
+                static::humanReadable($value);
+                Out::closeSub();
+            }
+        }
+    }
+    
+    /**
+     * Describe self
+     **/
+    public function describe() {
+        $info = $this->info();
+        
+        if(!Out::includeMode(Out::SENSITIVE))
+            $info = static::filter($info, static::$sensitive);
+        
+        if(!Out::includeMode(Out::VERBOSE))
+            $info = static::filter($info, static::$verbose);
+        
+        if(Out::isStructured()) {
+            Out::put($info);
+        } else {
+            static::humanReadable($info);
+        }
+    }
+    
+    /**
+     * Describe self
+     * 
+     * @return array
+     **/
+    abstract public function info();
+    
+    /**
+     * Test self and get results
+     **/
+    public function results() {
+        $results = $this->test();
+        
+        if(Out::isStructured()) {
+            Out::put($results);
+        } else {
+            static::humanReadable($results);
+        }
+    }
+    
+    /**
+     * Test self
+     * 
+     * @return array
+     **/
+    abstract public function test();
+    
+    /**
+     * Get peers
+     * 
+     * @return array
+     **/
+    public function getPeers() {
+        $peers = array();
+        
+        if(strpos(get_called_class(), 'Ldap')) {
+            $types = array(
+                'starttls' => array('port' => 389, 'protocol' => 'starttls'),
+                'ldaps' => array('port' => 636, 'protocol' => 'ldaps'),
+                'none' => array('port' => 389, 'protocol' => 'ldap'),
+                '' => array('port' => 389, 'protocol' => 'ldap'),
+            );
+            
+            foreach(array_map('trim', explode(',', $this->host)) as $host) {
+                $peer = NetworkPeer::analyseUrl($host);
+                if(!$peer) continue;
+                
+                if(!$peer->port)
+                    $peer = new NetworkPeer($peer->host, $types[$this->use_tls]['port'], $types[$this->use_tls]['protocol']);
+                
+                if(!$peer->protocol)
+                    $peer = new NetworkPeer($peer->host, $peer->port, $types[$this->use_tls]['protocol']);
+                
+                $peers[] = $peer;
+            }
+            
+        } else if(strpos(get_called_class(), 'Sql')) {
+            if(strtolower($this->db_type) !== 'csv') {
+                $types = array(
+                    'mysql' => array('port' => 3306, 'protocol' => 'mysql'),
+                    'pg' => array('port' => 5432, 'protocol' => 'pgsql'),
+                );
+                $type = $types[strtolower($this->db_type)];
+                
+                $port = $this->db_port ? $this->db_port : $type['port'];
+                $peers[] = new NetworkPeer($this->host, $port, $type['protocol']);
+            }
+            
+        } else if(array_key_exists('host', $this->params)) {
+            $usual = array(80 => 'http', 443 => 'https');
+            $protocol = array_key_exists($this->port, $usual) ? $usual[$this->port] : get_called_class();
+            
+            $peers[] = new NetworkPeer($this->host, $this->port, $protocol);
+            
+        } else if(array_key_exists('url', $this->params)) {
+            $peer = NetworkPeer::analyseUrl($this->url);
+            if($peer) $peers[] = $peer;
+        }
+        
+        return $peers;
+    }
+    
+    /**
+     * Getter
+     * 
+     * @param string $property
+     * 
+     * @return mixed|null
+     */
+    public function __get($property) {
+        return array_key_exists($property, $this->params) ? $this->params[$property] : null;
+    }
+}
+
+/** Subscribers datasource **/
+abstract class SubscribersDataSource extends DataSource {
+    /** @var array **/
+    protected static $names = array(
+        'count' => 'Found %d subscribers', 'subscribers' => 'Subscribers',
+        'email' => 'Email address', 'gecos' => 'Gecos'
+    );
+    
+    /**
+     * Test self
+     * 
+     * @return array
+     **/
+    public function test() {
+        $subscribers = $this->run();
+        
+        if(is_a($this, 'LocalListSubscribersDataSource')) {
+            if(is_null($subscribers) || !count($subscribers)) return array();
+            
+        } else {
+            if(is_null($subscribers)) return array('fetch_failed' => 'could not fetch subscribers');
+            if(!count($subscribers)) return array('fetch_failed' => 'got 0 subscribers');
+        }
+        
+        $results = array('count' => count($subscribers));
+        if(Out::includeMode(Out::VERBOSE)) {
+            uksort($subscribers, 'strcasecmp');
+            $results['subscribers'] = array();
+            foreach($subscribers as $email => $gecos)
+                $results['subscribers'][] = array('email' => $email, 'gecos' => $gecos);
+        }
+        
+        return $results;
+    }
+    
+    /**
+     * Run
+     * 
+     * @return array|null
+     */
+    abstract protected function run();
+}
+
+/** Plain subscribers datasource **/
+abstract class PlainSubscribersDataSource extends SubscribersDataSource {
+    /**
+     * Run
+     * 
+     * @return array
+     */
+    protected function run() {
+        $data = array_filter(explode("\n", $this->fetch()));
+        $subscribers = array();
+        foreach($data as $line) {
+            $bits = preg_split('`\s+`', $line, 2);
+            $email = array_shift($bits);
+            if(!filter_var($email, FILTER_VALIDATE_EMAIL))
+                throw new Exception("Did not get an email : ${email}\n");
+            
+            $subscribers[$email] = array_shift($bits);
+        }
+        
+        return $subscribers;
+    }
+    
+    /**
+     * Fetch plain data
+     * 
+     * @return string
+     */
+    abstract protected function fetch();
+}
+
+/** Local list subscribers datasource **/
+abstract class LocalListSubscribersDataSource extends SubscribersDataSource {
+    /**
+     * Run
+     * 
+     * @return array
+     */
+    protected function run() {
+        $list = $this->listname();
+        $domain = Env::get('domain');
+        
+        if(strpos($list, '@'))
+            list($list, $domain) = explode('@', $list);
+        
+        if(!$domain)
+            throw new Exception('List has no domain and no current domain');
+        
+        $list_path = Env::get('lists_dir').'/'.$domain.'/'.$list;
+        
+        if(!is_dir($list_path))
+            throw new Exception('List path not found : '.$list_path);
+        
+        $open = preg_grep('`status\s+open\s*`', file("$list_path/config"));
+        if(!count($open))
+            throw new Exception('List does not have "open" status');
+        
+        if($local = SQLClient::local()) {
+            $subscribers = array();
+            $q = 'SELECT user_subscriber, comment_subscriber FROM subscriber_table WHERE list_subscriber=:list AND robot_subscriber = :domain';
+            foreach($local->query($q, true, array(':list' => $list, 'domain' => $domain)) as $sub)
+                $subscribers[$sub['user_subscriber']] = $sub['comment_subscriber'];
+            
+            Out::put(array('warning' => 'Local SQL subscribers fetch does not honor filters'));
+            return $subscribers;
+            
+        } else {
+            Out::put(array('warning' => 'Local database access not enabled, cannot fetch subscribers'));
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Get list name
+     * 
+     * @return string
+     */
+    abstract protected function listname();
+}
+
+/** Custom attributes datasource **/
+abstract class CADataSource extends DataSource {
+    /** @var array **/
+    protected static $names = array(
+        'count' => 'Found custom attributes for %d subscribers', 'attributes' => 'Attributes'
+    );
+    
+    /**
+     * Test self
+     * 
+     * @return array
+     **/
+    public function test() {
+        $ca = $this->run();
+        
+        $results = array('count' => count($ca));
+        if(Out::includeMode(Out::VERBOSE)) {
+            uksort($ca, 'strcasecmp');
+            $results['attributes'] = array();
+            foreach($ca as $email => $attrs)
+                $results['attributes'][] = array('email' => $email, 'attributes' => $attrs);
+        }
+        
+        return $results;
+    }
+    
+    /**
+     * Run
+     * 
+     * @return array
+     */
+    protected function run() {
+        $ca = array();
+        foreach($this->fetch() as $result) {
+            if(!array_key_exists($this->email_entry, $result))
+                continue;
+            
+            $email = $result[$this->email_entry];
+            if(!filter_var($email, FILTER_VALIDATE_EMAIL))
+                throw new Exception('Did not get an email : '.$email);
+            
+            unset($result[$this->email_entry]);
+            $ca[$email] = $result;
+        }
+        
+        return $ca;
+    }
+    
+    /**
+     * Fetch
+     * 
+     * @return array
+     */
+    abstract protected function fetch();
+}
+
+/** include_file **/
+class IncludeFileDataSource extends PlainSubscribersDataSource {
+    /**
+     * Describe self
+     * 
+     * @return array
+     **/
+    public function info() {
+        return array(
+            'type' => Out::isStructured() ? 'include_file' : 'local file inclusion',
+            'path' => $this->arg
+        );
+    }
+    
+    /**
+     * Fetch
+     * 
+     * @return string
+     */
+    protected function fetch() {
+        if(!is_file($this->arg))
+            throw new Exception('File not found : '.$this->arg);
+        
+        if(!is_readable($this->arg))
+            throw new Exception('File not readable : '.$this->arg);
+        
+        return file_get_contents($this->arg);
+    }
+}
+
+/** include_remote_file **/
+class IncludeRemoteFileDataSource extends PlainSubscribersDataSource {
+    /** @var array **/
+    protected static $names = array(
+        'url' => 'URL',
+    );
+    
+    /** @var array **/
+    protected static $sensitive = array('password');
+    
+    /** @var array **/
+    protected static $verbose = array('user', 'password');
+    
+    /**
+     * Describe self
+     * 
+     * @return array
+     **/
+    public function info() {
+        return array(
+            'type' => Out::isStructured() ? 'include_remote_file' : 'remote file inclusion',
+            'url' => $this->url,
+            'user' => $this->user,
+            'password' => $this->passwd,
+        );
+    }
+    
+    /**
+     * Fetch
+     * 
+     * @return string
+     */
+    protected function fetch() {
+        $data = HTTPClient::query($this->url, null, null, $this->user ? "{$this->user}:{$this->passwd}" : null);
+        if($data === false)
+            throw new Exception('File download failed : '.$this->url);
+        
+        return $data;
+    }
+}
+
+/** include_list **/
+class IncludeListDataSource extends LocalListSubscribersDataSource {
+    /**
+     * Describe self
+     * 
+     * @return array
+     **/
+    public function info() {
+        $parts = preg_split('`\s+`', $this->arg, 2);
+        $list = array_shift($parts);
+        array_shift($parts); // filter keyword
+        $filter = implode(' ', $parts);
+        
+        return array(
+            'type' => Out::isStructured() ? 'include_list' : 'local list inclusion (old style)',
+            'list' => $list,
+            'filter' => $filter,
+        );
+    }
+    
+    /**
+     * Get list name
+     * 
+     * @return string
+     */
+    protected function listname() {
+        $parts = preg_split('`\s+`', $this->arg);
+        return array_shift($parts);
+    }
+}
+
+/** include_sympa_list **/
+class IncludeSympaListDataSource extends LocalListSubscribersDataSource {
+    /**
+     * Describe self
+     * 
+     * @return array
+     **/
+    public function info() {
+        return array(
+            'type' => Out::isStructured() ? 'include_sympa_list' : 'local list inclusion',
+            'list' => $this->listname,
+            'filter' => $this->filter,
+        );
+    }
+    
+    /**
+     * Get list name
+     * 
+     * @return string
+     */
+    protected function listname() {
+        return $this->listname;
+    }
+}
+
+/** include_remote_sympa_list **/
+class IncludeRemoteSympaListDataSource extends PlainSubscribersDataSource {
+    /** @var array **/
+    protected static $sensitive = array('password');
+    
+    /** @var array **/
+    protected static $verbose = array('cert', 'user', 'password');
+    
+    /**
+     * Describe self
+     * 
+     * @return array
+     **/
+    public function info() {
+        return array(
+            'type' => Out::isStructured() ? 'include_remote_sympa_list' : 'remote list inclusion',
+            'host' => $this->host,
+            'port' => $this->port,
+            'path' => $this->path,
+            'cert' => $this->cert,
+            'user' => $this->user,
+            'password' => $this->passwd,
+        );
+    }
+    
+    /**
+     * Fetch
+     * 
+     * @return string
+     */
+    public function fetch() {
+        $url = 'https://'.$this->host.':'.($this->port ? $this->port : 443).$this->path;
+        
+        $dir = Env::get('lists_dir').'/'.Env::get('domain').'/'.Env::get('list');
+        if($this->cert === 'robot') {
+            $robots_dir = Env::get('robots_dir');
+            if(!$robots_dir)
+                throw new Exception('Need to use robot certificate but no robot config path');
+            
+            $dir = $robots_dir.'/'.Env::get('domain');
+        }
+        
+        $cert = $dir.'/cert.pem';
+        $key = $dir.'/private_key';
+        
+        if(!file_exists($cert))
+            throw new Exception('Certificate not found : '.$cert);
+        
+        if(!file_exists($key))
+            throw new Exception('Private key not found : '.$key);
+        
+        $context = stream_context_create(array(
+            'http' => array(
+                'header'  => "Authorization: Basic ".base64_encode($this->user.':'.$this->passwd)
+            )
+        ));
+        
+        $data = HTTPClient::query($url, $cert, $key);
+        if($data === false)
+            throw new Exception('File download failed : '.$url);
+        
+        return $data;
+    }
+}
+
+/** include_ldap_query **/
+class IncludeLdapQueryDataSource extends SubscribersDataSource {
+    /** @var array **/
+    protected static $sensitive = array('password');
+    
+    /** @var array **/
+    protected static $verbose = array('use_tls', 'ssl_version', 'ssl_ciphers', 'ca_verify', 'user', 'password');
+    
+    /**
+     * Describe self
+     * 
+     * @return array
+     **/
+    public function info() {
+        return array(
+            'type' => Out::isStructured() ? 'include_ldap_query' : 'LDAP query',
+            'host' => $this->host,
+            'scope' => $this->scope,
+            'suffix' => $this->suffix,
+            'filter' => $this->filter,
+            'attributes' => $this->attrs,
+            'select' => $this->select,
+            'use_tls' => $this->use_tls,
+            'ssl_version' => $this->ssl_version,
+            'ssl_ciphers' => $this->ssl_ciphers,
+            'ca_verify' => $this->ca_verify,
+            'user' => $this->user,
+            'password' => $this->passwd,
+        );
+    }
+    
+    /**
+     * Run
+     * 
+     * @return array
+     */
+    public function run() {
+        $ds = $this;
+        return LDAPClient::tryHosts(array_map('trim', explode(',', $this->host)), $this->user, $this->passwd, $this->use_tls, function($ldap) use($ds) {
+            $attrs = array();
+            $attrs_k = explode(',', $ds->attrs);
+            $attrs[$attrs_k[0]] = true; // email
+            if(count($attrs_k) > 1) $attrs[$attrs_k[1]] = false; // gecos
+            
+            $results = $ldap->search($ds->suffix, $ds->filter, $attrs);
+            
+            $subscribers = array();
+            foreach($results as $result) {
+                $email = $result[$attrs_k[0]];
+                if(!filter_var($email, FILTER_VALIDATE_EMAIL))
+                    throw new Exception('Did not get an email : '.$email);
+                
+                $gecos = (count($attrs_k) > 1) ? $result[$attrs_k[1]] : null;
+                
+                $subscribers[$email] = $gecos;
+            }
+            
+            return $subscribers;
+        });
+    }
+}
+
+/** include_ldap_2level_query **/
+class IncludeLdap2levelQueryDataSource extends SubscribersDataSource {
+    /** @var array **/
+    protected static $sensitive = array('password');
+    
+    /** @var array **/
+    protected static $verbose = array('use_tls', 'ssl_version', 'ssl_ciphers', 'ca_verify', 'user', 'password');
+    
+    /**
+     * Describe self
+     * 
+     * @return array
+     **/
+    public function info() {
+        return array(
+            'type' => Out::isStructured() ? 'include_ldap_2level_query' : 'LDAP 2 levels query',
+            'host' => $this->host,
+            'scope_1' => $this->scope1,
+            'suffix_1' => $this->suffix1,
+            'filter_1' => $this->filter1,
+            'attributes_1' => $this->attrs1,
+            'select_1' => $this->attrs1,
+            'regexp_1' => $this->regexp1,
+            'scope_2' => $this->scope2,
+            'suffix_2' => $this->suffix2,
+            'filter_2' => $this->filter2,
+            'attributes_2' => $this->attrs2,
+            'select_2' => $this->attrs2,
+            'regexp_2' => $this->regexp2,
+            'use_tls' => $this->use_tls,
+            'ssl_version' => $this->ssl_version,
+            'ssl_ciphers' => $this->ssl_ciphers,
+            'ca_verify' => $this->ca_verify,
+            'user' => $this->user,
+            'password' => $this->passwd,
+        );
+    }
+    
+    /**
+     * Run
+     * 
+     * @return array
+     */
+    public function run() {
+        $ds = $this;
+        return LDAPClient::tryHosts(array_map('trim', explode(',', $this->host)), $this->user, $this->passwd, $this->use_tls, function($ldap) use($ds) {
+            $attrs2 = array();
+            $attrs_k = explode(',', $ds->attrs2);
+            $attrs2[$attrs_k[0]] = true; // email
+            if(count($attrs_k) > 1) $attrs2[$attrs_k[1]] = false; // gecos
+            
+            $results = $ldap->search2passes(
+                $ds->suffix1, $ds->filter1, $ds->attrs1,
+                $ds->suffix2, $ds->filter2, $attrs2
+            );
+            
+            $subscribers = array();
+            foreach($results as $result) {
+                $email = $result[$attrs_k[0]];
+                if(!filter_var($email, FILTER_VALIDATE_EMAIL))
+                    throw new Exception('Did not get an email : '.$email);
+                
+                $gecos = (count($attrs_k) > 1) ? $result[$attrs_k[0]] : null;
+                
+                $subscribers[$email] = $gecos;
+            }
+            
+            return $subscribers;
+        });
+    }
+}
+
+/** include_sql_query **/
+class IncludeSqlQueryDataSource extends SubscribersDataSource {
+    /** @var array **/
+    protected static $sensitive = array('password');
+    
+    /** @var array **/
+    protected static $verbose = array('connect_options', 'db_env', 'f_dir', 'user', 'password');
+    
+    /**
+     * Describe self
+     * 
+     * @return array
+     **/
+    public function info() {
+        return array(
+            'type' => Out::isStructured() ? 'include_sql_query' : 'SQL query',
+            'db_type' => $this->db_type,
+            'host' => $this->host,
+            'port' => $this->db_port,
+            'connect_options' => $this->connect_options,
+            'db_name' => $this->db_name,
+            'db_env' => $this->db_env,
+            'user' => $this->user,
+            'password' => $this->passwd,
+            'sql_query' => $this->sql_query,
+            'f_dir' => $this->f_dir,
+        );
+    }
+    
+    /**
+     * Run
+     * 
+     * @return array
+     */
+    public function run() {
+        $client = new SQLClient($this->db_type, $this->db_name, $this->host, $this->port, $this->user, $this->passwd);
+        
+        $subscribers = array();
+        foreach($client->query($this->sql_query, false) as $result) {
+            $email = array_shift($result);
+            if(!filter_var($email, FILTER_VALIDATE_EMAIL))
+                throw new Exception('Didn\'t get an email in first column of results : '.$email);
+            
+            $subscribers[$email] = array_shift($result);
+        }
+        
+        return $subscribers;
+    }
+}
+
+/** include_ldap_ca **/
+class IncludeLdapCaDataSource extends CADataSource {
+    /** @var array **/
+    protected static $sensitive = array('password');
+    
+    /** @var array **/
+    protected static $verbose = array('use_tls', 'ssl_version', 'ssl_ciphers', 'ca_verify', 'user', 'password');
+    
+    /**
+     * Describe self
+     * 
+     * @return array
+     **/
+    public function info() {
+        return array(
+            'type' => Out::isStructured() ? 'include_ldap_ca' : 'LDAP custom attributes query',
+            'host' => $this->host,
+            'scope' => $this->scope,
+            'suffix' => $this->suffix,
+            'filter' => $this->filter,
+            'attributes' => $this->attrs,
+            'select' => $this->select,
+            'email_entry' => $this->email_entry,
+            'use_tls' => $this->use_tls,
+            'ssl_version' => $this->ssl_version,
+            'ssl_ciphers' => $this->ssl_ciphers,
+            'ca_verify' => $this->ca_verify,
+            'user' => $this->user,
+            'password' => $this->passwd,
+        );
+    }
+    
+    /**
+     * Fetch
+     * 
+     * @return array
+     */
+    public function fetch() {
+        $ds = $this;
+        return LDAPClient::tryHosts(array_map('trim', explode(',', $this->host)), $this->user, $this->passwd, $this->use_tls, function($ldap) use($ds) {
+            $attrs = array_fill_keys(explode(',', $ds->attrs), true);
+            if(!array_key_exists($ds->email_entry, $attrs)) $attrs[$ds->email_entry] = false;
+            return $ldap->search($ds->suffix, $ds->filter, $attrs);
+        });
+    }
+}
+
+/** include_ldap_2level_ca **/
+class IncludeLdap2levelCaDataSource extends CADataSource {
+    /** @var array **/
+    protected static $sensitive = array('password');
+    
+    /** @var array **/
+    protected static $verbose = array('use_tls', 'ssl_version', 'ssl_ciphers', 'ca_verify', 'user', 'password');
+    
+    /**
+     * Describe self
+     * 
+     * @return array
+     **/
+    public function info() {
+        return array(
+            'type' => Out::isStructured() ? 'include_ldap_2level_ca' : 'LDAP 2 levels custom attributes query',
+            'host' => $this->host,
+            'scope_1' => $this->scope1,
+            'suffix_1' => $this->suffix1,
+            'filter_1' => $this->filter1,
+            'attributes_1' => $this->attrs1,
+            'select_1' => $this->attrs1,
+            'regexp_1' => $this->regexp1,
+            'scope_2' => $this->scope2,
+            'suffix_2' => $this->suffix2,
+            'filter_2' => $this->filter2,
+            'attributes_2' => $this->attrs2,
+            'select_2' => $this->attrs2,
+            'regexp_2' => $this->regexp2,
+            'email_entry' => $this->email_entry,
+            'use_tls' => $this->use_tls,
+            'ssl_version' => $this->ssl_version,
+            'ssl_ciphers' => $this->ssl_ciphers,
+            'ca_verify' => $this->ca_verify,
+            'user' => $this->user,
+            'password' => $this->passwd,
+        );
+    }
+    
+    /**
+     * Fetch
+     * 
+     * @return array
+     */
+    public function fetch() {
+        $ds = $this;
+        return LDAPClient::tryHosts(array_map('trim', explode(',', $this->host)), $this->user, $this->passwd, $this->use_tls, function($ldap) use($ds) {
+            $attrs2 = array_fill_keys(explode(',', $ds->attrs), true);
+            if(!array_key_exists($ds->email_entry, $attrs2)) $attrs2[$ds->email_entry] = false;
+
+            return $ldap->search2passes(
+                $ds->suffix1, $ds->filter1, $ds->attrs1,
+                $ds->suffix2, $ds->filter2, $attrs2
+            );
+        });
+    }
+}
+        
+/** include_sql_ca **/
+class IncludeSqlCaDataSource extends CADataSource {
+    /** @var array **/
+    protected static $sensitive = array('password');
+    
+    /** @var array **/
+    protected static $verbose = array('connect_options', 'db_env', 'f_dir', 'user', 'password');
+    
+    /**
+     * Describe self
+     * 
+     * @return array
+     **/
+    public function info() {
+        return array(
+            'type' => Out::isStructured() ? 'include_sql_ca' : 'SQL custom attributes query',
+            'db_type' => $this->db_type,
+            'host' => $this->host,
+            'port' => $this->db_port,
+            'connect_options' => $this->connect_options,
+            'db_name' => $this->db_name,
+            'db_env' => $this->db_env,
+            'user' => $this->user,
+            'password' => $this->passwd,
+            'sql_query' => $this->sql_query,
+            'email_entry' => $this->email_entry,
+            'f_dir' => $this->f_dir,
+        );
+    }
+    
+    /**
+     * Fetch
+     * 
+     * @return array
+     */
+    public function fetch() {
+        $client = new SQLClient($this->db_type, $this->db_name, $this->host, $this->port, $this->user, $this->passwd);
+        
+        return $client->query($this->sql_query, true);
+    }
+}
+
+Env::set('argv', $argv);
+
+if(Arguments::get('help')) {
+    $self = basename($argv[0]);
+    $desc = Arguments::getDescriptor();
+    echo "Sympa datasource tester\n";
+    echo "Usage : ${self} $desc\n";
+    
+    foreach(Arguments::getDescriptor(null, true) as $desc)
+        echo "\t$desc\n";
+    
+    echo "\n\tRequirements (depending on used datasources types)\n";
+    echo "\t\tphp-pdo and related drivers\n";
+    echo "\t\tphp-curl\n";
+    
+    exit;
+}
+
+try {
+    // Output mode, priority to less verbose modes
+    if(Arguments::get('quiet')) {
+        Out::setMode(Out::QUIET);
+        
+    } elseif(Arguments::get('verbose')) {
+        Out::setMode(Out::VERBOSE);
+        
+    } elseif(Arguments::get('sensitive')) {
+        Out::setMode(Out::SENSITIVE);
+    }
+    
+    if(Arguments::get('json'))
+        Out::setFormat(Out::JSON);
+    
+    $list_peers = Arguments::get('peers');
+    if($list_peers && Arguments::get('csv'))
+        Out::setFormat(Out::CSV);
+    
+    // Local database access
+    if(Arguments::has('db_dsn'))
+        SQLClient::local(Arguments::get('db_dsn'), (string)Arguments::get('db_user'), (string)Arguments::get('db_password'));
+    
+    // Better run as sympa user, some tests may not be accurate otherwise
+    if(exec('id -un') != 'sympa')
+        Out::put(array('warning' => 'Not running as sympa, tests maybe be biased ...'));
+    
+    // Get env from given args
+    $list = null;
+    $domain = null;
+    $lists_dir = trim(Arguments::get('lists_dir'));
+    $robots_dir = trim(Arguments::get('robots_dir'));
+        
+    if($lists_dir && !is_dir($lists_dir))
+        throw new Exception('Not a directory path or not readable : '.$lists_dir);
+    
+    if($robots_dir && !is_dir($robots_dir))
+        throw new Exception('Not a directory path or not readable : '.$robots_dir);
+        
+    $list_config = Arguments::get('list_config');
+    
+    if($list_config === '-') {
+        $list_config = 'php://stdin';
+        
+    } else if($list_config) {
+        if(substr($list_config, 0, 1) !== '/')
+            $list_config = getcwd().'/'.$list_config;
+        
+        if(!preg_match('`/config$`', $list_config))
+            $list_config .= '/config';
+        
+        $list_config = realpath($list_config);
+        
+        if(!is_file($list_config) || !is_readable($list_config))
+            throw new Exception('List config not found or not readable : '.$list_config);
+
+        $path = explode('/', $list_config);
+        array_pop($path); // Config file
+        $list = array_pop($path);
+        $domain = array_pop($path);
+        $lists_dir = implode('/', $path);
+        array_pop($path);
+        
+    } else {
+        if(Arguments::has('list_name'))
+            list($list, $domain) = explode('@', trim(Arguments::get('list_name')));
+    }
+    
+    if(!$list_config && (!$lists_dir || !$list || !$domain))
+        throw new Exception('No list config nor list and lists directory');
+    
+    if($robots_dir) {
+        if(substr($robots_dir, 0, 1) !== '/') { // Relative
+            if(!$lists_dir)
+                throw new Exception('Relative robot directory and no lists directory');
+            
+            $robots_dir = realpath("$lists_dir/$robots_dir");
+        }
+        
+        if(!is_dir($robots_dir))
+            throw new Exception('Robot directory is not robots config directory');
+        
+    } else {
+        if($lists_dir) { // Try to go up
+            $robots_dir = realpath("$lists_dir/../etc/");
+            if(!is_dir($robots_dir))
+                $robots_dir = null;
+        }
+    }
+    
+    Env::set('robots_dir', $robots_dir);
+    Env::set('lists_dir', $lists_dir);
+    Env::set('domain', $domain);
+    
+    $lists = array($list);
+    $multiple = (strpos($list, '*') !== false);
+    if($multiple) {
+        if($list !== '*') $list = '`^'.implode(array_map(function($m) {
+            return preg_quote($m, '`');
+        }, explode('*', $list)), '.*').'$`';
+        
+        $lists = array_filter(scandir("$lists_dir/$domain"), function($i) use($lists_dir, $domain, $list) {
+            if(substr($i, 0, 1) === '.') return false;
+            if(!is_dir("$lists_dir/$domain/$i")) return false;
+            if(!file_exists("$lists_dir/$domain/$i/config")) return false;
+            
+            if($list === '*') return true;
+            
+            return preg_match($list, $i);
+        });
+    }
+    
+    $peers = array();
+    $failures = 0;
+    foreach($lists as $list) {
+        Env::set('list', $list);
+        
+        // Parse datasources from config
+        $list_config = "$lists_dir/$domain/$list/config";
+        $datasources = DataSource::parse(file_get_contents($list_config));
+        
+        if($list_peers) {
+            foreach($datasources as $datasource) {
+                foreach($datasource->getPeers() as $peer) {
+                    $k = $peer->host.':'.$peer->ip.':'.$peer->port;
+                    $peers[$k] = array(
+                        'domain' => $domain,
+                        'target_host' => $peer->host,
+                        'target_ip' => $peer->ip,
+                        'target_port' => $peer->port,
+                        'protocol' => $peer->protocol,
+                    );
+                }
+            }
+            
+        } else if($datasources) {
+            if($multiple) Out::openSub("$list@$domain");
+            
+            $test = array();
+            if(Arguments::has('datasource_index')) {
+                $idx = (int)Arguments::get('datasource_index');
+                
+                if($idx < 0 || $idx >= count($datasources))
+                    throw new Exception('Datasource index out of bounds');
+                
+                $test = array($idx);
+            }
+            
+            $multiple_ds = !count($test) || count($test) > 1;
+            
+            if(Arguments::get('test_all'))
+                $test = array_keys($datasources);
+            
+            if(Out::isStructured()) Out::openSub($multiple_ds ? 'datasources' : 'datasource');
+            foreach($datasources as $idx => $datasource) {
+                if(count($test) && !in_array($idx, $test)) continue;
+                
+                if($multiple_ds) Out::openSub(Out::isStructured() ? '' : 'Datasource index: '.$idx);
+                
+                $datasource->describe();
+                
+                if(in_array($idx, $test)) {
+                    Out::openSub(Out::isStructured() ? 'results' : 'Test results:', 1);
+                    
+                    try {
+                        $datasource->results();
+                    } catch(Exception $e) {
+                        Out::put(array('error' => $e->getMessage()));
+                        $failures++;
+                    }
+                    
+                    Out::closeSub();
+                }
+                
+                if($multiple_ds) Out::closeSub();
+            }
+            if(Out::isStructured()) Out::closeSub();
+            
+            if($multiple) Out::closeSub();
+        }
+    }
+    
+    if($list_peers) {
+        if(Out::isStructured()) {
+            Out::openSub('peers');
+            Out::put(array_values($peers));
+            Out::closeSub();
+        } else {
+            DataSource::humanReadable(array_values($peers));
+        }
+    }
+    
+    Out::flush();
+    
+    if($failures) exit(1);
+    
+} catch(Exception $e) {
+    Out::put(array('error' => $e->getMessage()));
+    Out::flush();
+    exit(1);
+}

@@ -2,7 +2,7 @@
 
 - name: Provision Vagrant VM (Ubuntu 16.04 LTS)
   hosts: all
-  sudo: True
+  become: yes
   gather_facts: False
   vars:
       - ansible_ssh_user: vagrant

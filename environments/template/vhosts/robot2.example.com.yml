@@ -1,0 +1,17 @@
+---
+robot2.example.com:
+  common:
+    web:
+      domain: robot2.example.com
+    mail:
+      domain: robot2.example.com
+    admins:
+      - etienne@webmail.com
+      - olivier@webmail.com
+      - david@webmail.com
+  sympa:
+    config:
+      title: My increasingly cool service
+      create_list: listmaster
+      color_6: '#0431B4'
+    server: local-sympa-ubuntu16

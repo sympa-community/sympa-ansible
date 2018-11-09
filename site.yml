@@ -15,6 +15,25 @@
         that: "ansible_version.full | version_compare('2.5.0', '>=')"
         msg: "This playbook requires Ansible 2.5.0 or greater."
 
+- name: Get Jinja2 version
+  hosts: all
+  gather_facts: no
+  remote_user: "{{ ansible_remote_user }}"
+  tags: check_jinja2
+  tasks:
+    - action: jin_ver
+      register: jinja_version
+
+- name: Check Jinja2 version
+  hosts: all
+  remote_user: "{{ ansible_remote_user }}"
+  tags: check_jinja2
+  tasks:
+    - name: Check Jinja2 version
+      assert:
+        that: "jinja_version.version_value is version_compare('2.10', '>=')"
+        msg: "This playbook requires Jinja2 2.10 or greater. You have {{ jinja_version.version_value }}."
+
 - name: Configuration for all nodes
   hosts: all
   become: yes

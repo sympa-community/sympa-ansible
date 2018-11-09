@@ -1,41 +1,104 @@
 ---
-# Configure postfix and mail aliases
+- name: Install list aliases file
+  copy:
+    src: files/list_aliases.tt2
+    dest: "{{ install_prefix }}/{{ sympa.install_dir_name }}/etc/list_aliases.tt2"
+    owner: sympa
+    group: sympa
+    mode: 0644
 
-- name: Install required packages
-  apt: name={{ item }} state=present
+- name: Creating Sympa aliases file (1/2)
+  file:
+    path: "{{ sympa.mail.alias_directory }}"
+    state: directory
+    owner: sympa
+    group: sympa
+    mode: 0755
+
+- name: Creating Sympa aliases file (2/2)
+  file:
+    path: "{{ sympa.mail.alias_directory }}/{{ item }}"
+    state: touch
+    owner: sympa
+    group: sympa
+    mode: 0644
   with_items:
-    - postfix
+    - "{{ sympa.mail.alias_file }}"
+    - "{{ sympa.mail.alias_file }}.db"
 
-- name: Install Postfix main.cf configuration file
-  template: src=postfix/main.cf.j2 dest=/etc/postfix/main.cf
+- name: Compiling sympa_aliases
+  shell: "postmap {{ sympa.mail.alias_directory }}/{{ sympa.mail.alias_file }}"
+
+- name: Adding list domains as virtual domains
+  blockinfile:
+    path: /etc/postfix/domains.sympa
+    create: yes
+    state: present
+    marker: "# {mark} ANSIBLE MANAGED {{ item }} domain"
+    block: |
+      {{ item }}                # {{ item }} is a mailing list domain.
+  with_items: "{{ mail_domains }}"
+
+- name: Compiling Sympa transport
+  shell: postmap /etc/postfix/domains.sympa
+
+- name: Adding required generic aliases
+  blockinfile:
+    path: /etc/postfix/virtual.sympa
+    create: yes
+    state: present
+    marker: "# {mark} ANSIBLE MANAGED {{ item }} aliases"
+    block: |
+      sympa-request@{{ item }}  postmaster@localhost
+      sympa-owner@{{ item }}    postmaster@localhost
+  with_items: "{{ mail_domains }}"
+
+- name: Compiling Sympa transport
+  shell: postmap /etc/postfix/virtual.sympa
+
+- name: Adding required generic transports
+  blockinfile:
+    path: /etc/postfix/transport
+    create: yes
+    state: present
+    marker: "# {mark} ANSIBLE MANAGED {{ item }} transports"
+    block: |
+      sympa@{{ item }}          sympa:sympa@{{ item }}
+      listmaster@{{ item }}     sympa:listmaster@{{ item }}
+      bounce@{{ item }}         sympabounce:sympa@{{ item }}
+      abuse-feedback-report@{{ item }}  sympabounce:sympa@{{ item }}
+  with_items: "{{ mail_domains }}"
+
+- name: Compiling Sympa transport
+  shell: postmap /etc/postfix/transport
+
+- name: Master.cf configuration
+  blockinfile:
+    path: /etc/postfix/master.cf
+    marker: "# {mark} ANSIBLE MANAGED sympa transports"
+    block: |
+      sympa unix - n n - - pipe
+        flags=hqRu user=sympa argv={{ install_prefix }}/{{ sympa.install_dir_name }}/bin/queue ${nexthop}
+      sympabounce unix - n n - - pipe
+        flags=hqRu user=sympa argv={{ install_prefix }}/{{ sympa.install_dir_name }}/bin/bouncequeue ${nexthop}
   notify: restart postfix
-  
-- name: Create required /etc/mail/ directory    
-  file: dest=/etc/mail state=directory mode=755 owner=sympa group=sympa
 
-- name: Check if /etc/mail/sympa_list_aliases file exists
-  stat:
-    path: /etc/mail/sympa_list_aliases
-  register: sympa_list_aliases_check 
+- name: Setting up main.cf
+  blockinfile:
+    path: /etc/postfix/main.cf
+    marker: "# {mark} ANSIBLE MANAGED sympa configuration"
+    block: |
+      virtual_mailbox_domains =
+        hash:/etc/postfix/domains.sympa
+      virtual_mailbox_maps =
+        hash:/etc/postfix/transport,
+        hash:/etc/postfix/virtual.sympa,
+        hash:{{ sympa.mail.alias_directory }}/{{ sympa.mail.alias_file }}
+      virtual_alias_maps =
+        hash:/etc/postfix/virtual.sympa
+      transport_maps =
+        hash:/etc/postfix/transport,
+        hash:/etc/postfix/virtual.sympa,
+        hash:{{ sympa.mail.alias_directory }}/{{ sympa.mail.alias_file }}
+  notify: restart postfix
 
-- name: Install Sympa default list mail aliases
-  template: src=postfix/sympa_list_aliases.j2 dest=/etc/mail/sympa_list_aliases owner=sympa group=sympa mode=0664 force=no
-  when: sympa_list_aliases_check.stat.exists == False
-  notify: update postfix aliases database
-
-- name: Create virtual alias maps
-  template:
-    src: postfix/postfix_virtual.j2
-    dest: /etc/postfix/virtual
-
-- name: Compile virtual alias maps
-  shell: postmap /etc/postfix/virtual
-
-- name: Creating sympa global alias
-  template:
-    src: postfix/sympa_global_aliases.j2
-    dest: /etc/mail/sympa_global_aliases
-  notify: update postfix aliases database
-
-- name: Compile bounce alias
-  shell: postalias /etc/mail/sympa_global_aliases

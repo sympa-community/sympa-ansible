@@ -1,77 +1,121 @@
 ---
 
+- include_vars:
+    dir: "{{ inventory_dir }}/private/vhosts"
+    name: vhost_specific_variables
+  tags: apache, virtual_hosts
+
+- name: Set vhosts
+  tags: all
+  set_fact:
+    apache_vhosts: "{% set apache_vhosts = [] %}{% for d in vhost_specific_variables.values() %}{% if ('sympa' in d and d.sympa.server == inventory_hostname) or ('limesurvey' in d and d.limesurvey.server == inventory_hostname) or ('dokuwiki' in d and d.dokuwiki.server == inventory_hostname) or inventory_hostname == 'local-proxy'  %}{% set _ = apache_vhosts.append(common|combine(d.common, recursive=True)|combine(d, recursive=True)) %}{% endif %}{% endfor %}{{ apache_vhosts }}"
+
+- name: Setting false flag for proxy settings
+  set_fact:
+    proxy: 0
+
+- name: Setting flag for proxy settings
+  set_fact:
+    proxy: 1
+  tags: proxy
+  when: inventory_hostname == 'local-proxy'
+
 - name: Install Apache
+  tags: apache
   apt: name={{ item }}
   with_items:
   - apache2
   - apache2-utils
 
 - name: Put Apache vhost certs
+  tags: apache
   no_log: True
-  copy: content="{{ item.ssl_certificate }}" dest=/etc/ssl/certs/{{ item.name }}.crt owner=root group=root mode=644
-  when: item.ssl
-  with_items: "{{ vhosts }}"
-  notify: Restart Apache
+  copy: content="{{ item.ssl.certificate }}" dest=/etc/ssl/certs/{{ item.web.domain }}.crt owner=root group=root mode=644
+  when: item.ssl.enabled
+  with_items: "{{ apache_vhosts }}"
 
 - name: Put Apache vhost keys
+  tags: apache
   no_log: True
-  copy: content="{{ item.ssl_key }}" dest=/etc/ssl/private/{{ item.name }}.key owner=root group=ssl-cert mode=640
-  with_items: "{{ vhosts }}"
-  when: item.ssl
-  notify: Restart Apache
+  copy: content="{{ item.ssl.key | vault(vault_keydir) }}" dest=/etc/ssl/private/{{ item.web.domain }}.key owner=root group=ssl-cert mode=640
+  with_items: "{{ apache_vhosts }}"
+  when: item.ssl.enabled
 
 - name: Disable default Apache sites
+  tags: apache
   command: /usr/sbin/a2dissite {{ item }} removes=/etc/apache2/sites-enabled/{{ item }}.conf
   with_items:
   - 000-default
   - default-ssl
-  notify: Restart Apache
 
   # Enable modules required for ssl
 - name: Enable Apache modules
+  tags: apache
   apache2_module: name={{ item }} state=present
   with_items:
   - ssl
   - headers
-  notify: Restart Apache
+
+- name: Enable Apache proxy modules
+  tags: apache
+  apache2_module: name={{ item }} state=present
+  with_items:
+  - proxy
+  - proxy_http
+  when: proxy
 
 - name: Put global Apache config
+  tags: apache
   copy: src=stapling.conf dest=/etc/apache2/conf-available/stapling.conf owner=root group=root mode=644
-  notify: Restart Apache
 
 - name: Install Apache security config
+  tags: apache
   template: src=security.conf.j2 dest=/etc/apache2/conf-available/security.conf owner=root group=root mode=644
-  notify: Restart Apache
   
 - name: Install Apache main config with security options
+  tags: apache
   template: src=apache2.conf.j2 dest=/etc/apache2/apache2.conf owner=root group=root mode=644
-  notify: Restart Apache
+
+- name: Put Apache ports config
+  tags: apache
+  no_log: True
+  template: src=ports.conf.j2 dest=/etc/apache2/conf-available/ports.conf owner=root group=root mode=644
 
 - name: Enable global Apache config
+  tags: apache
   command: /usr/sbin/a2enconf {{ item }} creates=/etc/apache2/conf-enabled/{{ item }}.conf
   with_items:
-  - stapling
-  notify: Restart Apache
+    - stapling
+    - ports
 
   # Print message with vhost information. We use no_log below to suppress printing/logging the item array because it is
   # big and contains the SSL private key
 - name: Vhosts to be installed
-  debug: msg="vhost={{ vhosts[item|int].name }}:{{ vhosts[item|int].port }}; IP={{ vhosts[item|int].ip }}; SSL={{ vhosts[item|int].ssl }}"
-  with_sequence: "count={{ vhosts | length }} start=0"
-  #msg: "Configuring vhosts: {{ vhosts | map(attribute='name') | join(', ') }}"
+  tags: apache
+  debug: msg="vhost={{ apache_vhosts[item|int].web.domain }}:{{ apache_vhosts[item|int].port }}; IP={{ apache_vhosts[item|int].ip }}; SSL={{ apache_vhosts[item|int].ssl.enabled }}"
+  with_sequence: "count={{ apache_vhosts | length }} start=0"
+  #msg: "Configuring apache_vhosts: {{ apache_vhosts | map(attribute='name') | join(', ') }}"
 
 - name: Put Apache vhost config
+  tags: apache
   no_log: True
-  template: src=apache_vhost.conf.j2 dest=/etc/apache2/sites-available/{{ item.name }}:{{ item.port }}.conf owner=root group=root mode=644
-  with_items: "{{ vhosts }}"
-  notify: Restart Apache
+  template: src=apache_vhost.conf.j2 dest=/etc/apache2/sites-available/{{ item.web.domain }}.conf owner=root group=root mode=644
+  with_items: "{{ apache_vhosts }}"
 
 - name: Enable Apache vhost sites
+  tags: apache
   no_log: True
-  command: /usr/sbin/a2ensite {{ item.name }}:{{ item.port }} creates=/etc/apache2/sites-enabled/{{ item.name }}:{{ item.port }}.conf
-  with_items: "{{ vhosts }}"
-  notify: Restart Apache
-
+  command: /usr/sbin/a2ensite {{ item.web.domain }} creates=/etc/apache2/sites-enabled/{{ item.web.domain }}.conf
+  with_items: "{{ apache_vhosts }}"
 
 - name: Enable Apache on boot
+  tags: apache
   service: name=apache2 enabled=yes
+
+ # Include environment specific tasks
+- include: "{{ inventory_dir }}/tasks/apache.yml"
+
+- name: Check created config
+  shell: "apache2ctl configtest"
+  notify: Restart Apache
+  changed_when: true

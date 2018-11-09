@@ -1,53 +1,76 @@
 ---
 
-sympa_repository: https://github.com/sympa-community/sympa.git
-sympa_repository_version: HEAD
-sympa_install_from_repository: 0
-sympa_source: https://github.com/sympa-community/sympa/releases/download/
-sympa_version: 6.2.36
-sympa_download_url: "{{ sympa_source }}/{{ sympa_version }}/sympa-{{ sympa_version }}.tar.gz"
-sympa_sha256:
-    {
-     "6.1.17": "a506ea6e9c88c4a91d22bf146acb06fae5c277e98312b957bdae974739145b79",
-     "6.1.18": "4bf94c736582bf2f8ca1cfdc968d91c58aa4763990f59aa10e08c82b8f5fc572",
-     "6.1.19": "6851ab836d156df187a687630d54a982e284f034d3e74b3bc1da850841f11482",
-     "6.1.20": "b0afe73166e9c3427944bd47bfb07143bfc4a749a468e060370c5fe8c0b75dc5",
-     "6.1.21": "c38ce4c4da01219228f2f79f5d8e6a0edc105edca355a79eb398b48841872425",
-     "6.1.22": "f908b127f42252753f0e087c1dc077b2ea115b85efbbb391fd2ef28cbb65182d",
-     "6.1.23": "3d15aa8816dafcc4017cc06e52def44d5461498a05e9ef7634498b0993234ae4",
-     "6.1.24": "3b1cde93d26a9b44c98d50b972d74dc58335ec4fbd8c777cba822aafc7b34113",
-     "6.1.25": "14c3f5c2288385057a1baf035fdf925962a0b35462def3d3b1d90f0dce1efa7f",
-     "6.2.1":  "37b22c1689ad9897dac7c35f1b3cecfd2b0e2f9d7c58987668ea779b2a622908",
-     "6.2.2":  "3c3d9ccb289b524cf50ac220df55d54f2bbc68d66a6b490635fc37036714dcc0",
-     "6.2.3":  "4dc10fded7b3bc55fb45b287be3e3f678f1f7c8c8e8db3dfc75fcc995ca9ec08",
-     "6.2.4":  "3a473893b383e79c6a1fceca9f62bce8910f8c46671f6793b9721c861b5f1550",
-     "6.2.5":  "a5624f09f70b95ae22ed1b93b3409caf3c36c08847fca6332818e329844cb7d2",
-     "6.2.6":  "5fc937d842a3d9cd8dbad43dafb7ee5d1ffa0ff8918555628dc5f3882149abb2",
-     "6.2.7":  "b0380b29b1c6323f80029d24f6d24acb27cf4c697bc8eadca2037449dbfd8b84",
-     "6.2.8":  "17bc4dc8cc6894a9364d83db0db20c84abcda6e3ca19f57b12430a6c8297bb82",
-     "6.2.9":  "132a1997f4831b63f051e3d60b042d621f383fbe3d62024c02941dde74cbd210",
-     "6.2.11": "f3641207cd6d80865ee681b6d4b1a20b2ce219964cd0c97eaafd3600a526024f",
-     "6.2.12": "e7a50e3eded912f3d3d63b14acd23324861a8f545543d7a0aedd06cca17cb391",
-     "6.2.13": "bfd63706c275b4782bbfcacc2f4de248f661fe8ee44fa4ea11fcbed7a01d8851",
-     "6.2.14": "4d4d6eac6a93d3db1d1517bc56cedc2e8fd4685180b759b275dbacd23a2998d8",
-     "6.2.15": "b8acc1b94adac38d68340a5f472425431ce6dc8f0fbbe709d96c027dbd73d18b",
-     "6.2.16": "9fc09c6fd757fa5aadf356c331479836b8b3a1cd50a9e1609f3cd28bd4381b90",
-     "6.2.18": "2a2e0c487f10be315596451c4e72376ab4e8bb2a3d80168a0eb7ce9494e2f18b",
-     "6.2.20": "f368caa73d687754fd582ab7f34e2359c3ea4d773580c598b45a39d4e93327bb",
-     "6.2.22": "21f5e90f5f911c7f8d24b88b0cf45668545da5b45b7cf30138ba144eace6c8b7",
-     "6.2.24": "578224944370a0ea55f884591074f89d1b352628e9f39897dabea56bd7373310",
-     "6.2.30": "84253a9227f7ee0cef064861455bd6bdda89d41a6012b97f6903fe827c7f2f61",
-     "6.2.32": "e2990cbd57f931c4ca26c7b94db0090cac82bcc644be2f58bb48512af19fc52e",
-     "6.2.34": "ccd7744f0cd68ca1e968e0254624fffb5a186c71f218f881a0f07f88dd48ba0d",
-     "6.2.36": "b8012c8c33f72b33479a7f6a14501f112edf6560b997fa83224516308a237c95",
-     "6.2.37b.1": "b395744b8e3bdcfa25168176ab633def94e0d15f67a68cf1f461ed3da5240652",
-     "6.2.37b.2": "2f5eb71cf5d47b46fed6acf92489ae6793ec7579904239315f52ac9679bdb253",
-     }
-
-sympa_install_prefix: /usr/local/sympa
-sympa_apply_patches: 1
-sympa_force_smtp_route: 0
-sympa_incoming_smtp: '192.168.66.66'
-sympa_outgoing_server: "{{ sympa_incoming_smtp }}"
-sympa_db_app_user: sympa
-sympa_language: "en_US"
+sympa:
+  unix_user: sympa
+  unix_group: sympa
+  repository: https://github.com/sympa-community/git
+  repository_version: HEAD
+  install_from_repository: 0
+  source: https://github.com/sympa-community/sympa/releases/download/
+  version: 6.2.36
+  download_url: "http://www.sympa.org/distribution/releases"
+  sha256:
+      {
+       "6.1.17": "a506ea6e9c88c4a91d22bf146acb06fae5c277e98312b957bdae974739145b79",
+       "6.1.18": "4bf94c736582bf2f8ca1cfdc968d91c58aa4763990f59aa10e08c82b8f5fc572",
+       "6.1.19": "6851ab836d156df187a687630d54a982e284f034d3e74b3bc1da850841f11482",
+       "6.1.20": "b0afe73166e9c3427944bd47bfb07143bfc4a749a468e060370c5fe8c0b75dc5",
+       "6.1.21": "c38ce4c4da01219228f2f79f5d8e6a0edc105edca355a79eb398b48841872425",
+       "6.1.22": "f908b127f42252753f0e087c1dc077b2ea115b85efbbb391fd2ef28cbb65182d",
+       "6.1.23": "3d15aa8816dafcc4017cc06e52def44d5461498a05e9ef7634498b0993234ae4",
+       "6.1.24": "3b1cde93d26a9b44c98d50b972d74dc58335ec4fbd8c777cba822aafc7b34113",
+       "6.1.25": "14c3f5c2288385057a1baf035fdf925962a0b35462def3d3b1d90f0dce1efa7f",
+       "6.2.1":  "37b22c1689ad9897dac7c35f1b3cecfd2b0e2f9d7c58987668ea779b2a622908",
+       "6.2.2":  "3c3d9ccb289b524cf50ac220df55d54f2bbc68d66a6b490635fc37036714dcc0",
+       "6.2.3":  "4dc10fded7b3bc55fb45b287be3e3f678f1f7c8c8e8db3dfc75fcc995ca9ec08",
+       "6.2.4":  "3a473893b383e79c6a1fceca9f62bce8910f8c46671f6793b9721c861b5f1550",
+       "6.2.5":  "a5624f09f70b95ae22ed1b93b3409caf3c36c08847fca6332818e329844cb7d2",
+       "6.2.6":  "5fc937d842a3d9cd8dbad43dafb7ee5d1ffa0ff8918555628dc5f3882149abb2",
+       "6.2.7":  "b0380b29b1c6323f80029d24f6d24acb27cf4c697bc8eadca2037449dbfd8b84",
+       "6.2.8":  "17bc4dc8cc6894a9364d83db0db20c84abcda6e3ca19f57b12430a6c8297bb82",
+       "6.2.9":  "132a1997f4831b63f051e3d60b042d621f383fbe3d62024c02941dde74cbd210",
+       "6.2.11": "f3641207cd6d80865ee681b6d4b1a20b2ce219964cd0c97eaafd3600a526024f",
+       "6.2.12": "e7a50e3eded912f3d3d63b14acd23324861a8f545543d7a0aedd06cca17cb391",
+       "6.2.13": "bfd63706c275b4782bbfcacc2f4de248f661fe8ee44fa4ea11fcbed7a01d8851",
+       "6.2.14": "4d4d6eac6a93d3db1d1517bc56cedc2e8fd4685180b759b275dbacd23a2998d8",
+       "6.2.15": "b8acc1b94adac38d68340a5f472425431ce6dc8f0fbbe709d96c027dbd73d18b",
+       "6.2.16": "9fc09c6fd757fa5aadf356c331479836b8b3a1cd50a9e1609f3cd28bd4381b90",
+       "6.2.18": "2a2e0c487f10be315596451c4e72376ab4e8bb2a3d80168a0eb7ce9494e2f18b",
+       "6.2.20": "f368caa73d687754fd582ab7f34e2359c3ea4d773580c598b45a39d4e93327bb",
+       "6.2.22": "21f5e90f5f911c7f8d24b88b0cf45668545da5b45b7cf30138ba144eace6c8b7",
+       "6.2.24": "578224944370a0ea55f884591074f89d1b352628e9f39897dabea56bd7373310",
+       "6.2.30": "84253a9227f7ee0cef064861455bd6bdda89d41a6012b97f6903fe827c7f2f61",
+       "6.2.32": "e2990cbd57f931c4ca26c7b94db0090cac82bcc644be2f58bb48512af19fc52e",
+       "6.2.34": "ccd7744f0cd68ca1e968e0254624fffb5a186c71f218f881a0f07f88dd48ba0d",
+       "6.2.36": "b8012c8c33f72b33479a7f6a14501f112edf6560b997fa83224516308a237c95",
+       "6.2.37b.1": "b395744b8e3bdcfa25168176ab633def94e0d15f67a68cf1f461ed3da5240652",
+       "6.2.37b.2": "2f5eb71cf5d47b46fed6acf92489ae6793ec7579904239315f52ac9679bdb253",
+      }
+  install_dir_name: sympa
+  apply_patches: 1
+  mail:
+    domain: lists.example.com
+    alias_directory: /etc/mail
+    alias_file: sympa_transport
+  web:
+    domain: lists.example.com
+  db:
+    app_user: sympa
+  config:
+    color_0: '#F7F7F7'
+    color_1: '#222222'
+    color_2: '#004B94'
+    color_3: '#5E5E5E'
+    color_4: '#4c4c4c'
+    color_5: '#0090E9'
+    color_6: '#005ab2'
+    color_7: '#fff'
+    color_8: '#f2f6f9'
+    color_9: '#bfd2e1'
+    color_10: '#983222'
+    color_11: '#66aaff'
+    color_12: '#FFE7E7'
+    color_13: '#f48A7b'
+    color_14: '#ff9'
+    color_15: '#fe57a1'
+    language: 'en_US'
