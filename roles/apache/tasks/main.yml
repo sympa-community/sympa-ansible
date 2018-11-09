@@ -20,12 +20,6 @@
   tags: proxy
   when: inventory_hostname == 'local-proxy'
 
-- name: Adding all domain in /etc/hosts
-  tags: common
-  lineinfile: 
-    path: /etc/hosts
-    line: "192.168.66.60 lists.example.com robot1.example.com robot2.example.com robot3.example.com"
-
 - name: Install Apache
   tags: apache
   apt: name={{ item }}
