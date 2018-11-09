@@ -1,8 +1,7 @@
 ---
-
 - name: Install Sympa configuration file
   template: src=sympa.conf.j2 dest=/etc/sympa/sympa.conf owner=sympa group=sympa mode=0640
-  tags: sympa.conf
+  tags: sympa_conf
   notify: restart sympa
   
 - name: Create sympa log file

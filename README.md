@@ -62,13 +62,13 @@ The Sympa server parameters can be customized in the _environments/local/group_v
 # Group vars for sympa servers
 
 # FQDN for mail addresses
-common.mail.domain: lists.example.com
+sympa_mail_hostname: lists.example.com
 
 # FQDN of web interface
-sympa_web_hostname: "{{ common.mail.domain }}"
+sympa_web_hostname: "{{ sympa_mail_hostname }}"
 
 # Web server admin email
-server_admin_email: "listmaster@{{ common.mail.domain }}"
+server_admin_email: "listmaster@{{ sympa_mail_hostname }}"
 
 # Root directory to install Sympa software
 sympa_root_directory: /home/sympa
@@ -77,7 +77,7 @@ sympa_root_directory: /home/sympa
 sympa_listmaster_email: guevara@chemail.com
 
 # Root passwd for the Sympa database
-sympa.db.root_password: "{{ lookup('file',inventory_dir+'/password/sympa_db_root_password') }}"
+sympa_db_root_password: "{{ lookup('file',inventory_dir+'/password/sympa_db_root_password') }}"
 
 # App passwd for the Sympa database
 sympa_db_app_password: "{{ lookup('file',inventory_dir+'/password/sympa_db_app_password') }}"

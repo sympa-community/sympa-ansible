@@ -5,3 +5,20 @@
 dependencies:
   - role: apache
     tags: apache
+    vhosts:
+      # Note: config path needs a relative path because it will be loaded from the apache role
+    - config: "{{ lookup('template', role_path+'/../sympa_virtual_robot/templates/apache/sympa_vhost443.conf.j2') }}"
+      name: "{{ robot.hostname }}"
+      ip: "*" #"{{ host_ipv4 }}"
+      port: 443
+      ssl_certificate: "{{ sympa_ssl_certificate }}"
+      ssl_key: "{{ sympa_ssl_key }}"
+      ssl: yes
+      signedcertificate: yes
+
+    - config: "{{ lookup('template', role_path+'/../sympa_virtual_robot/templates/apache/sympa_vhost80.conf.j2') }}"
+      name: "{{ robot.hostname }}"
+      ip: "*" # "{{ host_ipv4 }}"
+      port: 80
+      ssl: no
+

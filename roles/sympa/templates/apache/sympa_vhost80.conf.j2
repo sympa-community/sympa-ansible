@@ -1,0 +1,5 @@
+    DocumentRoot "/var/www/html/"
+
+    ## Redirection systématique en HTTPS
+    RedirectMatch ^(.*)$ https://{{ sympa_web_hostname }}$1
+    

@@ -20,7 +20,7 @@
     - automake
     - gettext
     - git
-  when: sympa.install_from_repository  
+  when: sympa_install_from_repository  
 
 - name: Install required CPAN Perl modules
   apt: name={{ item }} state=present

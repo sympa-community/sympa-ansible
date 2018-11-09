@@ -9,8 +9,8 @@ Vagrant.configure("2") do |config|
     config.vm.box = "puppetlabs/ubuntu-16.04-64-nocm"
 
     # VM: "local-sympa"
-    config.vm.define "local-sympa" do |conf|
-        conf.vm.hostname = "local-sympa"
+    config.vm.define "local-sympa-ubuntu16" do |conf|
+        conf.vm.hostname = "local-sympa-ubuntu16"
         # Give it a fixed IP
         conf.vm.network "private_network", ip: "192.168.66.67", :netmask => "255.255.255.0"
         conf.vm.provider "vmware_fusion" do |v|
@@ -40,9 +40,7 @@ Vagrant.configure("2") do |config|
         # These are not used by provision.yml
 
         ansible.groups = {
-          "sympa" => ["local-sympa"],
-          "apache" => ["local-sympa"],
-          "postfix" => ["local-sympa"],
+          "sympa" => ["local-sympa-ubuntu16"],
         }
         ansible.playbook = "provision-vagrant-vm.yml"
         #ansible.verbose = "vvvv" # For troubleshooting ansible connection problems

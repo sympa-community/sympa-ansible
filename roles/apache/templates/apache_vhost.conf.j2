@@ -1,25 +1,17 @@
-{% if proxy %}
-<VirtualHost {{ item.ip }}:80>
-  ServerName {{ item.web.domain }}
-  RedirectMatch ^(.*)$ https://{{ item.web.domain }}$1
-</VirtualHost>
-{% endif %}
-
 <VirtualHost {{ item.ip }}:{{ item.port }}>
-    DocumentRoot /var/www/html
-    ServerAdmin {{ item.web.admin }}
+    ServerAdmin {% if server_admin_email is defined %}{{ server_admin_email }}{% else %}sympa@{{ item.name }}{% endif %}
 
-    ServerName {{ item.web.domain }}
+    ServerName {{ item.name }}:{{ item.port }}
     ServerSignature off
 
-    ErrorLog ${APACHE_LOG_DIR}/error_{{ item.web.domain }}.log
-    CustomLog ${APACHE_LOG_DIR}/access_{{ item.web.domain }}.log combined
+    ErrorLog ${APACHE_LOG_DIR}/error_{{ item.name }}.log
+    CustomLog ${APACHE_LOG_DIR}/access_{{ item.name }}.log combined
 
-{% if item.ssl.enabled %}
+{% if item.ssl %}
     # SSL/TLS Configuration
     SSLEngine on
-    SSLCertificateKeyFile /etc/ssl/private/{{ item.web.domain }}.key
-    SSLCertificateFile /etc/ssl/certs/{{ item.web.domain }}.crt
+    SSLCertificateKeyFile /etc/ssl/private/{{ item.name }}.key
+    SSLCertificateFile /etc/ssl/certs/{{ item.name }}.crt
 {# Less strict cipher suits #}
     SSLCipherSuite ECDHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES256-GCM-SHA384:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES128-GCM-SHA256:ECDHE-RSA-AES256-SHA384:DHE-RSA-AES256-SHA256:ECDHE-RSA-AES128-SHA256:DHE-RSA-AES128-SHA256:ECDHE-RSA-AES256-SHA:DHE-RSA-AES256-SHA:ECDHE-RSA-AES128-SHA:DHE-RSA-AES128-SHA:AES256-GCM-SHA384:AES128-GCM-SHA256:AES256-SHA256:AES128-SHA256:AES256-SHA:AES128-SHA
 {# Strict cipher suits
@@ -30,63 +22,13 @@
     SSLProtocol all -SSLv2 -SSLv3
 {# 15768000 seconds = 6 months #}
     Header always set Strict-Transport-Security max-age=15768000
-    {% if item.ssl.selfsignedcertificate is defined and item.ssl.selfsignedcertificate %}
+    {% if item.signedcertificate is defined and item.signedcertificate %}
     SSLUseStapling on
     {% else %}
     SSLUseStapling off
     {% endif %}
 {% endif %}
-{% if proxy %}
-  {% if 'sympa' in item %}
-    <Location /sympa>
-              Require all granted
-              RequestHeader set Front-End-Https "On"
-              ProxyPass         https://{{ hostvars[item.sympa.server]['ansible_eth1']['ipv4']['address'] }}/sympa
-              ProxyPassReverse  https://{{ hostvars[item.sympa.server]['ansible_eth1']['ipv4']['address'] }}/sympa
-              ProxyPreserveHost On
-    </Location>
-    <Location /sympasoap>
-              Require all granted
-              RequestHeader set Front-End-Https "On"
-              ProxyPass         https://{{ hostvars[item.sympa.server]['ansible_eth1']['ipv4']['address'] }}/sympasoap
-              ProxyPassReverse  https://{{ hostvars[item.sympa.server]['ansible_eth1']['ipv4']['address'] }}/sympasoap
-              ProxyPreserveHost On
-    </Location>
-    <Location /check-smtp-service-results>
-              Require all granted
-              RequestHeader set Front-End-Https "On"
-              ProxyPass         https://{{ hostvars[item.sympa.server]['ansible_eth1']['ipv4']['address'] }}/check-smtp-service-results
-              ProxyPassReverse  https://{{ hostvars[item.sympa.server]['ansible_eth1']['ipv4']['address'] }}/check-smtp-service-results
-              ProxyPreserveHost On
-    </Location>
-    <Location /static-sympa>
-              Require all granted
-              RequestHeader set Front-End-Https "On"
-              ProxyPass         https://{{ hostvars[item.sympa.server]['ansible_eth1']['ipv4']['address'] }}/static-sympa
-              ProxyPassReverse  https://{{ hostvars[item.sympa.server]['ansible_eth1']['ipv4']['address'] }}/static-sympa
-              ProxyPreserveHost On
-    </Location>
-  {% endif %}
-  {% if 'dokuwiki' in item %}
-    <Location /wiki>
-              Require all granted
-              RequestHeader set Front-End-Https "On"
-              ProxyPass         https://{{ hostvars[item.dokuwiki.server]['ansible_eth1']['ipv4']['address'] }}/wiki
-              ProxyPassReverse  https://{{ hostvars[item.dokuwiki.server]['ansible_eth1']['ipv4']['address'] }}/wiki
-              ProxyPreserveHost On
-    </Location>
-  {% endif %}
-  {% if 'limesurvey' in item %}
-    <Location /limesurvey>
-              Require all granted
-              RequestHeader set Front-End-Https "On"
-              ProxyPass         https://{{ hostvars[item.limesurvey.server]['ansible_eth1']['ipv4']['address'] }}/limesurvey
-              ProxyPassReverse  https://{{ hostvars[item.limesurvey.server]['ansible_eth1']['ipv4']['address'] }}/limesurvey
-              ProxyPreserveHost On
-    </Location>
-  {% endif %}
-    
-{% else %}
-    Alias /check-smtp-service-results {{ install_prefix }}/check_smtp/results/{{ item.web.domain }}
-{% endif %}
+
+    # VHost specific config
+{{ item.config }}
 </VirtualHost>

@@ -3,15 +3,18 @@
 ## Template for Sympa virtual robot creation and setup
 ## templates are called from the sympa/meta/main.yml file
 
+- debug: msg="Trace depuis role ; var={{ robot.hostname }}"
+
 # TODO : paramètres : fqdn, 
-- name : "robot {{ robot.mail.domain }}: create list_data directory" 
-  file: path="{{ sympa.lists_path }}/{{ robot.mail.domain }}" state=directory owner=sympa group=sympa
+# TODO : créer list_data/robot
+- name : "robot {{ robot.hostname }}: create list_data directory" 
+  file: path="{{ sympa_root_directory }}/list_data/{{ robot.hostname }}" state=directory owner=sympa group=sympa
 
-- name : "robot {{ robot.mail.domain }}: create etc directory" 
-  file: path="{{ install_prefix }}/{{ sympa.install_dir_name }}/etc/{{ robot.mail.domain }}" state=directory owner=sympa group=sympa
+- name : "robot {{ robot.hostname }}: create etc directory" 
+  file: path="{{ sympa_root_directory }}/etc/{{ robot.hostname }}" state=directory owner=sympa group=sympa
 
-- name: "robot {{ robot.mail.domain }}: install robot.conf" 
-  template: src=robot.conf.j2 dest="{{ install_prefix }}/{{ sympa.install_dir_name }}/etc/{{ robot.mail.domain }}/robot.conf" mode=0640 owner=sympa group=sympa
+- name: "robot {{ robot.hostname }}: install robot.conf" 
+  template: src=robot.conf.j2 dest="{{ sympa_root_directory }}/etc/{{ robot.hostname }}/robot.conf" mode=0640 owner=sympa group=sympa
   notify: restart sympa
   
 # TODO : créer conf postfix
