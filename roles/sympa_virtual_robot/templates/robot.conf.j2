@@ -3,7 +3,7 @@
 http_host       {{ robot.web.domain }}
 host            {{ robot.mail.domain }}
 wwsympa_url     https://{{ robot.web.domain }}/sympa
-soap_url	    https://{{ robot.web.domain }}/sympasoap
+soap_url	      https://{{ robot.web.domain }}/sympasoap
 cookie_domain   {{ robot.web.domain }}
 listmaster      {{ robot.admins | join(',') }}
 create_list     {{ robot.config.create_list }}
@@ -24,4 +24,4 @@ color_12        {{ robot.config.color_12 }}
 color_13        {{ robot.config.color_13 }}
 color_14        {{ robot.config.color_14 }}
 color_15        {{ robot.config.color_15 }}
-
+language        {{ robot.config.language }}

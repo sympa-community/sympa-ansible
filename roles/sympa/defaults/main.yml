@@ -6,8 +6,8 @@ sympa:
   repository: https://github.com/sympa-community/git
   repository_version: HEAD
   install_from_repository: 0
-  source: http://www.sympa.org/distribution/releases
-  version: 6.2.32
+  source: https://github.com/sympa-community/sympa/releases/download/
+  version: 6.2.36
   download_url: "http://www.sympa.org/distribution/releases"
   sha256:
       {
@@ -41,8 +41,11 @@ sympa:
        "6.2.24": "578224944370a0ea55f884591074f89d1b352628e9f39897dabea56bd7373310",
        "6.2.30": "84253a9227f7ee0cef064861455bd6bdda89d41a6012b97f6903fe827c7f2f61",
        "6.2.32": "e2990cbd57f931c4ca26c7b94db0090cac82bcc644be2f58bb48512af19fc52e",
+       "6.2.34": "ccd7744f0cd68ca1e968e0254624fffb5a186c71f218f881a0f07f88dd48ba0d",
+       "6.2.36": "b8012c8c33f72b33479a7f6a14501f112edf6560b997fa83224516308a237c95",
+       "6.2.37b.1": "b395744b8e3bdcfa25168176ab633def94e0d15f67a68cf1f461ed3da5240652",
+       "6.2.37b.2": "2f5eb71cf5d47b46fed6acf92489ae6793ec7579904239315f52ac9679bdb253",
       }
-
   install_dir_name: sympa
   apply_patches: 1
   mail:
@@ -70,3 +73,4 @@ sympa:
     color_13: '#f48A7b'
     color_14: '#ff9'
     color_15: '#fe57a1'
+    language: 'en_US'
