@@ -4,6 +4,14 @@
   with_items:
     - postfix
 
+- name: Getting hostname
+  shell: hostname -f
+  register: hostname_output
+
+- name: Setting hostname variable
+  set_fact:
+    hostname: "{{ hostname_output.stdout }}"
+
 - include_vars:
     dir: "{{ inventory_dir }}/private/vhosts"
     name: vhost_specific_variables

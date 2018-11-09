@@ -28,7 +28,7 @@ smtp_tls_session_cache_database = btree:${data_directory}/smtp_scache
 # information on enabling SSL in the smtp client.
 
 smtpd_relay_restrictions = permit_mynetworks,permit_sasl_authenticated,defer_unauth_destination
-myhostname = {{ inventory_hostname }}
+myhostname = {{ hostname }}
 mydestination = $myhostname, localhost.localdomain, localhost
 sympa_destination_recipient_limit = 1
 sympabounce_destination_recipient_limit = 1
