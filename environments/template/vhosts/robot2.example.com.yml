@@ -13,5 +13,5 @@ robot2.example.com:
     config:
       title: My increasingly cool service
       create_list: listmaster
-      color_4: '#0431B4'
+      color_6: '#0431B4'
     server: local-sympa-ubuntu16
