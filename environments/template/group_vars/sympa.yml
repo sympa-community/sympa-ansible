@@ -10,7 +10,7 @@ sympa_web_hostname: "{{ sympa_mail_hostname }}"
 sympa_root_directory: /usr/local/sympa
 
 # Email addresses of listmasters (comma separated)
-sympa_listmaster_email: john.doe@my.domain
+sympa_listmaster_email: "listmaster@{{ sympa_mail_hostname }}"
 
 # Root passwd for the Sympa database
 sympa_db_root_password: "{{ lookup('file',inventory_dir+'/password/sympa_db_root_password') }}"
