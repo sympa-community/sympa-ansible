@@ -3,8 +3,6 @@
 ## Template for Sympa virtual robot creation and setup
 ## templates are called from the sympa/meta/main.yml file
 
-- debug: msg="Trace depuis role ; var={{ robot.hostname }}"
-
 # TODO : paramètres : fqdn, 
 # TODO : créer list_data/robot
 - name : "robot {{ robot.hostname }}: create list_data directory" 
