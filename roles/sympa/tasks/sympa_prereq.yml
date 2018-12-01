@@ -27,7 +27,6 @@
   with_items:
   - libarchive-zip-perl # Perl module for manipulation of ZIP archives
   - libclass-singleton-perl # implementation of a "Singleton" class
-  - libdbd-mysql-perl # Perl5 database interface to the MySQL database
   - libdatetime-format-mail-perl # Convert between DateTime and RFC2822/822 formats
   - libfile-copy-recursive-perl # Perl extension for recursively copying files and directories
   - libfile-nfslock-perl # perl module to do NFS (or not) locking
@@ -57,7 +56,19 @@
   - libdbd-odbc-perl # Perl Database Driver implementing ODBC for DBI
   - libmail-dkim-perl # cryptographically identify the sender of email - perl library
   - libsoap-lite-perl # Perl implementation of a SOAP client and server
-  
+
+- name: Install CPAN module for MySQL
+  apt:
+    name: libdbd-mysql-perl
+  when:
+    - sympa_db_type == "mysql"
+
+- name: Install CPAN module for PostgreSQL
+  apt:
+    name: libdbd-pg-perl
+  when:
+    - sympa_db_type == "Pg"
+
 - name: add mhonarc path to PERL5LIB in profile.d/
   template: src=profile.d/sympa.sh.j2 dest=/etc/profile.d/sympa.sh
   tags: profile.d

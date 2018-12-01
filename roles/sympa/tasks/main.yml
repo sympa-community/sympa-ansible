@@ -36,7 +36,7 @@
 
 - name: Install and configure database
   tags: sympa_db
-  import_tasks: sympa_db.yml
+  include_tasks: "sympa_db_{{ sympa_db_type | lower }}.yml"
 
 - name: Enable Sympa startup
   tags: sympa_startup
