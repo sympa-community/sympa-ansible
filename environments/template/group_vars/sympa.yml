@@ -12,6 +12,9 @@ sympa_root_directory: /usr/local/sympa
 # Email addresses of listmasters (comma separated)
 sympa_listmaster_email: "listmaster@{{ sympa_mail_hostname }}"
 
+# Sympa database type (either "mysql" or "Pg")
+sympa_db_type: "mysql"
+
 # Root passwd for the Sympa database
 sympa_db_root_password: "{{ lookup('file',inventory_dir+'/password/sympa_db_root_password') }}"
 
