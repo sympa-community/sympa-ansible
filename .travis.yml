@@ -15,3 +15,5 @@ script:
   - echo "[sympa]" >> environments/local/inventory
   - echo "localhost" >> environments/local/inventory
   - ansible-playbook site.yml --connection=local --become -i environments/local/inventory
+services:
+  - mysql
