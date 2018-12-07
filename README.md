@@ -76,6 +76,9 @@ sympa_root_directory: /home/sympa
 # Email addresses of listmasters (comma separated)
 sympa_listmaster_email: guevara@chemail.com
 
+# Sympa database type (either "mysql" or "Pg")
+sympa_db_type: "mysql"
+
 # Root passwd for the Sympa database
 sympa_db_root_password: "{{ lookup('file',inventory_dir+'/password/sympa_db_root_password') }}"
 

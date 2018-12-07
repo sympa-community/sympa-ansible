@@ -1,0 +1,35 @@
+---
+# Install and configure Sympa database
+
+- name: Install required packages for PostgreSQL
+  apt:
+    name:
+      - postgresql
+      - libpq-dev
+      - python-psycopg2 # Required by Ansible
+    state: present
+
+- name: Create PostgreSQL database for Sympa
+  postgresql_db:
+    name: sympa
+    encoding: UTF-8
+    lc_collate: en_US.UTF-8
+    lc_ctype: en_US.UTF-8
+    template: template0
+    login_unix_socket: "/var/run/postgresql"
+    state: present
+  become: true
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
+
+- name: Create PostgreSQL user for Sympa
+  postgresql_user:
+    db: sympa
+    name: "{{ sympa_db_app_user }}"
+    password: "{{ sympa_db_app_password }}"
+    login_unix_socket: "/var/run/postgresql"
+  become: true
+  become_user: postgres
+  vars:
+    ansible_ssh_pipelining: true
