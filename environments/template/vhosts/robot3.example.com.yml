@@ -14,4 +14,4 @@ robot3.example.com:
       title: Now, that's some reaaaaally cool service!
       create_list: listmaster
       color_6: '#6A0888'
-    server: local-sympa
+    server: localhost

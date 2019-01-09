@@ -28,6 +28,11 @@
   set_fact:
     mail_domains: "{% set mail_domains = [] %}{% for d in postfix_vhosts %}{% set _ = mail_domains.append(d.domain) %}{% endfor %}{{ mail_domains }}"
 
+- name: Set vhosts web domains
+  tags: all
+  set_fact:
+    web_domains: "{% set web_domains = [] %}{% for d in sympa_vhosts %}{% set _ = web_domains.append(d.web.domain) %}{% endfor %}{{ web_domains }}"
+
 - name: Ensure group "sympa" exists
   group:
     name: "{{ sympa.unix_group }}"
@@ -75,7 +80,7 @@
 
 - name: Install and configure database
   tags: sympa_db
-  include_tasks: "sympa_db_{{ sympa.db.type | lower }}.yml"
+  import_tasks: "sympa_db_{{ sympa.db.type | lower }}.yml"
 
 - name: Enable Sympa startup
   tags: sympa_startup
