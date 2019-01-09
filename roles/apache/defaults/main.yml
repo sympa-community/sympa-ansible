@@ -1,0 +1,5 @@
+---
+
+common:
+  web:
+    domain: 'lists.example.com'

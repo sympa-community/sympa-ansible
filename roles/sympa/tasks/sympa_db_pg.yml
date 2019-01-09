@@ -26,8 +26,8 @@
 - name: Create PostgreSQL user for Sympa
   postgresql_user:
     db: sympa
-    name: "{{ sympa_db_app_user }}"
-    password: "{{ sympa_db_app_password }}"
+    name: "{{ sympa.db.app_user }}"
+    password: "{{ sympa.db.app_password }}"
     login_unix_socket: "/var/run/postgresql"
   become: true
   become_user: postgres

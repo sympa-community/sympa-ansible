@@ -1,0 +1,7 @@
+---
+
+- name: Setup SMTP chain monitoring
+  tags: postfix_monitoring_check_smtp, postfix_monitoring, postfix
+  import_tasks: monitoring/check_smtp.yml
+  when: group_names|select('in', ['sympa', 'dokuwiki', 'limesurvey'])|list|length > 0
+  

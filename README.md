@@ -61,46 +61,32 @@ The Sympa server parameters can be customized in the _environments/local/group_v
 
 # Group vars for sympa servers
 
-# FQDN for mail addresses
-sympa_mail_hostname: lists.example.com
-
-# FQDN of web interface
-sympa_web_hostname: "{{ sympa_mail_hostname }}"
-
-# Web server admin email
-server_admin_email: "listmaster@{{ sympa_mail_hostname }}"
-
-# Root directory to install Sympa software
-sympa_root_directory: /home/sympa
-
-# Email addresses of listmasters (comma separated)
-sympa_listmaster_email: guevara@chemail.com
-
-# Sympa database type (either "mysql" or "Pg")
-sympa_db_type: "mysql"
-
-# Root passwd for the Sympa database
-sympa_db_root_password: "{{ lookup('file',inventory_dir+'/password/sympa_db_root_password') }}"
-
-# App passwd for the Sympa database
-sympa_db_app_password: "{{ lookup('file',inventory_dir+'/password/sympa_db_app_password') }}"
-
-# SSL cert for Apache
-sympa_ssl_certificate: "{{ lookup('file',inventory_dir+'/ssl_cert/webserver.crt') }}"
-
-# SSL private key for Apache
-sympa_ssl_key: "{{ lookup('file',inventory_dir+'/ssl_cert/webserver.key') }}"
+sympa:
+  db:
+    type: mysql
+    app_user: sympa
+    app_password: "{{ lookup('file',inventory_dir+'/private/password/sympa_db_app_password') }}"
 ```
 
-Sympa virtual robots are enabled via YAML files, like _environments/local/sympa_virtual_robots/robot1.yml_ :
+Sympa virtual robots are enabled via YAML files, like _environments/local/private/vhosts/robot1.yml_ :
 
 ```
 #!yaml
 
 robot1:
-  hostname: robot1.example.com
-  title: Robot1 mailing list service
-  create_list: listmaster
+  common:
+    web:
+      domain: lists.example.com
+    mail:
+      domain: lists.example.com
+    admins:
+      - user1@webmail.com
+      - user2@webmail.net
+  sympa:
+    config:
+      title: My service
+      create_list: listmaster
+    server: local-sympa
 ```
 
 

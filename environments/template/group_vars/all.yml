@@ -13,3 +13,33 @@ timezone: Europe/Amsterdam
 # Default user to for Ansible "remote_user"
 # You can override this in groups_vars, or host_vars
 ansible_remote_user: root
+
+install_prefix: /usr/local
+
+db:
+  root_password: "{{ lookup('file',inventory_dir+'/private/password/db_root_password') }}"
+  root_user: root
+
+common:
+  ip: "*"
+  port: 443
+  ssl:
+    enabled: yes
+    certificate: "{{ lookup('file',inventory_dir+'/private/ssl_cert/webserver.crt') }}"
+    selfsignedcertificate: yes
+    key: "{{ lookup('file',inventory_dir+'/private/ssl_cert/webserver.key') }}"
+  web:
+    domain: lists.example.com
+    admin: support@renater.fr
+  mail:
+    domain: lists.example.com
+  admins:
+    - david@webmail.com
+    - etienne@webmail.com
+    - olivier@webmail.com    
+  check_smtp:
+    smtp_out: localhost
+    address: check-smtp-service-ping
+    auth_secret: foobar
+    max_delay: 300
+      
