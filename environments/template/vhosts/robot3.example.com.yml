@@ -6,9 +6,9 @@ robot3.example.com:
     mail:
       domain: robot3.example.com
     admins:
-      - etienne@webmail.com
-      - olivier@webmail.com
-      - david@webmail.com
+      - etienne@example.com
+      - olivier@example.com
+      - david@example.com
   sympa:
     config:
       title: Now, that's some reaaaaally cool service!

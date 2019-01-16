@@ -34,9 +34,9 @@ common:
   mail:
     domain: lists.example.com
   admins:
-    - david@webmail.com
-    - etienne@webmail.com
-    - olivier@webmail.com    
+    - david@example.com
+    - etienne@example.com
+    - olivier@example.com    
   check_smtp:
     smtp_out: localhost
     address: check-smtp-service-ping

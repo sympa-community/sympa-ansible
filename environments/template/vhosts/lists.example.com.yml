@@ -6,9 +6,9 @@ lists.example.com:
     mail:
       domain: lists.example.com
     admins:
-      - olivier@webmail.com
-      - etienne@webmail.com
-      - david@webmail.com
+      - olivier@example.com
+      - etienne@example.com
+      - david@example.com
   sympa:
     config:
       title: My lovely service
