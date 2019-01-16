@@ -67,25 +67,6 @@
               ProxyPreserveHost On
     </Location>
   {% endif %}
-  {% if 'dokuwiki' in item %}
-    <Location /wiki>
-              Require all granted
-              RequestHeader set Front-End-Https "On"
-              ProxyPass         https://{{ hostvars[item.dokuwiki.server]['ansible_eth1']['ipv4']['address'] }}/wiki
-              ProxyPassReverse  https://{{ hostvars[item.dokuwiki.server]['ansible_eth1']['ipv4']['address'] }}/wiki
-              ProxyPreserveHost On
-    </Location>
-  {% endif %}
-  {% if 'limesurvey' in item %}
-    <Location /limesurvey>
-              Require all granted
-              RequestHeader set Front-End-Https "On"
-              ProxyPass         https://{{ hostvars[item.limesurvey.server]['ansible_eth1']['ipv4']['address'] }}/limesurvey
-              ProxyPassReverse  https://{{ hostvars[item.limesurvey.server]['ansible_eth1']['ipv4']['address'] }}/limesurvey
-              ProxyPreserveHost On
-    </Location>
-  {% endif %}
-    
 {% else %}
     Alias /check-smtp-service-results {{ install_prefix }}/check_smtp/results/{{ item.web.domain }}
 {% endif %}
