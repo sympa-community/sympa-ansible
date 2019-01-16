@@ -27,7 +27,7 @@
   postgresql_user:
     db: sympa
     name: "{{ sympa.db.app_user }}"
-    password: "{{ sympa.db.app_password }}"
+    password: "{{ sympa.db.app_password | vault(vault_keydir) }}"
     login_unix_socket: "/var/run/postgresql"
   become: true
   become_user: postgres
