@@ -102,3 +102,15 @@
         hash:{{ sympa.mail.alias_directory }}/{{ sympa.mail.alias_file }}
   notify: restart postfix
 
+- name: Installing Sympa spam scenarios
+  copy:
+    src: "{{ item }}"
+    dest: "{{ install_prefix }}/{{ sympa.install_dir_name }}/etc/scenari"
+    owner: "{{ sympa.unix_user }}"
+    group: "{{ sympa.unix_group }}"
+    mode: 0644
+  when: mail.antispam is defined
+  with_items:
+    - spam_status.x-spam-status
+    - include.send.header
+
