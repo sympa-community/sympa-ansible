@@ -1,0 +1,43 @@
+---
+- name: Install required packages
+  apt: name={{ item }} state=present
+  with_items:
+    - spamassassin
+
+- name: adjust spamassassin configuration
+  lineinfile:
+    path: /etc/spamassassin/local.cf
+    regexp: '^{{ item }}'
+    line: "{{ item }} {{ mail.spamassassin.config.simple[item] }}"
+    insertbefore: '^ifplugin'
+  with_items: "{{ mail.spamassassin.config.simple }}"
+  notify: restart spamassassin
+
+- name: adjust spamassassin scoring
+  lineinfile:
+    path: /etc/spamassassin/local.cf
+    regexp: '^score {{ item }}'
+    line: "score {{ item }} {{ mail.spamassassin.config.score[item] }}"
+    insertbefore: '^ifplugin'
+  with_items: "{{ mail.spamassassin.config.score }}"
+  notify: restart spamassassin
+
+- name: set report_safe to 0
+  lineinfile:
+    path: /etc/spamassassin/local.cf
+    regexp: 'report_safe'
+    line: "report_safe 0"
+
+- name: Enable Spamassassin in Postfix
+  blockinfile:
+    path: /etc/postfix/master.cf
+    marker: "# {mark} ANSIBLE MANAGED Spamassassin config"
+    block: |
+      smtp inet n - n - - smtpd   -o content_filter=spamassassin:
+      spamassassin unix - n n - - pipe flags=Rq user=debian-spamd argv=/usr/bin/spamc -s 20000000 -e /usr/sbin/sendmail -oi -f ${sender} ${recipient}
+  notify: restart postfix
+
+- name: Enable nightly channel update
+  lineinfile:
+    path: /etc/crontab
+    line: "0 1     * * *   root    sa-update --gpgkey 6C6191E3 --channel updates.spamassassin.org ; service spamassassin restart >/dev/null 2>&1"

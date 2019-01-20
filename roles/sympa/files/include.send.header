@@ -1,0 +1,2 @@
+match ([msg->spam_status], /spam/)   smtp,dkim,md5,smime   ->   reject,quiet
+match ([msg->spam_status], /unsure/)   smtp,dkim,md5,smime   ->   editorkey
