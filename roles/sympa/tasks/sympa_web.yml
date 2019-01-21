@@ -2,26 +2,71 @@
 # Configure Apache
 
 - name: Install Apache2
-  apt:
-    name:
-      - apache2
-      - libapache2-mod-fcgid # FastCGI interface module for Apache 2
-    state: present
+  apt: name={{ item }} state=present
+  with_items:
+  - apache2
+  - libapache2-mod-fcgid # FastCGI interface module for Apache 2
+  - spawn-fcgi
 
-- name: Enable CGI Apache module
-  apache2_module: name=fcgid state=present
-  notify: Restart Apache
+- name: ensure sockets directory
+  file:
+    dest: "/var/run/sympa"
+    state: directory
+    mode: 0755
   tags: apache
- 
-- name: install custom fcgid.conf file
-  template: src=apache/fcgid.conf.j2 dest=/etc/apache2/mods-available/fcgid.conf
-  notify: Restart Apache
+
+- name: install wwsympa service config
+  template: src=fcgi/wwsympa.service.j2 dest=/lib/systemd/system/wwsympa.service
+  notify: restart systemd
+  tags: apache
+
+- name: start wwsympa
+  shell: "systemctl start wwsympa.service"
+  tags: apache
+
+- name: setup autostart for wwsympa
+  shell: "systemctl enable wwsympa.service"
+  tags: apache
+
+- name: install sympasoap service config
+  template: src=fcgi/sympasoap.service.j2 dest=/lib/systemd/system/sympasoap.service
+  notify: restart systemd
+  tags: apache
+
+- name: start sympasoap
+  shell: "systemctl start sympasoap.service"
+  tags: apache
+
+- name: setup autostart for sympasoap
+  shell: "systemctl enable sympasoap.service"
   tags: apache
 
 - name: Install Sympa web config
   template: src=apache/sympa_web.conf.j2 dest=/etc/apache2/conf-available/sympa.conf
-  notify: Restart Apache
+  notify: restart apache
   tags: apache
+
+- name: Enable mod_rewrite
+  shell: a2enmod proxy_fcgi
+  notify: restart apache
 
 - name: Enable Sympa web config
   shell: a2enconf sympa
+  notify: restart apache
+
+- name: Enable mod_rewrite
+  shell: a2enmod rewrite
+  notify: restart apache
+
+- name: Add redirect from / to /sympa
+  tags: apache
+  blockinfile:
+    state: present
+    marker: "# {mark} ANSIBLE MANAGED {{ item }} redirect to /sympa"
+    path: "/etc/apache2/sites-available/{{ item }}.conf"
+    block: |
+      RewriteEngine On
+      RewriteRule ^/?$ https://%{SERVER_NAME}/sympa [QSA,R=301,L]
+  notify: restart apache
+  with_items: "{{ web_domains }}"
+
