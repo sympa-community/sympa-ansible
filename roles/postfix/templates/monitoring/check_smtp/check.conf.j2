@@ -1,8 +1,0 @@
-smtp_out {{ common.check_smtp.smtp_out }}
-address {{ common.check_smtp.address }}
-auth_secret {{ common.check_smtp.auth_secret }}
-source {{ group_names|select('in', ['sympa', 'dokuwiki', 'limesurvey'])|first }}
-max_delay {{ common.check_smtp.max_delay }}
-{% for item in vhost_specific_variables.values()|map(attribute='common') %}
-{% if item.mail.domain != item.web.domain %}{{ item.mail.domain }} {{ item.web.domain }}{% endif %}
-{% endfor %}

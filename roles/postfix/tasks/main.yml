@@ -27,7 +27,11 @@
 - name: Install Postfix main.cf configuration file
   template: src=main.cf.j2 dest=/etc/postfix/main.cf
   notify: restart postfix
-  
+
+- debug: msg="{{ mail }}"
+
 - name: Add monitoring
   tags: postfix
-  import_tasks: monitoring.yml
+  include_role:
+    name: monitoring
+  when: mail.enable_check_smtp == 1
