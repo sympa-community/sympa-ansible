@@ -2,7 +2,7 @@
 
 - name: Provision Vagrant VM (Ubuntu 16.04 LTS)
   hosts: all
-  sudo: True
+  become: yes
   gather_facts: False
   vars:
       - ansible_ssh_user: vagrant
@@ -19,6 +19,6 @@
         apt: update_cache=yes upgrade=dist cache_valid_time=3600
 
       - name: Install optional packages
-        apt: name={{ item }}
-        with_items:
-        - vim
+        apt:
+          name:
+            - vim
