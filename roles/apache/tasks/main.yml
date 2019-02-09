@@ -11,21 +11,21 @@
   copy: content="{{ item.ssl_certificate }}" dest=/etc/ssl/certs/{{ item.name }}.crt owner=root group=root mode=644
   when: item.ssl
   with_items: "{{ vhosts }}"
-  notify: Restart Apache
+  notify: restart webserver
 
 - name: Put Apache vhost keys
   no_log: True
   copy: content="{{ item.ssl_key }}" dest=/etc/ssl/private/{{ item.name }}.key owner=root group=ssl-cert mode=640
   with_items: "{{ vhosts }}"
   when: item.ssl
-  notify: Restart Apache
+  notify: restart webserver
 
 - name: Disable default Apache sites
   command: /usr/sbin/a2dissite {{ item }} removes=/etc/apache2/sites-enabled/{{ item }}.conf
   with_items:
   - 000-default
   - default-ssl
-  notify: Restart Apache
+  notify: restart webserver
 
   # Enable modules required for ssl
 - name: Enable Apache modules
@@ -33,25 +33,25 @@
   with_items:
   - ssl
   - headers
-  notify: Restart Apache
+  notify: restart webserver
 
 - name: Put global Apache config
   copy: src=stapling.conf dest=/etc/apache2/conf-available/stapling.conf owner=root group=root mode=644
-  notify: Restart Apache
+  notify: restart webserver
 
 - name: Install Apache security config
   template: src=security.conf.j2 dest=/etc/apache2/conf-available/security.conf owner=root group=root mode=644
-  notify: Restart Apache
+  notify: restart webserver
   
 - name: Install Apache main config with security options
   template: src=apache2.conf.j2 dest=/etc/apache2/apache2.conf owner=root group=root mode=644
-  notify: Restart Apache
+  notify: restart webserver
 
 - name: Enable global Apache config
   command: /usr/sbin/a2enconf {{ item }} creates=/etc/apache2/conf-enabled/{{ item }}.conf
   with_items:
   - stapling
-  notify: Restart Apache
+  notify: restart webserver
 
   # Print message with vhost information. We use no_log below to suppress printing/logging the item array because it is
   # big and contains the SSL private key
@@ -64,13 +64,13 @@
   no_log: True
   template: src=apache_vhost.conf.j2 dest=/etc/apache2/sites-available/{{ item.name }}:{{ item.port }}.conf owner=root group=root mode=644
   with_items: "{{ vhosts }}"
-  notify: Restart Apache
+  notify: restart webserver
 
 - name: Enable Apache vhost sites
   no_log: True
   command: /usr/sbin/a2ensite {{ item.name }}:{{ item.port }} creates=/etc/apache2/sites-enabled/{{ item.name }}:{{ item.port }}.conf
   with_items: "{{ vhosts }}"
-  notify: Restart Apache
+  notify: restart webserver
 
 
 - name: Enable Apache on boot

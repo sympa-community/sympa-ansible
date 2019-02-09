@@ -1,5 +1,5 @@
 ---
 
-- name: Restart Apache
+- name: restart webserver
   service: name=apache2 state=restarted
   
