@@ -54,3 +54,5 @@ sympa_outgoing_server: "{{ sympa_incoming_smtp }}"
 sympa_db_type: mysql
 sympa_db_app_user: sympa
 sympa_language: "en_US"
+sympa_global_alias_file: "/etc/mail/sympa_global_aliases"
+sympa_list_alias_file: "/etc/mail/sympa_list_aliases"
