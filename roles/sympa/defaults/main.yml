@@ -7,8 +7,8 @@ sympa:
   repository_version: HEAD
   install_from_repository: 0
   source: https://github.com/sympa-community/sympa/releases/download/
-  version: 6.2.38
-  download_url: "http://www.sympa.org/distribution/releases"
+  version: 6.2.40
+  download_url: "{{ sympa.source }}/{{ sympa.version }}/sympa-{{ sympa.version }}.tar.gz"
   sha256:
       {
        "6.1.17": "a506ea6e9c88c4a91d22bf146acb06fae5c277e98312b957bdae974739145b79",
@@ -46,6 +46,7 @@ sympa:
        "6.2.37b.1": "b395744b8e3bdcfa25168176ab633def94e0d15f67a68cf1f461ed3da5240652",
        "6.2.37b.2": "2f5eb71cf5d47b46fed6acf92489ae6793ec7579904239315f52ac9679bdb253",
        "6.2.38": "eec726cc4b2c75f5f78fc794a646028bce5253ea147c3cb88dcef56708116419",
+       "6.2.40": "b36eaec975a859a2ba944ac3a26bbd1451aed42a8bd71309ae888f7b5d6737bb",
       }
   install_dir_name: sympa
   apply_patches: 1

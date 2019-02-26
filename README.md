@@ -256,7 +256,7 @@ password from the "password" directory in the environment:
 While you could use this directly in your templates or Ansible tasks, for readability, it is recommended to create a variable 
 fot the secret in group_vars. Assuming you have a "middleware" role, the group_vars/middleware.yml in your environment could contain:
 
-    # Password for the middleware managegment API
+    # Password for the middleware management API
     middleware_management_api_password: "{{ lookup('file', inventory_dir+'/password/middleware_management_api') }}"
     
     # Middleware encryption secret

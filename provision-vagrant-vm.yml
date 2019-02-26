@@ -19,6 +19,6 @@
         apt: update_cache=yes upgrade=dist cache_valid_time=3600
 
       - name: Install optional packages
-        apt: name={{ item }}
-        with_items:
-        - vim
+        apt:
+          name:
+            - vim
