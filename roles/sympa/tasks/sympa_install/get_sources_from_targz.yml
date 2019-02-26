@@ -4,7 +4,7 @@
 
 - name: Download Sympa tar.gz
   get_url:
-    url: "{{ sympa.download_url }}/{{ source_dir }}.tar.gz"
+    url: "{{ sympa.source }}/{{ sympa.version }}/sympa-{{ sympa.version }}.tar.gz"
     dest: "{{ install_prefix }}/{{ sympa.install_dir_name }}/src"
     sha256sum: "{{ sympa.sha256[sympa.version] }}"
   when: not sympa_archive_file.stat.exists

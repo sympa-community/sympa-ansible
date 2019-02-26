@@ -8,7 +8,6 @@ sympa:
   install_from_repository: 0
   source: https://github.com/sympa-community/sympa/releases/download/
   version: 6.2.40
-  download_url: "{{ sympa.source }}/{{ sympa.version }}/sympa-{{ sympa.version }}.tar.gz"
   sha256:
       {
        "6.1.17": "a506ea6e9c88c4a91d22bf146acb06fae5c277e98312b957bdae974739145b79",
