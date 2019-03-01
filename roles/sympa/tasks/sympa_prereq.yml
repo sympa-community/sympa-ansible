@@ -20,7 +20,7 @@
     - automake
     - gettext
     - git
-  when: sympa_install_from_repository  
+  when: sympa.install_from_repository  
 
 - name: Install required CPAN Perl modules
   apt: name={{ item }} state=present
@@ -61,13 +61,13 @@
   apt:
     name: libdbd-mysql-perl
   when:
-    - sympa_db_type == "mysql"
+    - sympa.db.type == "mysql"
 
 - name: Install CPAN module for PostgreSQL
   apt:
     name: libdbd-pg-perl
   when:
-    - sympa_db_type == "Pg"
+    - sympa.db.type == "Pg"
 
 - name: add mhonarc path to PERL5LIB in profile.d/
   template: src=profile.d/sympa.sh.j2 dest=/etc/profile.d/sympa.sh

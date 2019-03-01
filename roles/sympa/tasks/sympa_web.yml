@@ -16,3 +16,11 @@
   template: src=apache/fcgid.conf.j2 dest=/etc/apache2/mods-available/fcgid.conf
   notify: Restart Apache
   tags: apache
+
+- name: Install Sympa web config
+  template: src=apache/sympa_web.conf.j2 dest=/etc/apache2/conf-available/sympa.conf
+  notify: Restart Apache
+  tags: apache
+
+- name: Enable Sympa web config
+  shell: a2enconf sympa

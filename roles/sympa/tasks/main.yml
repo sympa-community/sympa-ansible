@@ -1,5 +1,49 @@
 ---
 
+- name: Build lists directory path
+  set_fact:
+    sympa: "{{ sympa | combine({ 'lists_path': install_prefix + '/' + sympa.install_dir_name + '/list_data'}) }}"
+  when: sympa.lists_path is not defined
+  tags: sympa
+
+- name: Build arc directory path
+  set_fact:
+    name: sympa.arc_path
+    sympa: "{{ sympa | combine({ 'arc_path': install_prefix + '/' + sympa.install_dir_name + '/arc'}) }}"
+  when: sympa.arc_path is not defined
+  tags: sympa
+
+- include_vars:
+    dir: "{{ inventory_dir }}/private/vhosts"
+    name: vhost_specific_variables
+  tags: sympa, virtual_hosts
+
+- name: Set vhosts
+  tags: sympa, virtual_hosts
+  set_fact:
+    sympa_vhosts: "{% set sympa_vhosts = [] %}{% for d in vhost_specific_variables.values() %}{% if 'sympa' in d and d.sympa.server == inventory_hostname %}{% set _ = sympa_vhosts.append(sympa|combine(d.sympa, recursive=True)|combine(d.common, recursive=True)) %}{% endif %}{% endfor %}{{ sympa_vhosts }}"
+
+- name: Set vhosts mail domains
+  tags: all
+  set_fact:
+    mail_domains: "{% set mail_domains = [] %}{% for d in postfix_vhosts %}{% set _ = mail_domains.append(d.domain) %}{% endfor %}{{ mail_domains }}"
+
+- name: Set vhosts web domains
+  tags: all
+  set_fact:
+    web_domains: "{% set web_domains = [] %}{% for d in sympa_vhosts %}{% set _ = web_domains.append(d.web.domain) %}{% endfor %}{{ web_domains }}"
+
+- name: Ensure group "sympa" exists
+  group:
+    name: "{{ sympa.unix_group }}"
+    state: present
+
+- name: Add sympa user
+  user:
+    name: "{{ sympa.unix_user }}"
+    group: "{{ sympa.unix_group }}"
+    password: no
+
 - name: Install prerequisites for Sympa
   tags: sympa_prereq
   import_tasks: sympa_prereq.yml
@@ -7,12 +51,12 @@
 - name: Getting source folder name
   tags: always
   include_vars: source_dir_repo.yml
-  when: sympa_install_from_repository
+  when: sympa.install_from_repository
   
 - name: Getting source folder name
   tags: always
   include_vars: source_dir_tgz.yml
-  when: not sympa_install_from_repository
+  when: not sympa.install_from_repository
 
 - name: Download Sympa sources
   tags: sympa_install
@@ -36,36 +80,26 @@
 
 - name: Install and configure database
   tags: sympa_db
-  include_tasks: "sympa_db_{{ sympa_db_type | lower }}.yml"
+  import_tasks: "sympa_db_{{ sympa.db.type | lower }}.yml"
 
 - name: Enable Sympa startup
   tags: sympa_startup
   import_tasks: sympa_startup.yml
 
-## include_vars merges all variables in a single hash
-## therefore each robot YML file needs to have a different hash key
-- include_vars:
-    dir: "{{ inventory_dir }}/sympa_virtual_robots"
-    name: robots
-  tags: sympa_robots
-
-#- name: Dump variables définissant les robots
-#  debug:
-#    var: "{{ item.value }}"
-#    verbosity: 0
-#  with_dict: "{{ robots }}"
-#  tags: sympa_robots
-
 ## Here we use loop_var to prevent conflicts on item var name with outer loops
 - name: Install and configure Sympa virtual robots
-  tags: sympa_robots
+  tags: virtual_hosts
   include_role:
     name: sympa_virtual_robot
   vars:
-    robot: "{{ robot_item.value }}"
-  with_dict: "{{ robots }}"
+    robot: "{{ robot_item }}"
+  loop: "{{ sympa_vhosts }}"
   loop_control:
     loop_var: robot_item
  
+- name: Install tools
+  tags: sympa_tools
+  import_tasks: sympa_tools.yml
+
  # Include environment specific tasks
 - include: "{{ inventory_dir }}/tasks/sympa.yml"

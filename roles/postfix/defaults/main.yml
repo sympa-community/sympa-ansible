@@ -1,0 +1,8 @@
+---
+
+mail:
+  domain: 'lists.example.com'
+  force_smtp_route: 0
+  incoming_smtp: '192.168.66.0'
+  outgoing_server: '192.168.66.0'
+  enable_check_smtp: 0

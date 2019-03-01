@@ -1,0 +1,17 @@
+---
+lists.example.com:
+  common:
+    web:
+      domain: lists.example.com
+    mail:
+      domain: lists.example.com
+    admins:
+      - olivier@example.com
+      - etienne@example.com
+      - david@example.com
+  sympa:
+    config:
+      title: My lovely service
+      create_list: listmaster
+      color_6: '#FF0000'
+    server: local-sympa

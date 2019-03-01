@@ -1,10 +1,10 @@
 ---
 
 - name: Upgrade Sympa
-  shell: "{{ sympa_install_prefix }}/bin/sympa.pl --upgrade"
+  shell: "{{ install_prefix }}/{{ sympa.install_dir_name }}/bin/sympa.pl --upgrade"
 
 - name: Create Sympa database for new installations
-  shell: "{{ sympa_root_directory }}/bin/sympa.pl --health_check"
+  shell: "{{ install_prefix }}/{{ sympa.install_dir_name }}/bin/sympa.pl --health_check"
 
 - name: Create systemd directory for custom conf
   file: dest=/etc/systemd/system/sympa.service.d state=directory mode=755
@@ -12,6 +12,11 @@
 - name: Install custom systemd conf to define requirements with mysql server  
   template: src=systemd/custom.conf.j2 dest=/etc/systemd/system/sympa.service.d/custom.conf mode=0644
 
+- name: Reload systemctl daemon
+  shell: systemctl daemon-reload
+
 - name: Enable Sympa on boot
   service: name=sympa enabled=yes
   
+- name: Start sympa
+  shell: service sympa start

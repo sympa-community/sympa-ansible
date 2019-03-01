@@ -1,0 +1,14 @@
+  DocumentRoot "/var/www/html/"
+  
+  Alias /static-sympa {{ install_prefix }}/{{ install_dir_name }}/static_content
+
+  <Location /static-sympa>
+    Require all granted
+  </Location>
+
+  <Location /sympa>
+    SetHandler fcgid-script
+    Require all granted
+  </Location>
+  
+  ScriptAlias /sympa {{ install_prefix }}/{{ install_dir_name }}/bin/wwsympa-wrapper.fcgi

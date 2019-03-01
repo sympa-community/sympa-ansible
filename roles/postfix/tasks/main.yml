@@ -1,0 +1,37 @@
+---
+- name: Install required packages
+  apt: name={{ item }} state=present
+  with_items:
+    - postfix
+
+- include_vars:
+    dir: "{{ inventory_dir }}/private/vhosts"
+    name: vhost_specific_variables
+  tags: apache, virtual_hosts
+
+- name: Set vhosts
+  tags: all
+  set_fact:
+    postfix_vhosts: "{% set postfix_vhosts = [] %}{% for d in vhost_specific_variables.values() %}{% if ('sympa' in d and 'server' in d.sympa and d.sympa.server == inventory_hostname) or ('limesurvey' in d and 'server' in d.limesurvey and d.limesurvey.server == inventory_hostname) or ('dokuwiki' in d and 'server' in d.dokuwiki and d.dokuwiki.server == inventory_hostname) or inventory_hostname == 'local-proxy'  %}{% set _ = postfix_vhosts.append(mail|combine(d.common.mail, recursive=True)) %}{% endif %}{% endfor %}{{ postfix_vhosts }}"
+
+- name: Set vhosts mail domains
+  tags: all
+  set_fact:
+    mail_domains: "{% set mail_domains = [] %}{% for d in postfix_vhosts %}{% set _ = mail_domains.append(d.domain) %}{% endfor %}{{ mail_domains }}"
+
+- name: Install required packages
+  apt: name={{ item }} state=present
+  with_items:
+    - postfix
+
+- name: Install Postfix main.cf configuration file
+  template: src=main.cf.j2 dest=/etc/postfix/main.cf
+  notify: restart postfix
+
+- debug: msg="{{ mail }}"
+
+- name: Add monitoring
+  tags: postfix
+  include_role:
+    name: monitoring
+  when: mail.enable_check_smtp == 1

@@ -1,0 +1,6 @@
+{% for port in apache_vhosts|map(attribute='port')|unique %}
+Listen {{ port }}
+{% endfor %}
+{% if proxy %}
+Listen 80
+{% endif %}
