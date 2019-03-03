@@ -56,9 +56,3 @@
     - 127.0.0.1
     - ::1
     - localhost
-
-- name: Create required /etc/mail/ directory    
-  file:
-    dest: /etc/mail
-    state: directory
-    mode: 755
