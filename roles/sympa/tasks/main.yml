@@ -97,9 +97,5 @@
   loop_control:
     loop_var: robot_item
  
-- name: Install tools
-  tags: sympa_tools
-  import_tasks: sympa_tools.yml
-
  # Include environment specific tasks
 - include: "{{ inventory_dir }}/tasks/sympa.yml"
