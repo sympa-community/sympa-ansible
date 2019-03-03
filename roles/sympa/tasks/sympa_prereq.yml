@@ -3,59 +3,63 @@
 # Install prerequisites for Sympa software
 
 - name: Install required packages
-  apt: name={{ item }} state=present
-  with_items:
-    - gcc
-    - make
+  apt:
+    name:
+      - gcc
+      - make
+    state: present
 
 - name: Install prerequisites for patching Sympa
-  apt: name={{ item }} state=present
-  with_items:
-    - patch
+  apt:
+    name:
+      - patch
+    state: present
 
 - name: Install prerequisites for installing Sympa from sources
-  apt: name={{ item }} state=present
-  with_items:
-    - autoconf
-    - automake
-    - gettext
-    - git
+  apt:
+    name:
+      - autoconf
+      - automake
+      - gettext
+      - git
+    state: present
   when: sympa.install_from_repository  
 
 - name: Install required CPAN Perl modules
-  apt: name={{ item }} state=present
-  with_items:
-  - libarchive-zip-perl # Perl module for manipulation of ZIP archives
-  - libclass-singleton-perl # implementation of a "Singleton" class
-  - libdatetime-format-mail-perl # Convert between DateTime and RFC2822/822 formats
-  - libfile-copy-recursive-perl # Perl extension for recursively copying files and directories
-  - libfile-nfslock-perl # perl module to do NFS (or not) locking
-  - libhtml-format-perl # module for transforming HTML into various formats
-  - libhtml-stripscripts-parser-perl # module to filter scripts out of HTML
-  - libio-stringy-perl # Perl modules for IO from scalars and arrays
-  - libintl-perl # Uniforum message translations system compatible i18n library
-  - mhonarc # Mail to HTML converter
-  - libmailtools-perl # Manipulate email in perl programs
-  - libmime-tools-perl # Perl5 modules for MIME-compliant messages
-  - libnet-ldap-perl # client interface to LDAP servers
-  - libcgi-fast-perl # CGI subclass for work with FCGI
-  - libmime-charset-perl # module for MIME character set information
-  - libmime-encwords-perl # Perl interface to deal with RFC 2047 encoded words
-  - libtemplate-perl # the "Template Toolkit" template processing system in perl
-  - libxml-libxml-perl # Perl interface to the libxml2 library
-  - libregexp-common-perl # module with common regular expressions
-  - libmime-lite-html-perl # Transform HTML page into MIME email
-  - libnet-cidr-perl # Manipulate IPv4/IPv6 netblocks in CIDR notation
-  - libterm-progressbar-perl # Perl module to print a progress bar
-  - libunicode-linebreak-perl # UAX #14 Unicode Line Breaking Algorithm
-  - libauthcas-perl # Client library for CAS 2.0
-  - libcrypt-ciphersaber-perl # Perl module implementing CipherSaber encryption
-  - libcrypt-openssl-x509-perl # Perl extension to OpenSSL's X509 API
-  - libcrypt-smime-perl # S/MIME message signing, verification, encryption and decryption module
-  - libdbd-csv-perl # DBI driver for CSV files
-  - libdbd-odbc-perl # Perl Database Driver implementing ODBC for DBI
-  - libmail-dkim-perl # cryptographically identify the sender of email - perl library
-  - libsoap-lite-perl # Perl implementation of a SOAP client and server
+  apt:
+    name:
+      - libarchive-zip-perl # Perl module for manipulation of ZIP archives
+      - libclass-singleton-perl # implementation of a "Singleton" class
+      - libdatetime-format-mail-perl # Convert between DateTime and RFC2822/822 formats
+      - libfile-copy-recursive-perl # Perl extension for recursively copying files and directories
+      - libfile-nfslock-perl # perl module to do NFS (or not) locking
+      - libhtml-format-perl # module for transforming HTML into various formats
+      - libhtml-stripscripts-parser-perl # module to filter scripts out of HTML
+      - libio-stringy-perl # Perl modules for IO from scalars and arrays
+      - libintl-perl # Uniforum message translations system compatible i18n library
+      - mhonarc # Mail to HTML converter
+      - libmailtools-perl # Manipulate email in perl programs
+      - libmime-tools-perl # Perl5 modules for MIME-compliant messages
+      - libnet-ldap-perl # client interface to LDAP servers
+      - libcgi-fast-perl # CGI subclass for work with FCGI
+      - libmime-charset-perl # module for MIME character set information
+      - libmime-encwords-perl # Perl interface to deal with RFC 2047 encoded words
+      - libtemplate-perl # the "Template Toolkit" template processing system in perl
+      - libxml-libxml-perl # Perl interface to the libxml2 library
+      - libregexp-common-perl # module with common regular expressions
+      - libmime-lite-html-perl # Transform HTML page into MIME email
+      - libnet-cidr-perl # Manipulate IPv4/IPv6 netblocks in CIDR notation
+      - libterm-progressbar-perl # Perl module to print a progress bar
+      - libunicode-linebreak-perl # UAX #14 Unicode Line Breaking Algorithm
+      - libauthcas-perl # Client library for CAS 2.0
+      - libcrypt-ciphersaber-perl # Perl module implementing CipherSaber encryption
+      - libcrypt-openssl-x509-perl # Perl extension to OpenSSL's X509 API
+      - libcrypt-smime-perl # S/MIME message signing, verification, encryption and decryption module
+      - libdbd-csv-perl # DBI driver for CSV files
+      - libdbd-odbc-perl # Perl Database Driver implementing ODBC for DBI
+      - libmail-dkim-perl # cryptographically identify the sender of email - perl library
+      - libsoap-lite-perl # Perl implementation of a SOAP client and server
+    state: present
 
 - name: Install CPAN module for MySQL
   apt:

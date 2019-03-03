@@ -3,11 +3,10 @@
 
 - name: Install required packages for MySQL
   apt: 
-    name: "{{item}}"
+    name:
+      - mysql-server
+      - python-mysqldb # Required by Ansible
     state: present
-  with_items:
-    - mysql-server
-    - python-mysqldb # Required by Ansible
 
 - name: Enable MySQL server on boot
   service:

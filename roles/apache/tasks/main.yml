@@ -22,10 +22,10 @@
 
 - name: Install Apache
   tags: apache
-  apt: name={{ item }}
-  with_items:
-  - apache2
-  - apache2-utils
+  apt:
+    name:
+      - apache2
+      - apache2-utils
 
 - name: Put Apache vhost certs
   tags: apache
