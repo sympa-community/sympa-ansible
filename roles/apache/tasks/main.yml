@@ -8,7 +8,7 @@
 - name: Set vhosts
   tags: all
   set_fact:
-    apache_vhosts: "{% set apache_vhosts = [] %}{% for d in vhost_specific_variables.values() %}{% if ('sympa' in d and d.sympa.server == inventory_hostname) or ('limesurvey' in d and d.limesurvey.server == inventory_hostname) or ('dokuwiki' in d and d.dokuwiki.server == inventory_hostname) or inventory_hostname == 'local-proxy'  %}{% set _ = apache_vhosts.append(common|combine(d.common, recursive=True)|combine(d, recursive=True)) %}{% endif %}{% endfor %}{{ apache_vhosts }}"
+    apache_vhosts: "{% set apache_vhosts = [] %}{% for d in vhost_specific_variables.values() %}{% if ('sympa' in d and d.sympa.server == inventory_hostname) or inventory_hostname == 'local-proxy'  %}{% set _ = apache_vhosts.append(common|combine(d.common, recursive=True)|combine(d, recursive=True)) %}{% endif %}{% endfor %}{{ apache_vhosts }}"
 
 - name: Setting false flag for proxy settings
   set_fact:

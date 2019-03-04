@@ -12,7 +12,7 @@
 - name: Set vhosts
   tags: all
   set_fact:
-    postfix_vhosts: "{% set postfix_vhosts = [] %}{% for d in vhost_specific_variables.values() %}{% if ('sympa' in d and 'server' in d.sympa and d.sympa.server == inventory_hostname) or ('limesurvey' in d and 'server' in d.limesurvey and d.limesurvey.server == inventory_hostname) or ('dokuwiki' in d and 'server' in d.dokuwiki and d.dokuwiki.server == inventory_hostname) or inventory_hostname == 'local-proxy'  %}{% set _ = postfix_vhosts.append(mail|combine(d.common.mail, recursive=True)) %}{% endif %}{% endfor %}{{ postfix_vhosts }}"
+    postfix_vhosts: "{% set postfix_vhosts = [] %}{% for d in vhost_specific_variables.values() %}{% if ('sympa' in d and 'server' in d.sympa and d.sympa.server == inventory_hostname) or inventory_hostname == 'local-proxy'  %}{% set _ = postfix_vhosts.append(mail|combine(d.common.mail, recursive=True)) %}{% endif %}{% endfor %}{{ postfix_vhosts }}"
 
 - name: Set vhosts mail domains
   tags: all
