@@ -19,11 +19,12 @@
   copy: content="{{ timezone }}" dest=/etc/timezone
 
 - name: Install ntp, iptables-persistent, rsyslog
-  apt: name={{item}} state=present
-  with_items:
-  - ntp
-  - iptables-persistent
-  - rsyslog
+  apt:
+    name:
+      - ntp
+      - iptables-persistent
+      - rsyslog
+    state: present
 
 - name: Put iptables configuration
   template: src={{ inventory_dir }}/templates/common/{{item}}.j2 dest=/etc/iptables/{{ item }}
