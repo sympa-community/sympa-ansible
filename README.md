@@ -464,6 +464,28 @@ The other top level directories and files are:
 - A _Vagrantfile_ for creating a VM using Vagrant
 - _ansible.cfg_ (optional) makes playbooks run faster by enabling SSH pipelining, 
 - _provision-vagrant-vm.yml_ playbook used by the Vagrant provisioning step only.
+- filter_plugins: contains custom filters to be used in Jinja2. It contains a single file, `custom_plugins.py` containing a single filter: `vault`. This is the filter used to decrypt data encrypted with keyczar. Example usage: `myvar: "{{ db.root_password | vault(vault_keydir) }}"`. `myvar` will contain the variable db.root_password decrypted using the keys located in the directory defined by variable `vault_keydir`.
+- action_plugins: contains custom actions to be used in the playbook. It contains a single file, `jin_ver.py` defining a single action that allows to check the jinja2 version installed on the host running the playbook. It is used in site.yml that way:
+```
+- name: Get Jinja2 version
+  hosts: all
+  gather_facts: no
+  remote_user: "{{ ansible_remote_user }}"
+  tags: check_jinja2
+  tasks:
+    - action: jin_ver
+      register: jinja_version
+- name: Check Jinja2 version
+  hosts: all
+  remote_user: "{{ ansible_remote_user }}"
+  tags: check_jinja2
+  tasks:
+    - name: Check Jinja2 version
+      assert:
+        that: "jinja_version.version_value is version_compare('2.10', '>=')"
+        msg: "This playbook requires Jinja2 2.10 or greater. You have {{ jinja_version.version_value }}."
+
+```
 
 ## Creating a new environment
 To get started you need an environment. Ansible-tools does not ship with a ready made environment, instead it ships with the tools
