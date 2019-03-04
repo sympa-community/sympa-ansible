@@ -12,11 +12,9 @@
 - name: Install custom systemd conf to define requirements with mysql server  
   template: src=systemd/custom.conf.j2 dest=/etc/systemd/system/sympa.service.d/custom.conf mode=0644
 
-- name: Reload systemctl daemon
-  shell: systemctl daemon-reload
-
-- name: Enable Sympa on boot
-  service: name=sympa enabled=yes
-  
-- name: Start sympa
-  shell: service sympa start
+- name: Start Sympa via systemd
+  systemd:
+    enabled: yes
+    state: started
+    name: sympa
+    daemon_reload: yes
