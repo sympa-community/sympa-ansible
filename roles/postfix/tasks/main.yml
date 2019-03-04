@@ -30,8 +30,3 @@
 
 - debug: msg="{{ mail }}"
 
-- name: Add monitoring
-  tags: postfix
-  include_role:
-    name: monitoring
-  when: mail.enable_check_smtp == 1
