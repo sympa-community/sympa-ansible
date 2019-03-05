@@ -15,6 +15,8 @@ Environment="FCGI_USER=sympa"
 Environment="FCGI_GROUP=sympa"
 Environment="FCGI_OPTS=-s /var/run/sympa/wwsympa.socket -M 0644 -U www-data"
 EnvironmentFile=-/etc/sysconfig/sympa
+RuntimeDirectory=sympa
+RuntimeDirectoryPreserve=yes
 Restart=always
 
 [Install]
