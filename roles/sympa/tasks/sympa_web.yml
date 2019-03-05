@@ -1,12 +1,13 @@
 ---
-# Configure Apache
 
-- name: Install Apache2
-  apt: name={{ item }} state=present
-  with_items:
-  - apache2
-  - libapache2-mod-fcgid # FastCGI interface module for Apache 2
-  - spawn-fcgi
+- name: Installing Apache2
+  apt:
+    name: 
+      - apache2
+      - libapache2-mod-fcgid
+      - spawn-fcgi
+    state: present
+  tags: apache
 
 - name: ensure sockets directory
   file:
