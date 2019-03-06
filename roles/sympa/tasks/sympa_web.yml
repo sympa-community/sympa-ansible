@@ -18,28 +18,26 @@
 
 - name: install wwsympa service config
   template: src=fcgi/wwsympa.service.j2 dest=/lib/systemd/system/wwsympa.service
-  notify: restart systemd
   tags: apache
 
 - name: start wwsympa
-  shell: "systemctl start wwsympa.service"
-  tags: apache
-
-- name: setup autostart for wwsympa
-  shell: "systemctl enable wwsympa.service"
+  systemd:
+    state: started
+    name: wwsympa
+    enabled: yes
+    daemon_reload: yes
   tags: apache
 
 - name: install sympasoap service config
   template: src=fcgi/sympasoap.service.j2 dest=/lib/systemd/system/sympasoap.service
-  notify: restart systemd
   tags: apache
 
 - name: start sympasoap
-  shell: "systemctl start sympasoap.service"
-  tags: apache
-
-- name: setup autostart for sympasoap
-  shell: "systemctl enable sympasoap.service"
+  systemd:
+    state: started
+    name: sympasoap
+    enabled: yes
+    daemon_reload: yes
   tags: apache
 
 - name: Install Sympa web config
