@@ -1,0 +1,19 @@
+---
+
+- name: Configure Spamassassin
+  tags: antispam
+  import_role:
+    name: spamassassin
+  when: common.mail.antispam == 'spamassassin'
+
+- name: Installing Sympa spam scenarios
+  tags: antispam
+  copy:
+    src: "{{ item }}"
+    dest: "{{ install_prefix }}/{{ sympa.install_dir_name }}/etc/scenari"
+    owner: "{{ sympa.unix_user }}"
+    group: "{{ sympa.unix_group }}"
+    mode: 0644
+  with_items:
+    - "{{ common.mail.antispam }}/spam_status.x-spam-status"
+    - include.send.header

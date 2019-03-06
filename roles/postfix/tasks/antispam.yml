@@ -1,4 +1,0 @@
-- name: Configure Spamassassin
-  tags: antispam
-  import_tasks: antispam/spamassassin.yml
-  when: mail.antispam == 'spamassassin'

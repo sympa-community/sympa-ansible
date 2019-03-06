@@ -23,7 +23,3 @@
   template: src=main.cf.j2 dest=/etc/postfix/main.cf
   notify: restart postfix
   
-- name: Include Antispam if needed
-  tags: postfix
-  import_tasks: antispam.yml
-  when: mail.antispam is defined

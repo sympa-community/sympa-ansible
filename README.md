@@ -278,7 +278,27 @@ Here is the list of the parameters used in the playbook, presented as YAML data:
  - `install_prefix`: the root where applications should be installed. Usefull if you're combining this playbook with others to install other appplications than Sympa.
  - `db.root_user`: the username of the database global root user.
  - `db.root_password`: the password of the database global root user.
- 
+
+### Antispam setup
+
+`mail.antispam`: If given a value, an antispam will be installed , with a role having the name of the parameter's value.
+
+#### Adding another antispam
+
+First, give `mail.antispam` the value of the role you plan to use. If it is given "spamassassin" as value, we install spamassassin.
+
+Second, setup the file to be used by Sympa antispam scenario. In the `roles/sympa/files/<your.antispam>/spam_status.x-spam-status` file,
+modify the headers to be checked to define ham, unsure or ham status.
+
+Example for Spamassassin:
+
+```
+title.gettext test x-spam-status  header
+
+match([header->X-Spam-Level][-1],/\*{5,10}/)  	smtp,dkim,smime,md5  -> unsure
+match([header->X-Spam-Level][-1],/\*{10,}/)  	smtp,dkim,smime,md5  -> spam
+true() smtp,dkim,md5,smime -> ham
+```
 
 ## Sympa namespace
 
@@ -432,6 +452,7 @@ common:
     incoming_smtp: '192.168.66.0'
     outgoing_server: '192.168.66.0'
     enable_check_smtp: 0
+    antispam: spamassassin
   admins:
     - david@example.com
     - etienne@example.com
