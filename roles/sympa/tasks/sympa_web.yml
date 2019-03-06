@@ -9,13 +9,6 @@
     state: present
   tags: apache
 
-- name: ensure sockets directory
-  file:
-    dest: "/var/run/sympa"
-    state: directory
-    mode: 0755
-  tags: apache
-
 - name: install wwsympa service config
   template: src=fcgi/wwsympa.service.j2 dest=/lib/systemd/system/wwsympa.service
   tags: apache
