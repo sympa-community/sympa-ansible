@@ -29,15 +29,6 @@
     regexp: 'report_safe'
     line: "report_safe 0"
 
-- name: Enable Spamassassin in Postfix
-  blockinfile:
-    path: /etc/postfix/master.cf
-    marker: "# {mark} ANSIBLE MANAGED Spamassassin config"
-    block: |
-      smtp inet n - n - - smtpd   -o content_filter=spamassassin:
-      spamassassin unix - n n - - pipe flags=Rq user=debian-spamd argv=/usr/bin/spamc -s 20000000 -e /usr/sbin/sendmail -oi -f ${sender} ${recipient}
-  notify: restart postfix
-
 - name: Enable nightly channel update
   lineinfile:
     path: /etc/crontab

@@ -22,4 +22,13 @@
 - name: Install Postfix main.cf configuration file
   template: src=main.cf.j2 dest=/etc/postfix/main.cf
   notify: restart postfix
-  
+
+- name: Enable Spamassassin in Postfix if needed.
+  blockinfile:
+    path: /etc/postfix/master.cf
+    marker: "# {mark} ANSIBLE MANAGED Spamassassin config"
+    block: |
+      smtp inet n - n - - smtpd   -o content_filter=spamassassin:
+      spamassassin unix - n n - - pipe flags=Rq user=debian-spamd argv=/usr/bin/spamc -s 20000000 -e /usr/sbin/sendmail -oi -f ${sender} ${recipient}
+  notify: restart postfix
+  when: common.mail.antispam is defined
