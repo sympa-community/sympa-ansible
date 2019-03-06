@@ -1,7 +1,4 @@
 ---
-- debug: msg="{{ sympa.mail }}"
-- debug: msg="{{ mail }}"
-- debug: msg="{{ common.mail }}"
 
 - name: Install list aliases file
   copy:
