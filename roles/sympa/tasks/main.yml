@@ -48,6 +48,10 @@
   tags: sympa_prereq
   import_tasks: sympa_prereq.yml
   
+- name: Install and configure database
+  tags: sympa_db
+  import_tasks: "sympa_db_{{ sympa.db.type | lower }}.yml"
+
 - name: Getting source folder name
   tags: always
   include_vars: source_dir_repo.yml
@@ -77,10 +81,6 @@
 - name: Configure Apache
   tags: sympa_web
   import_tasks: sympa_web.yml
-
-- name: Install and configure database
-  tags: sympa_db
-  import_tasks: "sympa_db_{{ sympa.db.type | lower }}.yml"
 
 - name: Enable Sympa startup
   tags: sympa_startup
