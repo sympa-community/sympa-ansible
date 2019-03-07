@@ -26,5 +26,3 @@ script:
   - echo "localhost" >> environments/local/inventory
   - sed -s -i 's/local-sympa-ubuntu16/localhost/' environments/local/private/vhosts/*
   - ansible-playbook site.yml --connection=local --become -i environments/local/inventory
-services:
-  - mysql
