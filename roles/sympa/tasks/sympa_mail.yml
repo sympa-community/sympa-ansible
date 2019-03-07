@@ -27,7 +27,7 @@
     - "{{ sympa.mail.alias_file }}.db"
 
 - name: Compiling sympa_aliases
-  shell: "postmap {{ sympa.mail.alias_directory }}/{{ sympa.mail.alias_file }}"
+  command: "postmap {{ sympa.mail.alias_directory }}/{{ sympa.mail.alias_file }}"
 
 - name: Adding list domains as virtual domains
   blockinfile:
@@ -40,7 +40,7 @@
   with_items: "{{ mail_domains }}"
 
 - name: Compiling Sympa transport
-  shell: postmap /etc/postfix/domains.sympa
+  command: postmap /etc/postfix/domains.sympa
 
 - name: Adding required generic aliases
   blockinfile:
@@ -54,7 +54,7 @@
   with_items: "{{ mail_domains }}"
 
 - name: Compiling Sympa transport
-  shell: postmap /etc/postfix/virtual.sympa
+  command: postmap /etc/postfix/virtual.sympa
 
 - name: Adding required generic transports
   blockinfile:
@@ -70,7 +70,7 @@
   with_items: "{{ mail_domains }}"
 
 - name: Compiling Sympa transport
-  shell: postmap /etc/postfix/transport
+  command: postmap /etc/postfix/transport
 
 - name: Master.cf configuration
   blockinfile:

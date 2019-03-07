@@ -39,15 +39,15 @@
   tags: apache
 
 - name: Enable mod_rewrite
-  shell: a2enmod proxy_fcgi
+  command: a2enmod proxy_fcgi
   notify: restart apache
 
 - name: Enable Sympa web config
-  shell: a2enconf sympa
+  command: a2enconf sympa
   notify: restart apache
 
 - name: Enable mod_rewrite
-  shell: a2enmod rewrite
+  command: a2enmod rewrite
   notify: restart apache
 
 - name: Add redirect from / to /sympa
