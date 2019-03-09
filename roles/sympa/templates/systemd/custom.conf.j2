@@ -1,4 +1,4 @@
 [Unit]
 
-Requires=mysql.service
-After=mysql.service
+Requires={% if sympa.db.type == 'Pg' %}postgresql{% else %}mysql{% endif %}.service
+After={% if sympa.db.type == 'Pg' %}postgresql{% else %}mysql{% endif %}.service
