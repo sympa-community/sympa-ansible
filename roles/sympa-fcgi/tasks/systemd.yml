@@ -11,18 +11,18 @@
     src: socket.j2
     dest: "{{ systemd.unit_directory }}/{{ unit_name }}@.socket"
 
-- name: Enable and start {{ unit_name }} services
-  systemd:
-    state: started
-    daemon_reload: yes
-    enabled: yes
-    name: "{{ unit_name }}@{{ item }}.service"
-  loop: "{{ range(1, vars['sympa']['web'][unit_name + '_procs'] + 1) | list }}"
-
 - name: Enable and start {{ unit_name }} sockets
   systemd:
     state: started
     daemon_reload: yes
     enabled: yes
     name: "{{ unit_name}}@{{ item }}.socket"
+  loop: "{{ range(1, vars['sympa']['web'][unit_name + '_procs'] + 1) | list }}"
+
+- name: Enable and start {{ unit_name }} services
+  systemd:
+    state: started
+    daemon_reload: yes
+    enabled: yes
+    name: "{{ unit_name }}@{{ item }}.service"
   loop: "{{ range(1, vars['sympa']['web'][unit_name + '_procs'] + 1) | list }}"
