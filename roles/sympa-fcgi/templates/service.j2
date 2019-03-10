@@ -1,0 +1,16 @@
+[Unit]
+Description = {{ unit_description }} (service instance %i)
+After = syslog.target
+BindTo = sympa.service
+
+[Service]
+User = {{ sympa.unix_user }}
+Group = {{ sympa.unix_group }}
+ExecStart = {{ install_prefix }}/{{ sympa.install_dir_name }}/bin/{{ unit_name }}.fcgi
+StandardOutput = null
+StandardInput = socket
+StandardError = null
+Restart=always
+
+[Install]
+WantedBy = multi-user.target

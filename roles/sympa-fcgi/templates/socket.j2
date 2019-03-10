@@ -1,0 +1,11 @@
+[Unit]
+Description = {{ unit_description }} (socket instance %i)
+
+[Socket]
+SocketUser = www-data
+SocketGroup = www-data
+SocketMode = 0660
+ListenStream = /run/{{ unit_name }}%i.sock
+
+[Install]
+WantedBy = sockets.target
