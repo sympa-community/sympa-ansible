@@ -35,20 +35,20 @@
 
 - name: Install Sympa web config
   template: src=apache/sympa_web.conf.j2 dest=/etc/apache2/conf-available/sympa.conf
-  notify: restart apache
+  notify: Restart Apache
   tags: apache
 
 - name: Enable mod_rewrite
   command: a2enmod proxy_fcgi
-  notify: restart apache
+  notify: Restart Apache
 
 - name: Enable Sympa web config
   command: a2enconf sympa
-  notify: restart apache
+  notify: Restart Apache
 
 - name: Enable mod_rewrite
   command: a2enmod rewrite
-  notify: restart apache
+  notify: Restart Apache
 
 - name: Add redirect from / to /sympa
   tags: apache
@@ -59,6 +59,6 @@
     block: |
       RewriteEngine On
       RewriteRule ^/?$ https://%{SERVER_NAME}/sympa [QSA,R=301,L]
-  notify: restart apache
+  notify: Restart Apache
   with_items: "{{ web_domains }}"
 
