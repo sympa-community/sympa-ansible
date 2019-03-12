@@ -15,6 +15,6 @@
 - name: Start Sympa via systemd
   systemd:
     enabled: yes
-    state: started
+    state: restarted
     name: sympa
     daemon_reload: yes
