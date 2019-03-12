@@ -9,11 +9,11 @@
   </Location>
 
   <Location /sympa>
-    SetHandler "proxy:unix:/var/run/sympa/wwsympa.socket|fcgi://localhost"
+    SetHandler "proxy:unix:/var/run/wwsympa/wwsympa.socket|fcgi://localhost"
     Require all granted
   </Location>
 
   <Location /sympasoap>
-    SetHandler "proxy:unix:/var/run/sympa/sympasoap.socket|fcgi://localhost"
+    SetHandler "proxy:unix:/var/run/sympasoap/sympasoap.socket|fcgi://localhost"
     Require all granted
   </Location>
