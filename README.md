@@ -33,10 +33,6 @@ Create the new environment for the VM:
 
     $ ./scripts/create_new_environment.sh environments/local
 
-Provision the environment:
-
-    $ vagrant provision
-
 And link the inventory to your local directory:
 
     $ ln -s ../../.vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory environments/local/inventory
