@@ -50,7 +50,7 @@
   
 - name: Install and configure database
   tags: sympa_db
-  import_tasks: "sympa_db_{{ sympa.db.type | lower }}.yml"
+  include_tasks: "sympa_db_{{ sympa.db.type | lower }}.yml"
 
 - name: Getting source folder name
   tags: always
