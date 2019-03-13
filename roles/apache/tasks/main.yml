@@ -116,6 +116,6 @@
 - include: "{{ inventory_dir }}/tasks/apache.yml"
 
 - name: Check created config
-  shell: "apache2ctl configtest"
+  command: "apache2ctl configtest"
   notify: Restart Apache
   changed_when: true

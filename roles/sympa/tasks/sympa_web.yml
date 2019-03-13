@@ -1,21 +1,36 @@
 ---
-# Configure Apache
 
-- name: Install Apache2
+- name: Installing Apache2
   apt:
-    name:
+    name: 
       - apache2
-      - libapache2-mod-fcgid # FastCGI interface module for Apache 2
+      - libapache2-mod-fcgid
+      - spawn-fcgi
     state: present
-
-- name: Enable CGI Apache module
-  apache2_module: name=fcgid state=present
-  notify: Restart Apache
   tags: apache
- 
-- name: install custom fcgid.conf file
-  template: src=apache/fcgid.conf.j2 dest=/etc/apache2/mods-available/fcgid.conf
-  notify: Restart Apache
+
+- name: install wwsympa service config
+  template: src=fcgi/wwsympa.service.j2 dest=/lib/systemd/system/wwsympa.service
+  tags: apache
+
+- name: start wwsympa
+  systemd:
+    state: started
+    name: wwsympa
+    enabled: yes
+    daemon_reload: yes
+  tags: apache
+
+- name: install sympasoap service config
+  template: src=fcgi/sympasoap.service.j2 dest=/lib/systemd/system/sympasoap.service
+  tags: apache
+
+- name: start sympasoap
+  systemd:
+    state: started
+    name: sympasoap
+    enabled: yes
+    daemon_reload: yes
   tags: apache
 
 - name: Install Sympa web config
@@ -23,5 +38,27 @@
   notify: Restart Apache
   tags: apache
 
+- name: Enable mod_rewrite
+  command: a2enmod proxy_fcgi
+  notify: Restart Apache
+
 - name: Enable Sympa web config
-  shell: a2enconf sympa
+  command: a2enconf sympa
+  notify: Restart Apache
+
+- name: Enable mod_rewrite
+  command: a2enmod rewrite
+  notify: Restart Apache
+
+- name: Add redirect from / to /sympa
+  tags: apache
+  blockinfile:
+    state: present
+    marker: "# {mark} ANSIBLE MANAGED {{ item }} redirect to /sympa"
+    path: "/etc/apache2/sites-available/{{ item }}.conf"
+    block: |
+      RewriteEngine On
+      RewriteRule ^/?$ https://%{SERVER_NAME}/sympa [QSA,R=301,L]
+  notify: Restart Apache
+  with_items: "{{ web_domains }}"
+
