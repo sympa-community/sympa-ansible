@@ -16,7 +16,7 @@
 
 # Generate a plaintext password
 
-# If a keyczar directory is provided, the password is output encrypted as well.
+# If an ansible vault key is provided, the password that is output is encrypted.
 
 if [ $# -lt 1 ]; then
     echo "Usage $0 <password length in characters> [keyvault for encrypting private key]"
@@ -34,12 +34,13 @@ fi
 
 if [ -d "$2" ]; then
     tempfile=`mktemp -t genpass.XXXXX`
-    echo -n ${password} > "$tempfile"    
-    `dirname $0`/encrypt-file.sh "$2" -f "$tempfile"
+    ansible-vault encrypt_string "$password" --vault-password-file "$2" > "$tempfile"
     if [ $? -ne "0" ]; then
         echo "Encryption failed"
         rm "$tempfile"
         exit 1
+    else
+        cat "$tempfile"
     fi
     rm "$tempfile"
 else

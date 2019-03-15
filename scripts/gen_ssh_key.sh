@@ -18,7 +18,7 @@
 # Base name. Base name for public and private key
 # Creates private key "<basename>.key" and public key "<basename>.pub"
 
-# If a keyczar directory is provided, the private key that is output is encrypted.
+# If an ansible vault key is provided, the private key that is output is encrypted.
 
 RSA_MODULUS_SIZE_BITS=4096
 CWD=`pwd`
@@ -39,7 +39,7 @@ if [ $# -lt 1 ]; then
 fi
 
 KEY_BASENAME=${1}
-KEY_DIR=${2}
+KEY_FILE=${2}
 
 if [ -e ${KEY_BASENAME}.key -o -e ${KEY_BASENAME}.pub ]; then
     echo "'${KEY_BASENAME}.key' or '${KEY_BASENAME}.pub' already exist. Leaving"
@@ -64,14 +64,10 @@ if [ $? -ne "0" ]; then
     error_exit "Error generating ssh keypair"
 fi
 
-if [ -d "${KEY_DIR}" ]; then
-    crypted_private_key=`${BASEDIR}/encrypt-file.sh "${KEY_DIR}" -f "${tmpdir}/id_rsa"`
+if [ -d "${KEY_FILE}" ]; then
+    ansible-vault encrypt ${tmpdir}/id_rsa --vault-password-file ${KEY_FILE} --output ${KEY_BASENAME}.key
     if [ $? -ne "0" ]; then
         error_exit "Error crypting private key"
-    fi
-    echo "${crypted_private_key}" > ${KEY_BASENAME}.key
-    if [ $? -ne "0" ]; then
-        error_exit "Error writing private key"
     fi
 
 else

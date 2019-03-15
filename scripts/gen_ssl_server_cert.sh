@@ -21,7 +21,7 @@
 # Base name. Base name for certificate and private key
 # DN: Certificate DN in OpenSSL format. e.g. "/CN=Common Name"
 
-# If a keyczar keyvault directory is provided, the key that is output is encrypted.
+# If an ansible vault key is provided, the private key that is output is encrypted.
 
 
 CWD=`pwd`
@@ -66,15 +66,17 @@ echo "Using openssl: ${OPENSSL}"
 CA_DIR=${1}
 CERT_BASENAME=${2}
 CERT_DN=${3}
-KEY_DIR=${4}
+KEY_FILE=${4}
+
+echo ${KEY_FILE}
 
 if [ $# -lt 3 ]; then
-    echo "Usage: $0 <CA directory> <basename> <Certificate DN> [keyvault for encrypting private key]"
+    echo "Usage: $0 <CA directory> <basename> <Certificate DN> [keyfile for encrypting private key]"
     echo
     echo "CA directory: Directory previously created with create_ca.sh"
     echo "Basename: name for storing certificate and key. Files are written to the current directory"
     echo "Certificate DN: Enter the distinguised name (DN) in OpenSSL DN format. E.g. /CN=<common name>/O=<organisation>/C=<country-code>"
-    echo "keyvault: If a keyczar keyvault directory is provided, the key that is output is encrypted."
+    echo "keyfile: If an Ansible vault key file is provided, the key that is output is encrypted."
     exit 1;
 fi
 
@@ -109,14 +111,10 @@ fi
 cd ${CWD}
 
 
-if [ -d "${KEY_DIR}" ]; then
-    crypted_private_key=`${BASEDIR}/encrypt-file.sh "${KEY_DIR}" -f "${tmpdir}/private_key.pem"`
+if [ -d "${KEY_FILE}" ]; then
+    ansible-vault encrypt ${tmpdir}/private_key.pem --vault-password-file ${KEY_FILE} --output ${CERT_BASENAME}.key
     if [ $? -ne "0" ]; then
         error_exit "Error crypting private key"
-    fi
-    echo "${crypted_private_key}" > ${CERT_BASENAME}.key
-    if [ $? -ne "0" ]; then
-        error_exit "Error writing private key"
     fi
 else
     cp ${tmpdir}/private_key.pem ${CERT_BASENAME}.key

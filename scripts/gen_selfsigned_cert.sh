@@ -18,7 +18,7 @@
 # Base name. Base name for certificate and private key
 # DN: Certificate DN in OpenSSL format. e.g. "/CN=Common Name"
 
-# If a keyczar directory is provided, the key that is output is encrypted.
+# If an ansible vault key is provided, the key that is output is encrypted.
 
 CERT_VALID_DAYS=1825
 RSA_MODULUS_SIZE_BITS=2048
@@ -41,7 +41,7 @@ fi
 
 CERT_BASENAME=${1}
 CERT_DN=${2}
-KEY_DIR=${3}
+KEY_FILE=${3}
 
 if [ -e ${CERT_BASENAME}.key -o -e ${CERT_BASENAME}.crt ]; then
     echo "'${CERT_BASENAME}.key' or '${CERT_BASENAME}.crt' already exist. Leaving"
@@ -80,14 +80,10 @@ if [ $? -ne "0" ]; then
     error_exit "Error creating certificate"
 fi
 
-if [ -d "${KEY_DIR}" ]; then
-    crypted_private_key=`${BASEDIR}/encrypt-file.sh "${KEY_DIR}" -f "${tmpdir}/private_key.pem"`
+if [ -d "${KEY_FILE}" ]; then
+    ansible-vault encrypt "${tmpdir}/id_rsa" --vault-password-file ${KEY_FILE} --output ${tmpdir}/private_key.pem
     if [ $? -ne "0" ]; then
         error_exit "Error crypting private key"
-    fi
-    echo "${crypted_private_key}" > ${CERT_BASENAME}.key
-    if [ $? -ne "0" ]; then
-        error_exit "Error writing private key"
     fi
 else
     cp ${tmpdir}/private_key.pem ${CERT_BASENAME}.key

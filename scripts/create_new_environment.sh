@@ -102,11 +102,6 @@ echo "Reading configuration from: ${ENVIRONMENT_CONF}"
 . "${ENVIRONMENT_CONF}"
 echo "Done reading configuration"
 
-# Fallback to USE_KEYCZAR misspelled as USE_KEYSZAR
-if [ -z "${USE_KEYCZAR}" ]; then
-    USE_KEYCZAR=${USE_KEYSZAR}
-fi
-
 if [ ! -e ${ENVIRONMENT_DIR} ]; then
     echo "Creating new environment directory"
     mkdir -p ${ENVIRONMENT_DIR}
@@ -170,20 +165,27 @@ for directory in "${directories[@]}"; do
 done
 
 
-KEY_DIR=""
-if [ "${USE_KEYCZAR}" -eq 1 ]; then
+if [ "${USE_VAULT}" -eq 1 ]; then
     # Create keystore for encypting secrets
-    KEY_DIR=${ENVIRONMENT_DIR}/${KEYSTORE_DIR}
+    KEY_FILE=${ENVIRONMENT_DIR}/${KEY_FILE_NAME}
+fi
+    
+if [ "${USE_VAULT}" -eq 1 ]; then
 
-    if [ ! -e ${KEY_DIR} ]; then
-        ${BASEDIR}/create_keydir.sh ${KEY_DIR}
+    if [ ! -e ${KEY_FILE} ]; then
+        generated_password=`${BASEDIR}/gen_password.sh ${PASSWORD_LENGTH}`
         if [ $? -ne "0" ]; then
             error_exit "Error creating keyset"
+        else
+            echo "${generated_password}" > ${KEY_FILE}
+            chmod 0600 ${KEY_FILE}
         fi
+    else
+        echo "Password exists, skipping"
     fi
-    echo "Using keydir: ${KEY_DIR}"
+    echo "Using keyfile: ${KEY_FILE}"
 else
-    echo "Not using keyczar. Keys and passwords will be stored in plaintext"
+    echo "Not using key vault. Keys and passwords will be stored in plaintext"
 fi
 
 
@@ -198,18 +200,18 @@ if [ ${#PASSWORDS[*]} -gt 0 ]; then
     for pass in "${PASSWORDS[@]}"; do
         if [ ! -e "${PASSWORD_DIR}/${pass}" ]; then
             echo "Generating password for ${pass}"
-            generated_password=`${BASEDIR}/gen_password.sh ${PASSWORD_LENGTH} ${KEY_DIR}`
+            generated_password=`${BASEDIR}/gen_password.sh ${PASSWORD_LENGTH}`
             if [ $? -ne "0" ]; then
                 error_exit "Error generating password"
             fi
-            echo "${generated_password}" > ${PASSWORD_DIR}/${pass}
+            ansible-vault encrypt_string "${generated_password}" --vault-password-file ${KEY_FILE}> ${PASSWORD_DIR}/${pass}
         else
             echo "Password ${pass} exists, skipping"
         fi
     done
     if [ ! -e "${PASSWORD_DIR}/empty_placeholder" ]; then
         echo "Creating empty_placeholder password"
-        generated_password=`${BASEDIR}/gen_password.sh 0 ${KEY_DIR}`
+        generated_password=`${BASEDIR}/gen_password.sh 0 ${KEY_FILE}`
         if [ $? -ne "0" ]; then
             error_exit "Error creating password"
         fi
@@ -231,7 +233,7 @@ if [ ${#SECRETS[*]} -gt 0 ]; then
     for secret in "${SECRETS[@]}"; do
         if [ ! -e "${SECRET_DIR}/${secret}" ]; then
             echo "Generating secret for ${secret}"
-            generated_secret=`${BASEDIR}/gen_password.sh ${SECRET_LENGTH} ${KEY_DIR}`
+            generated_secret=`${BASEDIR}/gen_password.sh ${SECRET_LENGTH} ${KEY_FILE}`
             if [ $? -ne "0" ]; then
                 error_exit "Error generating secret"
             fi
@@ -259,7 +261,7 @@ if [ ${#SAML_CERTS[*]} -gt 0 ]; then
         cert_dn=${cert#*:}
         if [ ! -e "${SAML_CERT_DIR}/${cert_name}.crt" -a "${SAML_CERT_DIR}/${cert_name}.key" ]; then
             echo "Creating SAML signing certificate and key for ${cert_name}; DN: ${cert_dn}"
-            ${BASEDIR}/gen_selfsigned_cert.sh ${cert_name} "${cert_dn}" ${KEY_DIR}
+            ${BASEDIR}/gen_selfsigned_cert.sh ${cert_name} "${cert_dn}" ${KEY_FILE}
             if [ $? -ne "0" ]; then
                 error_exit "Error creating SAML signing certificate"
             fi
@@ -297,7 +299,7 @@ if [ ${#SSL_CERTS[*]} -gt 0 ]; then
         cert_dn=${cert#*:}
         if [ ! -e "${SSL_CERT_DIR}/${cert_name}.crt" -a "${SSL_CERT_DIR}/${cert_name}.key" ]; then
             echo "Creating SSL certificate and key for ${cert_name}; DN: ${cert_dn}"
-            ${BASEDIR}/gen_ssl_server_cert.sh ${CA_DIR} ${cert_name} "${cert_dn}" ${KEY_DIR}
+            ${BASEDIR}/gen_ssl_server_cert.sh ${CA_DIR} ${cert_name} "${cert_dn}" ${KEY_FILE}
             if [ $? -ne "0" ]; then
                 error_exit "Error creating SSL certificate"
             fi
@@ -323,7 +325,7 @@ if [ ${#SSH_KEYS[*]} -gt 0 ]; then
     for key in "${SSH_KEYS[@]}"; do
         if [ ! -e "${SSH_KEY_DIR}/${key}.pub" -a "${SSH_KEY_DIR}/${key}.key" ]; then
             echo "Generating ssh keypair for ${key}"
-            ${BASEDIR}/gen_ssh_key.sh ${key} ${KEY_DIR}
+            ${BASEDIR}/gen_ssh_key.sh ${key} ${KEY_FILE}
             if [ $? -ne "0" ]; then
                 error_exit "Error generating SSH keypair"
             fi
@@ -341,18 +343,16 @@ echo
 echo "Created (or updated) passwords, secrets, certificates and/or ssh keys for the new environment as specified in
 the environment.conf: ${ENVIRONMENT_CONF}
 It is save to rerun this script as it will not overwrite existing files."
-if [ ${USE_KEYCZAR} -eq 1 ]; then
+if [ ${USE_VAULT} -eq 1 ]; then
 echo "
-* All secrets (except the CA private key) are encrypted with a symmetic key that is stored in a \"vault\". The vault is
-  located in ${KEY_DIR}
+* All secrets (except the CA private key) are encrypted with a symmetic key. The vault is
+  located in ${KEY_ILE}
 
-* You can use the encrypt.sh and encrypt-file.sh scripts to encrypt and decrypt the secrets.
+* You can use the ansible-vault commands to encrypt / decrypt the secrets. See https://docs.ansible.com/ansible/2.4/vault.html
 
 * For productions (like) systems it is advisable to keep this key separate from the environment. To do this:
-  1) Move the '${KEYSTORE_DIR}' to another location
-  2) Update vault_keydir in group_vars/all.yml to point to the new location
-  Note that rerunning this script after moving the key will result in a new key being created, which is probably
-  undesired.
+  1) Move the '${KEY_FILE}' to another location
+  2) ruen the ansible-playbook command with the option to point to this file.
 "
 fi
 if [ ${#SSL_CERTS[*]} -gt 0 ]; then
