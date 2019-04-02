@@ -5,7 +5,7 @@
 [Ansible](http://docs.ansible.com/) is an IT automation tool. It can configure systems, deploy software.
 
 This project is based on [Ansible-tools](https://github.com/pmeulen/ansible-tools), an example of Ansible Playbooks organization focusing on deployment for multiple environments,
- articulation with [Vagrant](https://www.vagrantup.com/docs/), [keyczar](https://github.com/google/keyczar) based encryption.
+ articulation with [Vagrant](https://www.vagrantup.com/docs/).
  Ansible-tools demonstrates a way to use Ansible to effectively and securely manage multiple environments ranging from development to production using the same playbook.
 
 # [Quickstart: Creating a development VM](id:quickstart)
@@ -69,7 +69,7 @@ Once you have created the environment, here is the layout of the environment dir
 
 ## vault-password directory
 
-This directory contains the secret used by keyczar to encrypt the secrets.
+This directory contains the secret used to encrypt the secrets.
 
 ## group_vars directory
 
