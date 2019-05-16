@@ -19,6 +19,8 @@ Virtualbox will run the development VM and Vagrant is used to create, configure 
 They are described in the [Ansible installation guide](http://docs.ansible.com/ansible/intro_installation.html).
 **Ansible 2.5 is required** for the _include-role_ feature to be used.
 
+On Debian, you can install `python-keyczar` to provide the needed `keyczart` executable.
+
 Clone or download this repository to your local machine:
 
     $ git clone https://github.com/sympa-community/sympa-ansible.git
