@@ -25,9 +25,7 @@ common:
   port: 443
   ssl:
     enabled: yes
-    certificate: "{{ lookup('file',inventory_dir+'/private/ssl_cert/webserver.crt') }}"
     selfsignedcertificate: yes
-    key: "{{ lookup('file',inventory_dir+'/private/ssl_cert/webserver.key') }}"
   web:
     domain: lists.example.com
     admin: support@renater.fr

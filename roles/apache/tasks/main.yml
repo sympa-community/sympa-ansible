@@ -27,19 +27,8 @@
       - apache2
       - apache2-utils
 
-- name: Put Apache vhost certs
-  tags: apache
-  no_log: True
-  copy: content="{{ item.ssl.certificate }}" dest=/etc/ssl/certs/{{ item.web.domain }}.crt owner=root group=root mode=644
-  when: item.ssl.enabled
-  with_items: "{{ apache_vhosts }}"
-
-- name: Put Apache vhost keys
-  tags: apache
-  no_log: True
-  copy: content="{{ item.ssl.key | vault(vault_keydir) }}" dest=/etc/ssl/private/{{ item.web.domain }}.key owner=root group=ssl-cert mode=640
-  with_items: "{{ apache_vhosts }}"
-  when: item.ssl.enabled
+- name: Include tasks for selfsigned SSL certificates
+  import_tasks: selfsigned.yml
 
 - name: Disable default Apache sites
   tags: apache

@@ -108,9 +108,7 @@ common:
   port: 443
   ssl:
     enabled: yes
-    certificate: "{{ lookup('file',inventory_dir+'/private/ssl_cert/webserver.crt') }}"
     selfsignedcertificate: yes
-    key: "{{ lookup('file',inventory_dir+'/private/ssl_cert/webserver.key') }}"
   web:
     domain: lists.example.com
     admin: support@renater.fr
@@ -170,26 +168,13 @@ This directory contains data that must be saved separately for each environment,
 
 After the environment generation, it contains the following directories:
 
-  - ca/
   - password/
-  - ssl_cert/
   - vhosts/
-
-### ca/ directory
-
-a pseudo certificate authority used to generate self_signed certificates. During development,
-you can chose to trust this authority to prevent browser warnings.
-Note that it sould also be used to create lists email adresses certificates.
 
 ### password/ directory
 
 This directory contains the encrypted versions of the passwords, such as db passwords.
 One file per password.
-
-### ssl_cert/ directory
-
-This directory contains the server certificates.
-Note that, for now, the playbook is quite dumb and reuses only one single certificates for all servers and virtual hosts...
 
 ### vhosts/ directory
 
@@ -347,9 +332,7 @@ For now, only Apache is configured.
   - `common.ip`: ("*" by default) IP for apache vhost configuration
   - `common.port`: SSL port for Apache
   - `common.ssl.enabled`: Set to 1 to enable ssl configuration
-  - `common.ssl.certificate`: Patch to the vhost certificate to install; Overriden by vhosts configuration.
   - `common.ssl.selfsignedcertificate`: Set to 1 if the certificate is self-signed: it implies a configuration change.
-  - `common.ssl.key`: Private key for the certificate
   - `common.web.domain`: web domain
   - `common.web.admin`: web admin email address
 
@@ -416,9 +399,7 @@ common:
   port: 443
   ssl:
     enabled: yes
-    certificate: "{{ lookup('file',inventory_dir+'/private/ssl_cert/webserver.crt') }}"
     selfsignedcertificate: yes
-    key: "{{ lookup('file',inventory_dir+'/private/ssl_cert/webserver.key') }}"
   web:
     domain: lists.example.com
     admin: support@renater.fr

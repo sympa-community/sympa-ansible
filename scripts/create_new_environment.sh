@@ -272,45 +272,6 @@ else
     echo "Skipping generation of self-signed certificates because none are defined in the environment.conf"
 fi
 
-# Create SSL server certificates
-if [ ${#SSL_CERTS[*]} -gt 0 ]; then
-    # Create Root CA for issueing SSL Server certs
-    CA_DIR=${ENVIRONMENT_DIR}/private/ca
-    if [ ! -e ${CA_DIR} ]; then
-        echo "Creating Root CA with DN: ${SSL_ROOT_DN}"
-        ${BASEDIR}/create_ca.sh ${CA_DIR} "${SSL_ROOT_DN}"
-        if [ $? -ne "0" ]; then
-            error_exit "Error creating CA"
-        fi
-    fi
-
-    # Create SSL server certificates
-    SSL_CERT_DIR=${ENVIRONMENT_DIR}/private/ssl_cert
-    if [ ! -e ${SSL_CERT_DIR} ]; then
-        echo "Creating ssl_cert directory"
-        mkdir -p ${SSL_CERT_DIR}
-    fi
-
-    cd ${SSL_CERT_DIR}
-    for cert in "${SSL_CERTS[@]}"; do
-        cert_name=${cert%%:*}
-        cert_dn=${cert#*:}
-        if [ ! -e "${SSL_CERT_DIR}/${cert_name}.crt" -a "${SSL_CERT_DIR}/${cert_name}.key" ]; then
-            echo "Creating SSL certificate and key for ${cert_name}; DN: ${cert_dn}"
-            ${BASEDIR}/gen_ssl_server_cert.sh ${CA_DIR} ${cert_name} "${cert_dn}" ${KEY_DIR}
-            if [ $? -ne "0" ]; then
-                error_exit "Error creating SSL certificate"
-            fi
-        else
-            echo "SSL certificate ${cert_name} exists, skipping"
-        fi
-    done
-    cd ${CWD}
-else
-    echo "Skipping generation of the CA and certificates because none are defined in the environment.conf"
-fi
-
-
 # Generate SSH keys
 if [ ${#SSH_KEYS[*]} -gt 0 ]; then
     SSH_KEY_DIR=${ENVIRONMENT_DIR}/private/ssh
