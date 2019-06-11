@@ -3,8 +3,8 @@
 sympa:
   unix_user: sympa
   unix_group: sympa
-  repository: https://github.com/sympa-community/git
-  repository_version: HEAD
+  repository: https://github.com/sympa-community/sympa.git
+  repository_version: sympa-6.2
   install_from_repository: 0
   source: https://github.com/sympa-community/sympa/releases/download/
   version: 6.2.42
