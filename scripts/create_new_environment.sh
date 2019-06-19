@@ -186,40 +186,6 @@ else
     echo "Not using keyczar. Keys and passwords will be stored in plaintext"
 fi
 
-
-# Generate passwords
-if [ ${#PASSWORDS[*]} -gt 0 ]; then
-    PASSWORD_DIR=${ENVIRONMENT_DIR}/private/password
-    if [ ! -e ${PASSWORD_DIR} ]; then
-        echo "Creating password directory"
-        mkdir -p ${PASSWORD_DIR}
-    fi
-
-    for pass in "${PASSWORDS[@]}"; do
-        if [ ! -e "${PASSWORD_DIR}/${pass}" ]; then
-            echo "Generating password for ${pass}"
-            generated_password=`${BASEDIR}/gen_password.sh ${PASSWORD_LENGTH} ${KEY_DIR}`
-            if [ $? -ne "0" ]; then
-                error_exit "Error generating password"
-            fi
-            echo "${generated_password}" > ${PASSWORD_DIR}/${pass}
-        else
-            echo "Password ${pass} exists, skipping"
-        fi
-    done
-    if [ ! -e "${PASSWORD_DIR}/empty_placeholder" ]; then
-        echo "Creating empty_placeholder password"
-        generated_password=`${BASEDIR}/gen_password.sh 0 ${KEY_DIR}`
-        if [ $? -ne "0" ]; then
-            error_exit "Error creating password"
-        fi
-        echo "${generated_password}" > ${PASSWORD_DIR}/private/empty_placeholder
-    fi
-else
-    echo "Skipping generation of passwords because none are defined in the environment.conf"
-fi
-
-
 # Generate secrets
 if [ ${#SECRETS[*]} -gt 0 ]; then
     SECRET_DIR=${ENVIRONMENT_DIR}/private/secret
