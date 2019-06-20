@@ -40,7 +40,7 @@ def run_module():
         # check if password file exists
         if not os.path.exists(module.params['password_file']):
             create_password_file(module.params['password_file'])
-            changed=True
+            result['changed']=True
 
     # setup vault
 
@@ -102,7 +102,7 @@ def run_module():
 #        module.params['vartree'],
     }
 
-    module.exit_json(changed=changed, ansible_facts=ansible_facts_val, vartree=module.params['vartree'])
+    module.exit_json(changed=result['changed'], ansible_facts=ansible_facts_val, vartree=module.params['vartree'])
 
 # populates leave entries with None value
 def walk_input(vault, vault_cli, node, params):
