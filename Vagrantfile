@@ -44,7 +44,9 @@ Vagrant.configure("2") do |config|
           "apache" => ["local-sympa"],
           "postfix" => ["local-sympa"],
         }
-        ansible.playbook = "provision-vagrant-vm.yml"
+        ansible.playbook = "create_inventory.yml"
+        ansible.limit="all"
+        ansible.inventory_path="environments/template/setup.ini"
         #ansible.verbose = "vvvv" # For troubleshooting ansible connection problems
     end
 
