@@ -22,7 +22,7 @@ def run_module():
     module_args = dict(
         src=dict(type='str'),
         dest=dict(type='str'),
-        password_file=dict(type='str'),
+        password_file=dict(type='str', no_log=True),
         vartree=dict(type='dict', required=True),
         length=dict(type='int', required=False, default=20),
     )
