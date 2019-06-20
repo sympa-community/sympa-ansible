@@ -48,12 +48,6 @@
         - "environments/template/vhosts/*.yml"
       delegate_to: localhost
 
-    - name: Create directory for the group variables
-      file:
-        state: directory
-        path: "{{ inventory_dir }}/group_vars"
-      delegate_to: localhost
-
     - name: Generate vars file for all groups
       template:
         src: "environments/template/group_vars/{{ item }}.yml"
