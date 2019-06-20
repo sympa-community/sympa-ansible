@@ -46,7 +46,7 @@ Vagrant.configure("2") do |config|
         }
         ansible.playbook = "create_inventory.yml"
         ansible.limit="all"
-        ansible.inventory_path="environments/template/setup.ini"
+        ansible.inventory_path="environments/setup.ini"
         #ansible.verbose = "vvvv" # For troubleshooting ansible connection problems
     end
 
