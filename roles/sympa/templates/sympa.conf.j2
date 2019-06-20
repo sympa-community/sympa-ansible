@@ -275,7 +275,7 @@ db_user	{{ sympa.db.app_user }}
 ## Password for the database connection
 ## What ever you use a password or not, you must protect the SQL server (is it
 ## not a public internet service ?)
-db_passwd	{{ sympa.db.app_password | vault(vault_keydir) }}
+db_passwd	{{ sympa.db.app_password }}
 
 ## Database private extention to subscriber table
 ## You need to extend the database format with these fields

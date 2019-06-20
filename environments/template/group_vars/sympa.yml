@@ -4,8 +4,8 @@
 sympa:
   db:
     app_user: sympa
-    app_password: "{{ lookup('file',inventory_dir+'/private/password/sympa_db_app_password') }}"
+    app_password: "{{ vault_secrets.db.app_password }}"
     readonly_user: sympareadonly
-    readonly_password: "{{ lookup('file',inventory_dir+'/private/password/sympa_db_readonly_password') }}"
+    readonly_password: "{{ vault_secrets.db.readonly_password }}"
   lists_path: /var/lib/sympa/list_data
   arc_path: /var/lib/sympa/archives
