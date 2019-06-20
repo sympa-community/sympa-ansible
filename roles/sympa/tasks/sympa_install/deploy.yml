@@ -4,19 +4,16 @@
   command: ./configure --prefix={{ install_prefix }}/{{ sympa.install_dir_name }} --with-lockdir=/var/lock --without-initdir --with-unitsdir=/lib/systemd/system --with-spooldir=/var/spool/sympa --with-expldir={{ sympa.lists_path }}
   args:
     chdir: "{{ install_prefix }}/{{ sympa.install_dir_name }}/src/{{ source_dir }}"
-    executable: /bin/bash
 
 - name: "Install Sympa [2/3: make]"
   command: make
   args:
     chdir: "{{ install_prefix }}/{{ sympa.install_dir_name }}/src/{{ source_dir }}"
-    executable: /bin/bash
 
 - name: "Install Sympa [3/3: make install]"
   command: make install
   args:
     chdir: "{{ install_prefix }}/{{ sympa.install_dir_name }}/src/{{ source_dir }}"
-    executable: /bin/bash
 
 - name: Fix ownership
   file:
@@ -43,4 +40,3 @@
     owner: sympa
     group: sympa
     mode: 0755
-
