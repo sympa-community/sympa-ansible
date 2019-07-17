@@ -4,10 +4,6 @@
 
 [Ansible](http://docs.ansible.com/) is an IT automation tool. It can configure systems, deploy software.
 
-This project is based on [Ansible-tools](https://github.com/pmeulen/ansible-tools), an example of Ansible Playbooks organization focusing on deployment for multiple environments,
- articulation with [Vagrant](https://www.vagrantup.com/docs/), [keyczar](https://github.com/google/keyczar) based encryption.
- Ansible-tools demonstrates a way to use Ansible to effectively and securely manage multiple environments ranging from development to production using the same playbook.
-
 # [Quickstart: Creating a development VM](id:quickstart)
 
 First install the tools on your local machine:
@@ -27,17 +23,9 @@ Next change into the "sympa-ansible" directory and start the development VM:
 
     $ vagrant up
 
-This prepares a VM that is ready to be managed by Ansible. It will call a simple Ansible playbook to make some changes to the VM.
-
-Create the new environment for the VM:
-
-    $ ./scripts/create_new_environment.sh environments/local
-
-And link the inventory to your local directory:
-
-    $ ln -s ../../.vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory environments/local/inventory
-
-Run `$ vagrant provision` to rerun just the provisioning step and update the inventory.
+This prepares a VM that is ready to be managed by Ansible. It will call a
+simple Ansible playbook to make some changes to the VM and create an
+inventory in `environments/local`.
 
 A starting point for a playbook is provided. Run the playbook "site.yml": 
 
@@ -57,15 +45,17 @@ You can now connect to your Sympa server web interface [https://lists.example.co
 
 Once you have created the environment, here is the layout of the environment directory:
 
-  - ansible-keystore/
   - group_vars/
   - private/
   - tasks/
   - templates/
+  - vault-password
 
-## ansible-keystore directory
+## vault-password file
 
-This directory contains the secret used by keyczar to encrypt the secrets.
+This file contains the vault secret (https://docs.ansible.com/ansible/latest/user_guide/vault.html). Please make
+sure that the permissions stay prohibitive (write and read only for the
+current user).
 
 ## group_vars directory
 
@@ -89,8 +79,6 @@ Anything not specifically related to either mail or sympa should go there.
 Here is the default file content:
 
 ```
-vault_keydir: "{{ inventory_dir }}/ansible-keystore"
-
 managed_file_dir: /opt/ansible/managed_files
 
 timezone: Europe/Amsterdam
@@ -162,19 +150,7 @@ sympa:
   arc_path: /var/lib/sympa/archives
 ```
 
-## private directory
 
-This directory contains data that must be saved separately for each environment, such as encrypted secrets and domain descriptions.
-
-After the environment generation, it contains the following directories:
-
-  - password/
-  - vhosts/
-
-### password/ directory
-
-This directory contains the encrypted versions of the passwords, such as db passwords.
-One file per password.
 
 ### vhosts/ directory
 
@@ -224,6 +200,8 @@ This directory contains files for tasks to be executed at the end of their respe
   - sympa.yml is executed at the end of the sympa role
   - apache.yml is executed at the end ot the apache role
   - common.yml is executed at the en of the common role.
+
+Currently there are no tasks in `sympa.yml`and `apache.yml`.
 
 Why only these three roles? Because we never had to execute other environment-specific tasks for the other roles (such as postfix).
 But if you want it, just add the following  line at the end of the main.yml task of the corresponding role:
@@ -647,95 +625,3 @@ Now you can use these variables in your tasks and templates. E.g.
       copy: content="{{ middleware_ssl_key }}" dest=/etc/nginx/middleware.key owner=root mode=400
       notify:
           - restart nginx
-
-## Encrypting secrets
-An [environment](#environment) will typically contain secrets like passwords, private keys. Ansible-tools can use a vault 
-to store these secrets in encrypted form in the environment. A vault uses a symmetric key to encrypt and decrypt secrets 
-so only this key has to be protected. This allows the encrypted values to be put under version control like the rest 
-of the environment.
-
-The included "create_new_environment.sh" script can be used to create the encryption key for an environment and to
-generate the secrets required by the environment in one go. The specification for the secrets to create and whether 
-to use encryption in configured in the "environment.conf" in the template.
-
-When talking about a **vault** in the rest of this document this refers to the way ansible-tools uses keyczar to work 
-with encrypted values, not the Ansible playbook vault.
-
-### Required tools
-
-To use the vault python-keyczar must be installed. Use `pip install python-keyczar` to install this tool.
-
-### Enabling encryption
-
-To enable encryption of secrets set "USE_KEYSZAR=1" in _environments/template/environment.conf_. Any new password,
-secrets or private keys generated by the "create_new_environment.sh" will be encrypted. Existing secrets will not be 
-changed. To create encrypted secrets you can delete the exiting ons and rerun the script, or you can encrypt them
-manually using the _encrypt-file.sh_ script. 
-
-E.g to output the encrypted contents of "environments/password/some_password":
-
-`$ ./scripts/encrypt-file.sh environment/local/ansible-keystore -f environments/password/some_password`
-
-The encrypted secrets, password and certificates to be created by the _create_new_environment.sh_ script are specified 
-in the _environments/template/environment.conf_ file. Generated secrets will be stored in the environment in the 
-"password", "secret", "ssl_cert" or "saml_cert" directory, depending on type.
-
-You must update your playbooks to decrypt the secrets. The ansible-tools example playbook already set a variable "vault_keydir" in 
-_group_vars/all.yml_ that points to the keyczar keyset for decrypting secrets: `vault_keydir: "{{ inventory_dir }}/ansible-keystore"`.
-
-We assume that you are loading your secrets in (group) variables as described [above](#using_secrets).
-
-To decrypt a secret so it can be used in an Ansible playbook you use the custom Jinja2 filter "vault". This filter 
-expects one argument: the location of the keyset to use to decrypt the secret.
-
-Example of an Ansible task that is not using encrypted passwords:
-
-    - name: add mariadb backup user
-      mysql_user:
-        name: "{{ mariadb_backup_user }}"
-        password: "{{ mariadb_backup_password }}"
-        login_user: root
-        login_password: "{{ mariadb_root_password }}"
-        priv: "*.*:SELECT"
-        state: present
-      when: mariadb_enable_remote_ssh_backup | default(false)
-
-Example of the same task that is using encrypted passwords:
-
-    # Task that is using encrypted passwords
-    - name: add mariadb backup user
-      mysql_user:
-        name: "{{ mariadb_backup_user }}"
-        password: "{{ mariadb_backup_password | vault(vault_keydir) }}"
-        login_user: root
-        login_password: "{{ mariadb_root_password | vault(vault_keydir) }}"
-        priv: "*.*:SELECT"
-        state: present
-      when: mariadb_enable_remote_ssh_backup | default(false)
- 
-### Keyset
-
-When "USE_KEYCZAR=1" in _environments/template/environment.conf_ the "create_new_environment.sh" script will create a 
-keyset for the environment. This keyset contains the secret key that is used to encrypt and decrypt secrets. An existing 
-keyset will not be overwritten.
-
-### Creating an encrypted secret
-
-Several utility scripts are provided to create encrypted secrets:
-
-* An existing secret in a file can be encrypted using _encrypt-file.sh_ script.
-  E.g. to encrypt the contents of "/file/with/plaintext/secret" and store it in "environment/secrets/encrypted_secret":
-
-    `$ ./scripts/encrypt-file.sh environment/local/ansible-keystore -f /file/with/plaintext/secret > environment/secrets/encrypted_secret`
-
-* A new random password can be generated using the _gen_password.sh_ script.
-  E.g. to generate a new 15 character long encrypted password in "environment/passwords/encrypted_password":
-  
-    `$ ./scripts/gen_password.sh 15 environment/local/ansible-keystore > environment/secrets/encrypted_secret`
-
-### Decrypting an encrypted file
-
-An encrypted file can be decrypted using the "-d" option to the _encrypt-file.sh_ script.
-E.g. to output the decrypted contents of "environment/password/some_password":
-
-`$ ./scripts/encrypt-file.sh -d environment/local/ansible-keystore -f environment/password/some_password`
