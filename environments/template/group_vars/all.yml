@@ -1,8 +1,5 @@
 # group_vars/all: Variables visible in all roles
 
-# Location of the keystore directory on the deploy host
-vault_keydir: "{{ inventory_dir }}/ansible-keystore"
-
 # Directory for keeping files on the remote host for use by Ansible
 managed_file_dir: /opt/ansible/managed_files
 
