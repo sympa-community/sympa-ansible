@@ -1,0 +1,33 @@
+---
+
+# required for using openssl_* modules
+- name: Install pyOpenSSL module on target
+  apt:
+    name:
+      - python-openssl
+
+- name: Ensure directory exists for local self-signed TLS certs.
+  file:
+    path: /etc/ssl/certs/{{ item.web.domain }}
+    state: directory
+  with_items: "{{ apache_vhosts }}"
+
+- name: Generate an OpenSSL private key.
+  openssl_privatekey:
+    path: /etc/ssl/private/{{ item.web.domain }}.key
+  with_items: "{{ apache_vhosts }}"
+
+- name: Generate an OpenSSL CSR.
+  openssl_csr:
+    path: /etc/ssl/private/{{ item.web.domain }}.csr
+    privatekey_path: /etc/ssl/private/{{ item.web.domain }}.key 
+    common_name: "{{ item.web.domain }}"
+  with_items: "{{ apache_vhosts }}"
+    
+- name: Generate a Self Signed OpenSSL certificate.
+  openssl_certificate:
+    path: /etc/ssl/certs/{{ item.web.domain }}.crt
+    privatekey_path: /etc/ssl/private/{{ item.web.domain }}.key 
+    csr_path: /etc/ssl/private/{{ item.web.domain }}.csr
+    provider: selfsigned
+  with_items: "{{ apache_vhosts }}"

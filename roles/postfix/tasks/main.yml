@@ -5,7 +5,7 @@
     state: present
 
 - include_vars:
-    dir: "{{ inventory_dir }}/private/vhosts"
+    dir: "{{ inventory_dir }}/vhosts"
     name: vhost_specific_variables
   tags: apache, virtual_hosts
 

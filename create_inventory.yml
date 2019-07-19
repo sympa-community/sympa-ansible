@@ -1,0 +1,67 @@
+- name: Setup
+  hosts: all
+  gather_facts: false
+
+  vars:
+    ansible_python_interpreter: "{{ ansible_playbook_python }}"
+    env_directories:
+      - "group_vars"
+      - "host_vars"
+      - "handlers"
+      - "tasks"
+      - "templates"
+      - "templates/common"
+      - "vhosts"
+    inventory_dir: "environments/local"
+
+  tasks:
+    - name: Create directory for new environment
+      file:
+        state: directory
+        path: "{{ inventory_dir }}"
+      delegate_to: localhost
+
+    - name: Create secrets
+      vault_random:
+        password_file: "{{ inventory_dir }}/vault-password"
+        vartree:
+          db:
+            root_password: null
+            app_password: null
+            readonly_password: null
+      delegate_to: localhost
+
+    - name: Create directories
+      file:
+        state: directory
+        path: "{{ inventory_dir }}/{{ item }}"
+      with_items: "{{ env_directories }}"
+      delegate_to: localhost
+
+    - name: Copy files
+      copy:
+        src: "{{ item }}"
+        dest: "{{ inventory_dir }}/{{ item | relpath('environments/template') }}"
+      with_fileglob:
+        - "environments/template/templates/common/*.j2"
+        - "environments/template/tasks/*.yml"
+        - "environments/template/vhosts/*.yml"
+      delegate_to: localhost
+
+    - name: Generate vars file for all groups
+      template:
+        src: "environments/template/group_vars/{{ item }}.yml"
+        dest: "{{ inventory_dir }}/group_vars/{{ item }}.yml"
+        force: no
+      with_items:
+        - all
+        - postfix
+        - sympa
+      delegate_to: localhost
+
+    - name: Write inventory file
+      template:
+        src: "environments/template/inventory.ini"
+        dest: "{{ inventory_dir }}/inventory"
+        force: no
+      delegate_to: localhost

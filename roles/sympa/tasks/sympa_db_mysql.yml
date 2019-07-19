@@ -23,12 +23,12 @@
 - name: 'Update Mysql Root Password'
   mysql_user:
     login_user: root
-    login_password: "{{ db.root_password | vault(vault_keydir) }}"
+    login_password: "{{ db.root_password }}"
     ## Useful to update root user only if it is in the initial configuration state
     check_implicit_admin: yes
     name: root
     host: "{{ item }}"
-    password: "{{ db.root_password | vault(vault_keydir) }}"
+    password: "{{ db.root_password }}"
     priv: "*.*:ALL,GRANT"
     state: present
   with_items:
@@ -40,15 +40,15 @@
   mysql_db:
     name: sympa
     login_user: root
-    login_password: "{{ db.root_password | vault(vault_keydir) }}"
+    login_password: "{{ db.root_password }}"
     state: present
 
 - name: Configure sympa user for MySQL server
   mysql_user:
     login_user: root
-    login_password: "{{ db.root_password | vault(vault_keydir) }}"
+    login_password: "{{ db.root_password  }}"
     name: "{{ sympa.db.app_user }}"
-    password: "{{ sympa.db.app_password | vault(vault_keydir) }}"
+    password: "{{ sympa.db.app_password }}"
     host: "{{ item }}"
     priv: "sympa.*:ALL"
   with_items:

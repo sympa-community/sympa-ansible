@@ -1,6 +1,7 @@
 /environments/*
 !/environments/template
 !/environments/template/*
+!/environments/setup.ini
 *.pyc
 /.idea
 /.vagrant

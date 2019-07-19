@@ -1,8 +1,5 @@
 # group_vars/all: Variables visible in all roles
 
-# Location of the keystore directory on the deploy host
-vault_keydir: "{{ inventory_dir }}/ansible-keystore"
-
 # Directory for keeping files on the remote host for use by Ansible
 managed_file_dir: /opt/ansible/managed_files
 
@@ -17,7 +14,7 @@ ansible_remote_user: root
 install_prefix: /usr/local
 
 db:
-  root_password: "{{ lookup('file',inventory_dir+'/private/password/db_root_password') }}"
+  root_password: {{ vault_secrets.db.root_password }}
   root_user: root
 
 common:
@@ -25,9 +22,7 @@ common:
   port: 443
   ssl:
     enabled: yes
-    certificate: "{{ lookup('file',inventory_dir+'/private/ssl_cert/webserver.crt') }}"
     selfsignedcertificate: yes
-    key: "{{ lookup('file',inventory_dir+'/private/ssl_cert/webserver.key') }}"
   web:
     domain: lists.example.com
     admin: support@renater.fr
