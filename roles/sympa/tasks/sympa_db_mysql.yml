@@ -1,11 +1,15 @@
 ---
 # Install and configure Sympa database
 
+- name: Install Ansible prerequisites for MySQL modules
+  apt:
+    name:
+      - python-mysqldb
+
 - name: Install required packages for MySQL
   apt: 
     name:
-      - mysql-server
-      - python-mysqldb # Required by Ansible
+      "{{ db.packages | default('mysql-server') }}"
     state: present
 
 - name: Enable MySQL server on boot
