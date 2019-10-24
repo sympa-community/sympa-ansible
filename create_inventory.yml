@@ -59,9 +59,11 @@
         - sympa
       delegate_to: localhost
 
-    - name: Write inventory file
-      template:
-        src: "environments/template/inventory.ini"
+    - name: Create symlink for inventory file
+      file:
+        state: link
+        src: "../../.vagrant/provisioners/ansible/inventory/vagrant_ansible_inventory"
         dest: "{{ inventory_dir }}/inventory"
-        force: no
+        force: yes
+        follow: no
       delegate_to: localhost
