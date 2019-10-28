@@ -6,7 +6,7 @@
   notify: restart sympa
   
 - name: Create sympa log file
-  file: dest=/var/log/sympa state=touch mode=622 owner=syslog group=adm
+  file: dest=/var/log/sympa.log state=touch mode=0640 owner=sympa group=adm
   tags: syslog
   
 - name: Install custom rsyslog conf file
