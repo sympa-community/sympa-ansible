@@ -12,11 +12,11 @@
 
 - name: Setting false flag for proxy settings
   set_fact:
-    proxy: 0
+    proxy: false
 
 - name: Setting flag for proxy settings
   set_fact:
-    proxy: 1
+    proxy: true
   tags: proxy
   when: inventory_hostname == 'local-proxy'
 
