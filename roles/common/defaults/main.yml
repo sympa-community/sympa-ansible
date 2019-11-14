@@ -11,9 +11,9 @@ users:
       password: no
       group: sympa
       
-set_hostname: 0
+set_hostname: false
 
-set_hosts: 0
+set_hosts: false
 
 ## This variable should be populated this way:
 ## public_keys:
