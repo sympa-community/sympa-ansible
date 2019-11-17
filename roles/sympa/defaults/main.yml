@@ -79,3 +79,4 @@ sympa:
     color_14: '#ff9'
     color_15: '#fe57a1'
     language: 'en_US'
+    log_level: 0
