@@ -294,6 +294,7 @@ All parameters can't be defined in the playbook. Only the few below. Don't hesit
 
   - `sympa.config.color_*`: the colors to be used for Sympa web interface.
   - `sympa.config.language`: the default server language.
+  - `sympa.config.log_level`: the log level (0..4)
 
 ### Sympa patchs
 

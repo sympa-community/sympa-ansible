@@ -73,7 +73,7 @@ syslog	LOCAL1
 
 ## Log verbosity
 ## 0: normal, 2,3,4: for debug
-log_level	0
+log_level	{{ sympa.config.log_level }}
 
 ## Communication mode with syslogd (unix | inet)
 log_socket_type	unix
