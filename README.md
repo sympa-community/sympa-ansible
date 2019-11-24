@@ -318,7 +318,7 @@ For now, only Apache is configured.
 
   - `common.mail.domain`: mail domain (overriden by vhosts configuration)
   - `common.mail.force_smtp_route`: if set to 1, any outgoing SMTP session will be made towards `common.mail.outgoing_server` without DNS resolution.
-  - `common.mail.incoming_smtp`: the IP from which incoming mail should come to the server. Leave blak if you accept any incoming server.
+  - `common.mail.incoming_smtp`: the IP from which incoming mail should come to the server. Remove variable to accept any incoming server.
   - `common.mail.outgoing_server`: See `common.mail.force_smtp_route`.
   - `common.mail.enable_check_smtp`: Optional activation of a program sending mails to check whether mails arrive or not.
 
