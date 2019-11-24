@@ -58,6 +58,8 @@ sympa:
     alias_file: sympa_transport
   web:
     domain: lists.example.com
+  sympasoap:
+    enabled: true
   db:
     type: mysql
     app_user: sympa

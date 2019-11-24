@@ -31,6 +31,16 @@
     name: sympasoap
     enabled: yes
     daemon_reload: yes
+  when: sympa.sympasoap.enabled
+  tags: apache
+
+- name: stop sympasoap
+  systemd:
+    state: stopped
+    name: sympasoap
+    enabled: no
+    daemon_reload: yes
+  when: not sympa.sympasoap.enabled
   tags: apache
 
 - name: Install Sympa web config

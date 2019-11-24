@@ -31,8 +31,10 @@ listmaster	{{ common.admins | join(',') }}
 ## URL of main Web page
 wwsympa_url	https://{{ common.web.domain }}/sympa
 
+{% if sympa.sympasoap.enabled %}
 ## URL of SOAP service
 soap_url	https://{{ common.web.domain }}/sympasoap
+{% endif %}
 
 ## Store distributed messages into archive
 ## This setting can be overridden by each list

@@ -45,6 +45,7 @@
               ProxyPassReverse  https://{{ hostvars[item.sympa.server]['ansible_eth1']['ipv4']['address'] }}/sympa
               ProxyPreserveHost On
     </Location>
+{% if sympa.sympasoap.enabled %}
     <Location /sympasoap>
               Require all granted
               RequestHeader set Front-End-Https "On"
@@ -52,6 +53,7 @@
               ProxyPassReverse  https://{{ hostvars[item.sympa.server]['ansible_eth1']['ipv4']['address'] }}/sympasoap
               ProxyPreserveHost On
     </Location>
+{% endif %}
     <Location /check-smtp-service-results>
               Require all granted
               RequestHeader set Front-End-Https "On"
