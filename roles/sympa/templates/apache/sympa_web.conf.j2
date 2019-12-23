@@ -2,8 +2,6 @@
   
   Alias /static-sympa {{ install_prefix }}/{{ sympa.install_dir_name }}/static_content
 
-  Redirect 302 /sympa/sso_login/groupware/init /Shibboleth.sso/Login?target=/sympa/sso_login/groupware
-  
   <Location /static-sympa>
     Require all granted
   </Location>
