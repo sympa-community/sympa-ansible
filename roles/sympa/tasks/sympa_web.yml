@@ -10,7 +10,7 @@
   tags: apache
 
 - name: install wwsympa service config
-  template: src=fcgi/wwsympa.service.j2 dest=/lib/systemd/system/wwsympa.service
+  template: src=fcgi/wwsympa.service.j2 dest=/etc/systemd/system/wwsympa.service
   tags: apache
 
 - name: start wwsympa
@@ -22,7 +22,7 @@
   tags: apache
 
 - name: install sympasoap service config
-  template: src=fcgi/sympasoap.service.j2 dest=/lib/systemd/system/sympasoap.service
+  template: src=fcgi/sympasoap.service.j2 dest=/etc/systemd/system/sympasoap.service
   tags: apache
 
 - name: start sympasoap
