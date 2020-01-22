@@ -7,6 +7,10 @@ aliases_program postmap
 
 aliases_db_type hash
 
+{% if mail.antispam is defined %}
+antispam_feature  on
+{% endif %}
+
 {% if 'alias_manager' in sympa.config %}
 alias_manager  {{ sympa.config.alias_manager }}
 {% endif %}

@@ -1,4 +1,5 @@
 ---
+
 - name: Install list aliases file
   copy:
     src: files/list_aliases.tt2
@@ -102,3 +103,6 @@
         hash:{{ sympa.mail.alias_directory }}/{{ sympa.mail.alias_file }}
   notify: restart postfix
 
+- name: Include Antispam if needed
+  import_tasks: sympa_antispam.yml
+  when: common.mail.antispam is defined

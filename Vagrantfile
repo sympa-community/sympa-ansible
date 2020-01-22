@@ -14,7 +14,7 @@ Vagrant.configure("2") do |config|
         # Give it a fixed IP
         conf.vm.network "private_network", ip: "192.168.66.67", :netmask => "255.255.255.0"
         conf.vm.provider "vmware_fusion" do |v|
-            v.vmx["memsize"] = "1024"
+            v.vmx["memsize"] = "2048"
         end
         conf.vm.provider "virtualbox" do |v|
             v.memory = 1024

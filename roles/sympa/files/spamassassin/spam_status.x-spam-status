@@ -1,0 +1,5 @@
+title.gettext test x-spam-status  header
+
+match([header->X-Spam-Level][-1],/\*{5,10}/)  	smtp,dkim,smime,md5  -> unsure
+match([header->X-Spam-Level][-1],/\*{10,}/)  	smtp,dkim,smime,md5  -> spam
+true() smtp,dkim,md5,smime -> ham
