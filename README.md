@@ -302,6 +302,11 @@ All parameters can't be defined in the playbook. Only the few below. Don't hesit
   - `arc_path`: full path to the directory where the lists archives will be stored.
 
 
+### Sympa web
+
+The SOAP server is disabled by default. To turn it on, set
+`sympa.soap.enabled` to true.
+
 ## Common namespace
 
 ### Web configuration

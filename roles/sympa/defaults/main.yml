@@ -61,7 +61,7 @@ sympa:
   web:
     domain: lists.example.com
   sympasoap:
-    enabled: true
+    enabled: false
   db:
     type: mysql
     app_user: sympa
