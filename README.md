@@ -296,7 +296,7 @@ All parameters can't be defined in the playbook. Only the few below. Don't hesit
   - `sympa.config.language`: the default server language.
   - `sympa.config.log_level`: the log level (0..4)
 
-### Sympa patchs
+### Sympa paths
 
   - `lists_path`: full path to the directory containing the lists config.
   - `arc_path`: full path to the directory where the lists archives will be stored.
