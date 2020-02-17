@@ -12,6 +12,9 @@
     ServerName {{ item.web.domain }}
     ServerSignature off
 
+    RewriteEngine On
+    RewriteRule ^/?$ https://%{SERVER_NAME}/sympa [QSA,R=301,L]
+
     ErrorLog ${APACHE_LOG_DIR}/error_{{ item.web.domain }}.log
     CustomLog ${APACHE_LOG_DIR}/access_{{ item.web.domain }}.log combined
 
