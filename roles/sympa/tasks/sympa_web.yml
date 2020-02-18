@@ -60,15 +60,3 @@
   command: a2enmod rewrite
   notify: Restart Apache
 
-- name: Add redirect from / to /sympa
-  tags: apache
-  blockinfile:
-    state: present
-    marker: "# {mark} ANSIBLE MANAGED {{ item }} redirect to /sympa"
-    path: "/etc/apache2/sites-available/{{ item }}.conf"
-    block: |
-      RewriteEngine On
-      RewriteRule ^/?$ https://%{SERVER_NAME}/sympa [QSA,R=301,L]
-  notify: Restart Apache
-  with_items: "{{ web_domains }}"
-
