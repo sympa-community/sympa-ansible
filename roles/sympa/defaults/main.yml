@@ -7,7 +7,7 @@ sympa:
   repository_version: sympa-6.2
   install_from_repository: 0
   source: https://github.com/sympa-community/sympa/releases/download/
-  version: 6.2.52
+  version: 6.2.54
   sha256:
       {
        "6.1.17": "a506ea6e9c88c4a91d22bf146acb06fae5c277e98312b957bdae974739145b79",
@@ -51,6 +51,7 @@ sympa:
        "6.2.48": "651838c9ebb7fdffc3c397ee34f74362126df03c5e5779a1f3e35ab76419d30f",
        "6.2.50": "aed60f03d869b3b2096c85f5da327221dcb3a96d885b301aec56bdadf6308ac8",
        "6.2.52": "028d2bce1a2556c3d404b8423772f1a148ea2b58d271ee7ef2208ddc65c6641a",
+       "6.2.54": "6bd54e6dcf9b003575b01202952edba28a392af90ff8cf908e1d3e6417e5a733",
        }
   install_dir_name: sympa
   apply_patches: 1
