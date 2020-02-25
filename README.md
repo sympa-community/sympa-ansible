@@ -234,7 +234,7 @@ Here is the list of the parameters used in the playbook, presented as YAML data:
 
 ## global parameters
 
- - `install_prefix`: the root where applications should be installed. Usefull if you're combining this playbook with others to install other appplications than Sympa.
+ - `install_prefix`: the root where applications should be installed. Useful if you're combining this playbook with others to install other appplications than Sympa.
  - `db.root_user`: the username of the database global root user.
  - `db.root_password`: the password of the database global root user.
  
@@ -285,7 +285,7 @@ The mail setup is the same as the one proposed by the
   - `sympa.db.type`: ony two values: `mysql` or `Pg`. Defines which RDBMS to use as Sympa database backend.
   - `sympa.db.app_user`: username used by Sympa for accessing its own database.
   - `sympa.db.app_password`: password used by Sympa for accessing its own database.
-  - `sympa.db.readonly_user`: a user with readonly privleges to Sympa database. Can be usefull.
+  - `sympa.db.readonly_user`: a user with readonly privleges to Sympa database. Can be useful.
   - `sympa.db.readonly_password`: a password for the user with readonly privleges to Sympa database.
 
 ### Sympa configuration
