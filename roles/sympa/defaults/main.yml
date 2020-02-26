@@ -67,21 +67,5 @@ sympa:
     type: mysql
     app_user: sympa
   config:
-    color_0: '#F7F7F7'
-    color_1: '#222222'
-    color_2: '#004B94'
-    color_3: '#5E5E5E'
-    color_4: '#4c4c4c'
-    color_5: '#0090E9'
-    color_6: '#005ab2'
-    color_7: '#fff'
-    color_8: '#f2f6f9'
-    color_9: '#bfd2e1'
-    color_10: '#983222'
-    color_11: '#66aaff'
-    color_12: '#FFE7E7'
-    color_13: '#f48A7b'
-    color_14: '#ff9'
-    color_15: '#fe57a1'
     language: 'en_US'
     log_level: 0
