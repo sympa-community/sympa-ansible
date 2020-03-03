@@ -9,19 +9,9 @@ listmaster      {{ robot.admins | join(',') }}
 create_list     {{ robot.config.create_list }}
 default_home    home
 title           {{ robot.config.title }}
-color_1         {{ robot.config.color_1 }}
-color_2         {{ robot.config.color_2 }}
-color_3         {{ robot.config.color_3 }}
-color_4         {{ robot.config.color_4 }}
-color_5         {{ robot.config.color_5 }}
-color_6         {{ robot.config.color_6 }}
-color_7         {{ robot.config.color_7 }}
-color_8         {{ robot.config.color_8 }}
-color_9         {{ robot.config.color_9 }}
-color_10        {{ robot.config.color_10 }}
-color_11        {{ robot.config.color_11 }}
-color_12        {{ robot.config.color_12 }}
-color_13        {{ robot.config.color_13 }}
-color_14        {{ robot.config.color_14 }}
-color_15        {{ robot.config.color_15 }}
+{% for n in range(0,16) %}
+{% if 'color_' + n | string in robot.config %}
+color_{{ n }} {{ robot.config.get('color_' + n | string) }}
+{% endif %}
+{% endfor %}
 lang        {{ robot.config.language }}

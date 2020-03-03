@@ -82,10 +82,6 @@
   tags: sympa_web
   import_tasks: sympa_web.yml
 
-- name: Enable Sympa startup
-  tags: sympa_startup
-  import_tasks: sympa_startup.yml
-
 ## Here we use loop_var to prevent conflicts on item var name with outer loops
 - name: Install and configure Sympa virtual robots
   tags: virtual_hosts
@@ -96,6 +92,10 @@
   loop: "{{ sympa_vhosts }}"
   loop_control:
     loop_var: robot_item
- 
+
+- name: Enable Sympa startup
+  tags: sympa_startup
+  import_tasks: sympa_startup.yml
+
  # Include environment specific tasks
 - include: "{{ inventory_dir }}/tasks/sympa.yml"
