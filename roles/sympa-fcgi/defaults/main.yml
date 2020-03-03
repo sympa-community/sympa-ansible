@@ -1,0 +1,7 @@
+---
+sympa:
+  web:
+    wwsympa_procs: 5
+    sympasoap_procs: 5
+systemd:
+  unit_directory: "/lib/systemd/system"

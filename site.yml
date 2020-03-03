@@ -49,3 +49,4 @@
   remote_user: "{{ ansible_remote_user }}"
   roles:
   - sympa
+  - sympa-fcgi

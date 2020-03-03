@@ -1,0 +1,26 @@
+---
+- name: Set up systemd for WWSympa
+  include_tasks:
+    file: systemd.yml
+    apply:
+      tags:
+        - sympa-fcgi
+        - wwsympa-fcgi
+  vars:
+    unit_name: wwsympa
+    unit_description: "WWSympa - Web interface for Sympa mailing list manager"
+  tags:
+    - always
+
+- name: Set up systemd for Sympa SOAP server
+  include_tasks:
+    file: systemd.yml
+    apply:
+      tags:
+        - sympa-fcgi
+        - wwsympa-fcgi
+  vars:
+    unit_name: sympasoap
+    unit_description: "SympaSOAP - SOAP interface for Sympa mailing list manager"
+  tags:
+    - always
