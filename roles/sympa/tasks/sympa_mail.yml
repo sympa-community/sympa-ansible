@@ -72,17 +72,6 @@
 - name: Compiling Sympa transport
   command: postmap /etc/postfix/transport
 
-- name: Master.cf configuration
-  blockinfile:
-    path: /etc/postfix/master.cf
-    marker: "# {mark} ANSIBLE MANAGED sympa transports"
-    block: |
-      sympa unix - n n - - pipe
-        flags=hqRu user=sympa argv={{ install_prefix }}/{{ sympa.install_dir_name }}/bin/queue ${nexthop}
-      sympabounce unix - n n - - pipe
-        flags=hqRu user=sympa argv={{ install_prefix }}/{{ sympa.install_dir_name }}/bin/bouncequeue ${nexthop}
-  notify: restart postfix
-
 - name: Setting up main.cf
   blockinfile:
     path: /etc/postfix/main.cf
