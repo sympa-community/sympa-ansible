@@ -34,18 +34,16 @@
         that: "jinja_version.version_value is version_compare('2.10', '>=')"
         msg: "This playbook requires Jinja2 2.10 or greater. You have {{ jinja_version.version_value }}."
 
-- name: Configuration for all nodes
+- name: Apply roles to appropriate nodes
   hosts: all
   become: yes
-  tags: common
   remote_user: "{{ ansible_remote_user }}"
   roles:
-  - common
+    - role: common
+      tags:
+        - common
+    - role: sympa
+      tags:
+        - sympa
+      when: "'sympa' in group_names"
 
-- name: Apply role "sympa" to hosts in group "sympa"
-  hosts: sympa
-  become: yes
-  tags: sympa
-  remote_user: "{{ ansible_remote_user }}"
-  roles:
-  - sympa
