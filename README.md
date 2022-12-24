@@ -1,3 +1,9 @@
+# Notice
+
+**This repository is obsolete and superseded by [Ansible role for
+Sympa](https://github.com/sympa-community/ansible-role-sympa) and other
+roles for Postfix, Apache, Nginx, MySQL or PostgreSQL.**
+
 # Sympa deployment with Ansible
 
 [Sympa](https://www.sympa.org/) is an open source mailing list software
